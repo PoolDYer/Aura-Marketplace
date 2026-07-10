@@ -1,0 +1,438 @@
+<!DOCTYPE html><html class="light" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aura - Mis Favoritos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&amp;family=General+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f6f2f4",
+                    "primary-fixed-dim": "#ffb95a",
+                    "border-muted": "#4A2F52",
+                    "background": "#fcf8fa",
+                    "surface-tint": "#845400",
+                    "on-primary-container": "#704700",
+                    "tertiary-fixed-dim": "#d8bee0",
+                    "on-secondary-container": "#00705f",
+                    "on-tertiary-fixed-variant": "#543f5c",
+                    "tertiary": "#6c5774",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fcf8fa",
+                    "outline-variant": "#d6c3b0",
+                    "inverse-primary": "#ffb95a",
+                    "secondary": "#006b5b",
+                    "on-tertiary-container": "#5d4865",
+                    "on-secondary-fixed-variant": "#005144",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#ffb347",
+                    "secondary-fixed-dim": "#7dd7c2",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#99f3de",
+                    "error-warm": "#E8927C",
+                    "text-muted": "#C9B8CE",
+                    "surface": "#fcf8fa",
+                    "text-catalog": "#211527",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "on-background": "#1c1b1d",
+                    "text-voice": "#F5EEF0",
+                    "on-surface-variant": "#524535",
+                    "surface-voice": "#2E1C36",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#313032",
+                    "on-surface": "#1c1b1d",
+                    "outline": "#847463",
+                    "surface-dim": "#dcd9db",
+                    "primary-fixed": "#ffddb6",
+                    "bg-voice": "#211527",
+                    "on-primary-fixed-variant": "#643f00",
+                    "on-primary-fixed": "#2a1800",
+                    "secondary-container": "#96f0db",
+                    "inverse-on-surface": "#f4f0f2",
+                    "surface-container-highest": "#e5e1e3",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-high": "#ebe7e9",
+                    "surface-container": "#f1edef",
+                    "surface-variant": "#e5e1e3",
+                    "tertiary-fixed": "#f5d9fd",
+                    "primary": "#845400",
+                    "on-secondary-fixed": "#00201a",
+                    "tertiary-container": "#d4b9db",
+                    "bg-catalog": "#FAF6F8",
+                    "surface-catalog": "#FFFFFF",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed": "#26142e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xxl": "48px",
+                    "huge": "64px",
+                    "base": "16px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "md": "12px"
+            },
+            "fontFamily": {
+                    "body-sm": ["General Sans"],
+                    "headline-md": ["Bricolage Grotesque"],
+                    "headline-sm": ["Bricolage Grotesque"],
+                    "display-xl": ["Bricolage Grotesque"],
+                    "body-md": ["General Sans"],
+                    "util-mono": ["IBM Plex Mono"],
+                    "display-lg-mobile": ["Bricolage Grotesque"],
+                    "body-lg": ["General Sans"],
+                    "display-lg": ["Bricolage Grotesque"],
+                    "util-mono-sm": ["IBM Plex Mono"]
+            },
+            "fontSize": {
+                    "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "headline-md": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display-xl": ["56px", {"lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "util-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "400"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "util-mono-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .onda-viva {
+            animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        .product-card-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(132, 84, 0, 0.1);
+            transform: translateY(-4px);
+        }
+        .soft-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<nav class="bg-surface/80 dark:bg-bg-voice/80 backdrop-blur-md docked full-width top-0 sticky z-50 border-b border-outline-variant/30 dark:border-border-muted shadow-sm dark:shadow-none transition-all duration-300">
+<div class="flex justify-between items-center px-base py-sm max-w-7xl mx-auto w-full">
+<!-- Mobile Menu Toggle (Visible md:hidden) -->
+<button aria-label="Menu" class="md:hidden text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 p-sm rounded-full transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">menu</span>
+</button>
+<!-- Brand -->
+<a class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-primary dark:text-primary-fixed-dim tracking-tight hover:opacity-80 transition-opacity" href="#">
+                Aura
+            </a>
+<!-- Desktop Navigation (Hidden md:hidden) -->
+<div class="hidden md:flex items-center gap-lg">
+<a class="text-on-surface-variant dark:text-text-muted hover:text-primary dark:hover:text-secondary-fixed transition-colors font-headline-sm text-headline-sm px-sm py-xs" href="#">Explorar</a>
+<a class="text-primary dark:text-primary-fixed-dim border-b-2 border-primary transition-colors font-headline-sm text-headline-sm px-sm py-xs" href="#">Favoritos</a>
+<a class="text-on-surface-variant dark:text-text-muted hover:text-primary dark:hover:text-secondary-fixed transition-colors font-headline-sm text-headline-sm px-sm py-xs" href="#">Pedidos</a>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-xs">
+<button aria-label="Search" class="text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 p-sm rounded-full transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">mic</span>
+</button>
+<button aria-label="Profile" class="text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 p-sm rounded-full transition-colors hidden md:block">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">person</span>
+</button>
+<button aria-label="Cart" class="text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 p-sm rounded-full transition-colors relative">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">shopping_cart</span>
+<span class="absolute top-1 right-1 bg-primary text-on-primary w-4 h-4 rounded-full flex items-center justify-center font-util-mono-sm text-util-mono-sm font-bold text-[10px]">2</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-base py-xl">
+<!-- Header Section -->
+<div class="mb-huge flex flex-col md:flex-row md:items-end justify-between gap-base">
+<div>
+<h1 class="font-headline-md text-headline-md md:text-display-lg font-bold text-on-background mb-xs">Mis Favoritos</h1>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Una selección curada de tus piezas preferidas.</p>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-base py-sm bg-surface-container-high rounded-full hover:bg-surface-container-highest transition-colors font-body-md text-body-md">
+<span class="material-symbols-outlined text-[18px]">sort</span>
+<span class="">Ordenar</span>
+</button>
+</div>
+</div>
+<!-- Wishlist Bento Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-lg">
+<!-- Product Card 1 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A premium minimalist glass vase with organic curves, placed on a white marble plinth. Soft, high-key studio lighting with warm amber undertones creates a calm, sophisticated mood. The overall aesthetic is clean, tactile, and high-end, fitting for a modern luxury catalog." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmmQgZrrxuFl3WgB1it10W6mYuwAaDtZiWpdjz11rxJnQoTa9AwSiRFn6txB7cMeTM5rLaRzXmBqcMLIep12_js4MKcS6SA9rKhquyvN_q2E90mMAK0N_ITeX3qbxcwU79upt3NXCOeelgH--ZP_o6b39h8TZrISIYXp0NBcvOdIYMN_LWjDkFCHiAEtByB5m5Fj-X4HBF4xKqo1uuKaqwWAOXebenm20APLUM50rsB_Jnrz-QKYTyiQ">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+<div class="absolute bottom-xs left-sm">
+<span class="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-[8px] font-body-sm text-body-sm">Disponible</span>
+</div>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Florero Orgánico Lume</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Cristal soplado artesanalmente</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$89.00</span>
+<button class="flex items-center gap-xs bg-primary-container text-on-primary-container px-md py-sm rounded-full font-body-md text-body-md font-semibold hover:bg-primary-fixed-dim transition-colors scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="">Añadir</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A pair of high-fidelity wireless headphones in a soft matte mint finish. The product is photographed in a minimalist setting with gentle shadows. The lighting is diffused and professional, highlighting the tactile texture of the ear cushions and the sleek metal headband. Sophisticated and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL9Q8u-alBUdgmQJK2RkJRysY1X3YdWRKdysKv9PGeLYslBQIQKRz0DsxcmXj8cypJ3qt2h8dGEPXi3f2NklBXlLnq-VMcsWzsIePIHpa4k9zF3ATvWtzXRPasc_F1wB0TqNgq6yiql79HY2VI158HYNvYifVX72l0lOQpHd0bNLiHi1eG6mjnUy3TLHYFlZY4K8HGVn-Z0C3tK7v6XBAgugL-YAxgjr4PjUsIokmI8yzECo9Y71aASg">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+<div class="absolute bottom-xs left-sm">
+<span class="px-sm py-xs bg-primary-fixed text-on-primary-fixed-variant rounded-[8px] font-body-sm text-body-sm">Pocas unidades</span>
+</div>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Aura Sound Max</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Cancelación de ruido activa</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$249.00</span>
+<button class="flex items-center gap-xs bg-primary-container text-on-primary-container px-md py-sm rounded-full font-body-md text-body-md font-semibold hover:bg-primary-fixed-dim transition-colors scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="">Añadir</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A minimalist ceramic table lamp with a soft linen shade. The base has a speckled stone texture in neutral tones. The scene is lit by the warm glow of the lamp itself, creating a cozy and intimate atmosphere within a clean, modern interior space. Muted color palette with tactile focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXQOqmz_Jh2oTEwIFqGukci6ZfJhnpDA6TsILp4YhiWGCdUdtXDyiVGTkswnPHqeatFpDbYIvNW7MUtcEoHuOh9VpjGkIh1L6L1YA1PwGLqmJHNjYDMI5QaUiI9t3R_ewM0SXIFF29yAiSnQBQ2OXxGxXwxmsgJtDPnnxiaHOkMxvd_pVWbqBeq4SG6B7epEoFSYUSabrvsuyF2DNiAXHeoY_RPRNlFKEIs0bLWu5BZFFFFIOBa1LqtA">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Lámpara Nórdica Terra</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Cerámica y lino natural</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$120.00</span>
+<button class="flex items-center gap-xs bg-primary-container text-on-primary-container px-md py-sm rounded-full font-body-md text-body-md font-semibold hover:bg-primary-fixed-dim transition-colors scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="">Añadir</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A sleek, minimalist electric kettle in a matte charcoal finish. It sits on a dark wooden countertop with soft morning light streaming from the side, creating long gentle shadows. The design is contemporary and functional, reflecting a high-end kitchen accessory. Deep tonal depth and premium materials." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX1r_-qMkjlRN1N6A7BYbSFR6-e8frHoEX08FY__JE-wN8T6ZQ2DS0WF_l530fszmg9osgsG7ytr_kHMOeJlQW0pKCXFkyxYLHmNtV079_7sFBCXHNJYMZL-ONMxDQ9Ko-SaFQgqL8MjfPpLEDa0D7KNlUsyijdD_Hquz689CdDU84lSwDelI_eVDO0HTm82vyGeqla_1FwGvlbTcUV6gdOhZTl9CUmkqO197U-5q-a9rbHpr6Y7ZB4w">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+<div class="absolute bottom-xs left-sm">
+<span class="px-sm py-xs bg-surface-container-highest text-on-surface-variant rounded-[8px] font-body-sm text-body-sm">Agotado</span>
+</div>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Tetera Smart Onyx</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Control de temperatura preciso</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$155.00</span>
+<button class="flex items-center gap-xs bg-surface-container-high text-text-muted px-md py-sm rounded-full font-body-md text-body-md font-semibold cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+<span class="">Avisar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Empty State / Suggestion Card (Bento Style) -->
+<div class="group lg:col-span-2 xl:col-span-2 bg-surface-container-low rounded-[16px] p-xl flex flex-col md:flex-row items-center gap-lg border border-dashed border-outline-variant">
+<div class="flex-1 space-y-md">
+<span class="font-util-mono text-util-mono text-primary uppercase tracking-widest">¿Buscas algo más?</span>
+<h2 class="font-headline-md text-headline-md text-on-background">Tu asistente Aura puede ayudarte a encontrar lo que amas.</h2>
+<button class="flex items-center gap-sm bg-primary text-on-primary px-lg py-md rounded-full font-body-lg text-body-lg font-semibold hover:bg-surface-tint transition-all scale-100 active:scale-95">
+<span class="material-symbols-outlined">mic</span>
+<span class="">Pregúntale a Aura</span>
+</button>
+</div>
+<div class="relative w-full md:w-48 h-48 flex items-center justify-center">
+<div class="absolute inset-0 bg-primary-container rounded-full onda-viva opacity-20"></div>
+<div class="relative z-10 w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-[48px] text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">auto_awesome</span>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A luxurious, thick-knit wool throw blanket in a soft cream color, draped over the corner of a minimalist light-grey sofa. The texture of the knit is very clear, suggesting warmth and comfort. The lighting is soft and airy, creating a calm, high-end living room atmosphere. Tactile minimalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKE_LEdZBYQAVLrDi8Mzs8mv3z5a6CA_twHuHMn5HXEysdovTq4uTSsEQcE_O88hyGmtsY2-SRz3wr7WSxQ8DLFRH_fHzzHYDzlGIK7CXIKKKmTGMdFZpMauVwOZCzNzIYIHWtKdybJqZ7Tx3dWFW0teFNeMKECgWeRV6_0RMNg6rAFSzmv_coXL1a0qJXj462VxntlbgUeUjUii0bw4U0CSYVqSxTe-w5wtbAYC0q3ArDVKcat12crQ">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Manta de Lana Merina</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Tejido artesanal premium</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$195.00</span>
+<button class="flex items-center gap-xs bg-primary-container text-on-primary-container px-md py-sm rounded-full font-body-md text-body-md font-semibold hover:bg-primary-fixed-dim transition-colors scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="">Añadir</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 6 -->
+<div class="group relative bg-surface-catalog rounded-[16px] overflow-hidden border border-surface-container-high transition-all duration-300 product-card-hover">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A minimalist wireless charging pad made of natural cork and brushed aluminum. A high-end smartphone is placed on it, with a subtle glow around the base. The setting is a clean oak wood desk with a small succulent in the background. Calm, organized, and tech-sophisticated aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABk5o9K7A5clUb6lOM7o0xElw4_szGiAxYzQPBC-k3tevNVtVwbNtM9KZK8Qa2wwMViZue_1d0R1eZx1oKgrnd8IK_jVn7fVSk8C8lBwN2Y202xOfD-AgwKu57QlhyB1ifREjxKZXFvuCgpaj9wJ8WVBkA5-gSabUfJQ2bKPtN10LGXWWCquAb1CHjjR7GfDSav97We-_QjgKxpxnEtZF-9CxZxFsWJRMBdOCcQY_f6XLc9aox1cTOAA">
+<button class="absolute top-sm right-sm w-10 h-10 flex items-center justify-center bg-white/80 backdrop-blur-md rounded-full text-error hover:bg-error hover:text-white transition-all shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">heart_minus</span>
+</button>
+<div class="absolute bottom-xs left-sm">
+<span class="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-[8px] font-body-sm text-body-sm">Disponible</span>
+</div>
+</div>
+<div class="p-base flex flex-col gap-sm">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-background truncate">Cargador Aura Qi</h3>
+<p class="text-on-surface-variant font-body-md text-body-md">Materiales sostenibles</p>
+</div>
+<div class="flex items-center justify-between mt-xs">
+<span class="font-util-mono text-util-mono text-primary font-semibold">$65.00</span>
+<button class="flex items-center gap-xs bg-primary-container text-on-primary-container px-md py-sm rounded-full font-body-md text-body-md font-semibold hover:bg-primary-fixed-dim transition-colors scale-95 active:scale-90 duration-200">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="">Añadir</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-base pb-safe pt-xs bg-surface-container-lowest dark:bg-surface-voice shadow-lg rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-text-muted px-md py-xs hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-body-sm text-body-sm">Catalog</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-text-muted px-md py-xs hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">mic</span>
+<span class="font-body-sm text-body-sm">Assistant</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-text-muted px-md py-xs hover:text-primary dark:hover:text-primary-fixed-dim" href="#">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="font-body-sm text-body-sm">Cart</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed-dim text-on-primary-container dark:text-on-primary-fixed rounded-full px-md py-xs transition-all duration-300 scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">person</span>
+<span class="font-body-sm text-body-sm">Profile</span>
+</a>
+</nav>
+<!-- Voice FAB (Primary Action) -->
+<div class="fixed bottom-24 right-base md:bottom-base md:right-xl z-40 group">
+<button class="relative w-16 h-16 flex items-center justify-center rounded-full bg-primary text-on-primary shadow-xl hover:scale-110 transition-all duration-300">
+<div class="absolute inset-0 rounded-full onda-viva bg-primary-container opacity-40"></div>
+<span class="material-symbols-outlined text-[32px] relative z-10">mic</span>
+</button>
+<span class="absolute right-20 top-1/2 -translate-y-1/2 bg-surface-voice text-text-voice px-base py-sm rounded-lg text-body-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none hidden md:block">
+            ¿Cómo puedo ayudarte hoy?
+        </span>
+</div>
+<!-- Footer (Desktop) -->
+<footer class="hidden md:block bg-surface-container-low border-t border-surface-container-high mt-huge py-huge">
+<div class="max-w-7xl mx-auto px-base grid grid-cols-1 md:grid-cols-4 gap-xl">
+<div class="space-y-base">
+<span class="font-headline-md text-headline-md font-bold text-primary">Aura</span>
+<p class="text-on-surface-variant text-body-md">Redefiniendo el ecommerce a través de la calidez y la inteligencia intuitiva.</p>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-base">Navegación</h4>
+<ul class="space-y-sm text-on-surface-variant font-body-md">
+<li class=""><a class="hover:text-primary" href="#">Colecciones</a></li>
+<li class=""><a class="hover:text-primary" href="#">Novedades</a></li>
+<li class=""><a class="hover:text-primary" href="#">Sostenibilidad</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-base">Ayuda</h4>
+<ul class="space-y-sm text-on-surface-variant font-body-md">
+<li class=""><a class="hover:text-primary" href="#">Envíos</a></li>
+<li class=""><a class="hover:text-primary" href="#">Devoluciones</a></li>
+<li class=""><a class="hover:text-primary" href="#">Contacto</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-background mb-base">Síguenos</h4>
+<div class="flex gap-md">
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container transition-all">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center hover:bg-primary-container hover:text-on-primary-container transition-all">
+<span class="material-symbols-outlined text-[20px]">public</span>
+</button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-base mt-xl pt-lg border-t border-surface-container-high text-on-surface-variant text-body-sm flex flex-col md:flex-row justify-between gap-base">
+<span class="">© 2024 Aura Experience. Todos los derechos reservados.</span>
+<div class="flex gap-lg">
+<a class="hover:underline" href="#">Privacidad</a>
+<a class="hover:underline" href="#">Términos</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for add to cart feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (this.innerText.includes('Añadir')) {
+                    const originalText = this.innerHTML;
+                    this.classList.add('bg-secondary-container', 'text-on-secondary-container');
+                    this.innerHTML = '<span class="material-symbols-outlined text-[18px]">check_circle</span><span>¡Listo!</span>';
+                    setTimeout(() => {
+                        this.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+                        this.innerHTML = originalText;
+                    }, 2000);
+                }
+            });
+        });
+    </script>
+
+
+</body></html>

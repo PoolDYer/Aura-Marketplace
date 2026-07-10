@@ -1,0 +1,305 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Aura - Catálogo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&amp;family=General+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#524535",
+                        "text-muted": "#C9B8CE",
+                        "surface-container-low": "#f6f2f4",
+                        "on-background": "#1c1b1d",
+                        "surface-catalog": "#FFFFFF",
+                        "surface-container": "#f1edef",
+                        "on-primary-fixed": "#2a1800",
+                        "surface": "#fcf8fa",
+                        "secondary-fixed-dim": "#7dd7c2",
+                        "secondary": "#006b5b",
+                        "tertiary-fixed": "#f5d9fd",
+                        "surface-variant": "#e5e1e3",
+                        "on-secondary-fixed": "#00201a",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#ffb95a",
+                        "secondary-fixed": "#99f3de",
+                        "surface-dim": "#dcd9db",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#ffb95a",
+                        "on-primary-container": "#704700",
+                        "tertiary": "#6c5774",
+                        "on-tertiary-container": "#5d4865",
+                        "primary": "#845400",
+                        "surface-container-high": "#ebe7e9",
+                        "primary-container": "#ffb347",
+                        "outline": "#847463",
+                        "on-tertiary-fixed": "#26142e",
+                        "bg-catalog": "#FAF6F8",
+                        "surface-voice": "#2E1C36",
+                        "tertiary-fixed-dim": "#d8bee0",
+                        "border-muted": "#4A2F52",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f4f0f2",
+                        "on-secondary-fixed-variant": "#005144",
+                        "surface-tint": "#845400",
+                        "error-warm": "#E8927C",
+                        "tertiary-container": "#d4b9db",
+                        "on-error-container": "#93000a",
+                        "bg-voice": "#211527",
+                        "surface-container-highest": "#e5e1e3",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#313032",
+                        "on-secondary-container": "#00705f",
+                        "secondary-container": "#96f0db",
+                        "on-surface": "#1c1b1d",
+                        "text-catalog": "#211527",
+                        "primary-fixed": "#ffddb6",
+                        "on-tertiary-fixed-variant": "#543f5c",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#643f00",
+                        "outline-variant": "#d6c3b0",
+                        "background": "#fcf8fa",
+                        "error": "#ba1a1a",
+                        "text-voice": "#F5EEF0",
+                        "surface-bright": "#fcf8fa",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "huge": "64px",
+                        "xl": "32px",
+                        "xxl": "48px",
+                        "base": "16px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "md": "12px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Bricolage Grotesque"],
+                        "headline-sm": ["Bricolage Grotesque"],
+                        "display-lg-mobile": ["Bricolage Grotesque"],
+                        "util-mono-sm": ["IBM Plex Mono"],
+                        "body-md": ["General Sans"],
+                        "body-sm": ["General Sans"],
+                        "display-xl": ["Bricolage Grotesque"],
+                        "util-mono": ["IBM Plex Mono"],
+                        "body-lg": ["General Sans"],
+                        "headline-md": ["Bricolage Grotesque"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "util-mono-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "display-xl": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "util-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .onda-viva {
+            background: linear-gradient(45deg, #ffb95a, #006b5b);
+            background-size: 200% 200%;
+            animation: pulse-wave 3s ease-in-out infinite;
+        }
+        @keyframes pulse-wave {
+            0% { background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(255, 185, 90, 0.4); }
+            50% { background-position: 100% 50%; box-shadow: 0 0 0 10px rgba(0, 107, 91, 0); }
+            100% { background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(255, 185, 90, 0); }
+        }
+    </style>
+</head>
+<body class="bg-bg-catalog text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-outline-variant/30">
+<div class="flex justify-between items-center px-base py-sm max-w-7xl mx-auto w-full">
+<!-- Brand -->
+<div class="flex items-center gap-md">
+<span class="font-display-lg text-display-lg font-bold text-primary">Aura</span>
+</div>
+<!-- Search Bar with Voice Button -->
+<div class="flex-1 max-w-xl mx-xl relative hidden md:block">
+<div class="relative flex items-center bg-surface-container rounded-full px-4 py-2">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-md font-body-md text-on-surface placeholder-on-surface-variant" placeholder="Buscar productos..." type="text">
+<button aria-label="Activar búsqueda por voz" class="absolute right-1 top-1 bottom-1 w-10 h-10 rounded-full flex items-center justify-center onda-viva text-white shadow-sm transition-transform hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-md text-primary">
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined">person</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-variant/50 transition-colors relative">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<!-- Mobile Search Toggle -->
+<button class="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-huge py-xl px-base">
+<!-- Sidebar Filters -->
+<aside class="w-full md:w-64 flex-shrink-0 flex flex-col gap-lg hidden md:flex">
+<div class="font-headline-sm text-headline-sm text-on-surface mb-sm">Filtros</div>
+<!-- Category Filter -->
+<div class="border-b border-outline-variant/30 pb-md">
+<div class="font-body-md text-body-md font-semibold mb-sm text-on-surface">Categoría</div>
+<div class="flex flex-col gap-sm">
+<label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span>Cuidado Personal</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span>Hogar y Bienestar</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant">
+<input class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span>Accesorios</span>
+</label>
+</div>
+</div>
+<!-- Price Filter -->
+<div class="border-b border-outline-variant/30 pb-md">
+<div class="font-body-md text-body-md font-semibold mb-sm text-on-surface">Precio</div>
+<div class="flex items-center gap-sm">
+<input class="w-full bg-surface-container border-none rounded-lg text-sm px-3 py-2 text-on-surface focus:ring-primary" placeholder="Min" type="number">
+<span class="text-on-surface-variant">-</span>
+<input class="w-full bg-surface-container border-none rounded-lg text-sm px-3 py-2 text-on-surface focus:ring-primary" placeholder="Max" type="number">
+</div>
+</div>
+<!-- Availability Filter -->
+<div>
+<div class="font-body-md text-body-md font-semibold mb-sm text-on-surface">Disponibilidad</div>
+<label class="flex items-center gap-sm cursor-pointer hover:text-primary transition-colors text-on-surface-variant">
+<input checked="" class="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox">
+<span>En Stock</span>
+</label>
+</div>
+</aside>
+<!-- Product Grid Area -->
+<div class="flex-1 flex flex-col gap-lg">
+<!-- Sort and Results Count -->
+<div class="flex justify-between items-center bg-surface-catalog rounded-xl p-md shadow-sm border border-outline-variant/10">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Mostrando 1-9 de 24 productos</span>
+<div class="flex items-center gap-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant hidden sm:inline">Ordenar por:</span>
+<select class="bg-surface-container border-none rounded-lg text-body-md font-body-md px-3 py-2 text-on-surface focus:ring-primary cursor-pointer">
+<option>Relevancia</option>
+<option>Precio: Menor a Mayor</option>
+<option>Precio: Mayor a Menor</option>
+<option>Novedades</option>
+</select>
+</div>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
+<!-- Product Card 1 -->
+<div class="bg-surface-catalog rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-outline-variant/10 flex flex-col group">
+<div class="relative h-64 bg-surface-container w-full overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A minimalist photograph of a sleek, pale ceramic essential oil diffuser resting on a polished wooden table. Soft natural light streams through a nearby window, casting delicate shadows. The scene embodies a clean, modern aesthetic with warm, calming undertones, perfectly fitting the high-end catalog style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFviU8DssthwDAUzWlJFaD_g0vbeJM37-fZqB71Xh3jrjQEgMSTw9ifnTsFaoUw_mtGOHbEqeHu-W_sBXhx7FhI2PUe4GiPmsb5RVh0gUvdYT7VrW9DsGfJvkntAWQQzRPp0cqEWjHXa89KeWr9cCjFJOXQwnWIjrNEGScI6MfnT8etaOLu0OutWJBJ8zG5qST6unwPlAzRjD8Cz0mRZq9piaXBYX2FT0rDA2OYbPcGgFGbLYhhLiDdw">
+<div class="absolute top-sm right-sm bg-secondary/10 text-secondary px-2 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-util-mono-sm text-util-mono-sm">Disponible</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-xs">Difusor Cerámico Zen</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md flex-1">Difusor ultrasónico de diseño minimalista para aromaterapia.</p>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-sm text-headline-sm text-primary">$45.00</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 (Low Stock) -->
+<div class="bg-surface-catalog rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-outline-variant/10 flex flex-col group relative">
+<!-- Subtle Glow for "Mentioned" state simulation -->
+<div class="absolute inset-0 rounded-[16px] ring-2 ring-primary-container ring-offset-2 opacity-0 group-hover:opacity-50 transition-opacity pointer-events-none"></div>
+<div class="relative h-64 bg-surface-container w-full overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A beautifully crafted artisanal soy candle in an amber glass jar, placed on a textured linen cloth. The lighting is soft and moody, highlighting the warm tones of the glass against a clean white background. The image reflects a premium, tactile, and calming product presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC1jGehEgSBCf9ZUjYUjxuvuXQNk0lOIWP-CbE_unJAdgXdKA_R-AXbGicuP_S0Twt5Bkc2ku6fUia9lwQXyuapQ-nDfZlzytBzSORffVnp3sVRAtaiQpVTpQ5Wc85MjHTvua8UIvZzl2hwcoTQoZmjnCkFJcLKNDACqUallMnja6Kp9IrE-3ff9XS4_eKm5NKbZcRT3MnsR_FeIOiI3ylBEisXWmtKdc2CYlnSM__mk3SlZknfMP8DQ">
+<div class="absolute top-sm right-sm bg-primary-container/20 text-on-primary-container px-2 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm border border-primary-container/30">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span class="font-util-mono-sm text-util-mono-sm">Poco Stock</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-xs">Vela de Soya Ámbar</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md flex-1">Fragancia de sándalo y vainilla en frasco reutilizable.</p>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-sm text-headline-sm text-primary">$22.00</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-catalog rounded-[16px] overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-outline-variant/10 flex flex-col group">
+<div class="relative h-64 bg-surface-container w-full overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A collection of smooth, organic-shaped massage stones elegantly arranged on a soft, muted grey surface. The lighting is diffused, creating a serene spa-like atmosphere that emphasizes relaxation and high-quality wellness products." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgvjq7F4cA5IMBPKIclejtyScEdpYGqr7XqVIbruVd982XJrf7Mc9gs6v1_XXIBF3bh31shXYunqh57UM6e6hCBjbzJgDaWTjq2hcO6_niGpR6lmMudz8-Z3DLCHPQV9of5NNDfyn74yWr1gGHIzOFrclYa_g82qYBPrYp2hgXh-5wnuFfcEXE7IRadxXMBlKsM6lgmQmuT_3-rxJEMMOFD_Nwf15QNOul2kJA2ds4ttFF9RmBL6r4-w">
+<div class="absolute top-sm right-sm bg-secondary/10 text-secondary px-2 py-1 rounded-lg flex items-center gap-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span class="font-util-mono-sm text-util-mono-sm">Disponible</span>
+</div>
+</div>
+<div class="p-md flex flex-col flex-1">
+<h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-xs">Set Piedras de Masaje</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-md flex-1">Kit de piedras basálticas para terapia térmica relajante.</p>
+<div class="flex justify-between items-center mt-auto">
+<span class="font-headline-sm text-headline-sm text-primary">$35.00</span>
+<button class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center hover:bg-primary hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-xl px-base flex flex-col items-center gap-md bg-surface-container border-t border-outline-variant/20 mt-auto">
+<div class="font-display-lg text-display-lg text-primary mb-sm">Aura</div>
+<div class="flex flex-wrap justify-center gap-md mb-sm">
+<a class="font-util-mono-sm text-util-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacidad</a>
+<a class="font-util-mono-sm text-util-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Términos</a>
+<a class="font-util-mono-sm text-util-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Envíos</a>
+<a class="font-util-mono-sm text-util-mono-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contacto</a>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">© 2024 Aura Commerce. Diseñado para la calma.</p>
+</footer>
+<!-- FAB Voice Button (Mobile only, contextual) -->
+<button aria-label="Asistente de Voz Aura" class="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center onda-viva text-white shadow-lg z-50 transition-transform hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</body></html>

@@ -1,0 +1,373 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Sprint 1: Solo configuración base
+// Sprint 2: Autenticación
+enum RolUsuario {
+  COMPRADOR
+  VENDEDOR
+  ADMINISTRADOR
+}
+
+enum EstadoUsuario {
+  PENDIENTE
+  ACTIVO
+  SUSPENDIDO
+}
+
+model Usuario {
+  id                 String         @id @default(uuid())
+  nombre             String
+  email              String         @unique
+  passwordHash       String
+  estado             EstadoUsuario  @default(PENDIENTE)
+  rol                RolUsuario     @default(COMPRADOR)
+  fechaRegistro      DateTime       @default(now())
+  fechaActualizacion DateTime       @updatedAt
+  intentosFallidos   Int            @default(0)
+  bloqueadoHasta     DateTime?
+  telefono           String?
+  refreshTokens      RefreshToken[]
+  direcciones        Direccion[]
+  preferencias       PreferenciasUsuario?
+  publicaciones      Publicacion[]
+  carrito            Carrito?
+  ordenes            Orden[]
+  sesiones           Sesion[]
+  favoritos          Favorito[]
+  resenas            Resena[]
+  notificaciones     Notificacion[]
+  auditorias         Auditoria[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revocado  Boolean  @default(false)
+}
+
+// Sprint 3: Usuarios, Direcciones y Preferencias
+
+model Direccion {
+  id           String  @id @default(uuid())
+  usuarioId    String
+  usuario      Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  calle        String
+  ciudad       String
+  estado       String
+  codigoPostal String
+  pais         String
+  referencia   String?
+  activa       Boolean @default(true)
+  ordenes      Orden[]
+}
+
+model PreferenciasUsuario {
+  id               String  @id @default(uuid())
+  usuarioId        String  @unique
+  usuario          Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  notifNuevaOrden  Boolean @default(true)
+  notifEstadoOrden Boolean @default(true)
+  notifSeguridad   Boolean @default(true) // RD-15: Siempre verdadero o no editable
+  notifMarketing   Boolean @default(false)
+}
+
+// Sprint 4: Productos, Categorías e Inventario
+
+enum EstadoPublicacion {
+  BORRADOR
+  ACTIVA
+  INACTIVA
+  ELIMINADA
+}
+
+model Categoria {
+  id          String      @id @default(uuid())
+  nombre      String
+  descripcion String?
+  parentId    String?
+  parent      Categoria?  @relation("Jerarquia", fields: [parentId], references: [id])
+  children    Categoria[] @relation("Jerarquia")
+  activa      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  
+  publicaciones Publicacion[]
+}
+
+model Publicacion {
+  id          String            @id @default(uuid())
+  nombre      String
+  descripcion String
+  precio      Decimal
+  estado      EstadoPublicacion @default(BORRADOR)
+  vendedorId  String
+  vendedor    Usuario           @relation(fields: [vendedorId], references: [id])
+  categoriaId String
+  categoria   Categoria         @relation(fields: [categoriaId], references: [id])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  inventario  Inventario?
+  imagenes    ImagenPublicacion[]
+  itemsCarrito ItemCarrito[]
+  lineasOrden LineaOrden[]
+  favoritos   Favorito[]
+  resenas     Resena[]
+  promociones Promocion[]
+  
+  @@index([estado])
+  @@index([categoriaId])
+  @@index([precio])
+}
+
+model Inventario {
+  id                String      @id @default(uuid())
+  publicacionId     String      @unique
+  publicacion       Publicacion @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+  cantidad          Int
+  cantidadReservada Int         @default(0)
+  updatedAt         DateTime    @updatedAt
+}
+
+model ImagenPublicacion {
+  id            String      @id @default(uuid())
+  publicacionId String
+  publicacion   Publicacion @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+  url           String
+  orden         Int         @default(0)
+  activa        Boolean     @default(true)
+}
+
+// Sprint 5: Marketplace
+model Carrito {
+  id          String   @id @default(uuid())
+  compradorId String   @unique
+  comprador   Usuario  @relation(fields: [compradorId], references: [id], onDelete: Cascade)
+  updatedAt   DateTime @updatedAt
+  items       ItemCarrito[]
+}
+
+model ItemCarrito {
+  id            String      @id @default(uuid())
+  carritoId     String
+  carrito       Carrito     @relation(fields: [carritoId], references: [id], onDelete: Cascade)
+  publicacionId String
+  publicacion   Publicacion @relation(fields: [publicacionId], references: [id])
+  cantidad      Int
+  agregadoAt    DateTime    @default(now())
+
+  @@unique([carritoId, publicacionId])
+}
+
+enum EstadoOrden {
+  PENDIENTE
+  CONFIRMADA
+  EN_PREPARACION
+  DESPACHADA
+  ENTREGADA
+  CANCELADA
+  ESCALADA
+}
+
+model Orden {
+  id                 String      @id @default(uuid())
+  compradorId        String
+  comprador          Usuario     @relation(fields: [compradorId], references: [id])
+  direccionId        String
+  direccion          Direccion   @relation(fields: [direccionId], references: [id])
+  estado             EstadoOrden @default(PENDIENTE)
+  total              Decimal
+  numeroConfirmacion String      @unique
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  lineas             LineaOrden[]
+  pago               Pago?
+  resenas            Resena[]
+}
+
+model LineaOrden {
+  id             String      @id @default(uuid())
+  ordenId        String
+  orden          Orden       @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  publicacionId  String
+  publicacion    Publicacion @relation(fields: [publicacionId], references: [id])
+  nombreProducto String
+  precioUnitario Decimal
+  cantidad       Int
+  subtotal       Decimal
+}
+
+enum EstadoPago {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  REEMBOLSADO
+}
+
+model Pago {
+  id                 String     @id @default(uuid())
+  ordenId            String     @unique
+  orden              Orden      @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  referenciaPasarela String?
+  monto              Decimal
+  estado             EstadoPago @default(PENDIENTE)
+  metodoPago         String?
+  createdAt          DateTime   @default(now())
+}
+
+// Sprint 6: Agente Inteligente
+
+model Sesion {
+  id        String   @id @default(uuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  conversaciones Conversacion[]
+}
+
+model Conversacion {
+  id        String   @id @default(uuid())
+  sesionId  String
+  sesion    Sesion   @relation(fields: [sesionId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  mensajes  Mensaje[]
+}
+
+enum RolMensaje {
+  USER
+  AGENT
+  SYSTEM
+}
+
+model Mensaje {
+  id             String       @id @default(uuid())
+  conversacionId String
+  conversacion   Conversacion @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  rol            RolMensaje
+  contenido      String       @db.Text
+  createdAt      DateTime     @default(now())
+  
+  intenciones    Intencion[]
+}
+
+model Intencion {
+  id          String   @id @default(uuid())
+  mensajeId   String
+  mensaje     Mensaje  @relation(fields: [mensajeId], references: [id], onDelete: Cascade)
+  nombre      String
+  confianza   Float
+  
+  entidades   EntidadExtraida[]
+}
+
+model EntidadExtraida {
+  id          String    @id @default(uuid())
+  intencionId String
+  intencion   Intencion @relation(fields: [intencionId], references: [id], onDelete: Cascade)
+  tipo        String
+  valor       String
+}
+
+// Sprint 7: Administración y Funcionalidades Complementarias
+
+model Favorito {
+  id            String      @id @default(uuid())
+  compradorId   String
+  comprador     Usuario     @relation(fields: [compradorId], references: [id], onDelete: Cascade)
+  publicacionId String
+  publicacion   Publicacion @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+  creadoAt      DateTime    @default(now())
+
+  @@unique([compradorId, publicacionId])
+}
+
+model Resena {
+  id            String      @id @default(uuid())
+  ordenId       String
+  orden         Orden       @relation(fields: [ordenId], references: [id])
+  compradorId   String
+  comprador     Usuario     @relation(fields: [compradorId], references: [id], onDelete: Cascade)
+  publicacionId String
+  publicacion   Publicacion @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+  calificacion  Int
+  comentario    String?     @db.Text
+  creadoAt      DateTime    @default(now())
+}
+
+model Promocion {
+  id                  String      @id @default(uuid())
+  publicacionId       String
+  publicacion         Publicacion @relation(fields: [publicacionId], references: [id], onDelete: Cascade)
+  porcentajeDescuento Decimal
+  activa              Boolean     @default(true)
+  inicio              DateTime
+  fin                 DateTime
+}
+
+enum TipoCupon {
+  PORCENTAJE
+  MONTO_FIJO
+}
+
+model Cupon {
+  id            String    @id @default(uuid())
+  codigo        String    @unique
+  descuento     Decimal
+  tipo          TipoCupon
+  vigenciaHasta DateTime
+  usos          Int       @default(0)
+  usosMaximos   Int
+}
+
+enum EstadoNotificacion {
+  PENDIENTE
+  ENVIADA
+  FALLIDA
+}
+
+model Notificacion {
+  id        String             @id @default(uuid())
+  usuarioId String
+  usuario   Usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tipo      String
+  contenido String             @db.Text
+  canal     String
+  estado    EstadoNotificacion @default(PENDIENTE)
+  createdAt DateTime           @default(now())
+  enviadaAt DateTime?
+}
+
+model Auditoria {
+  id        String   @id @default(uuid())
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  accion    String
+  modulo    String
+  resultado String
+  ipCliente String?
+  timestamp DateTime @default(now())
+}
+
+// Sprint 8: Calidad y Producción
+model TokenRevocado {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.Text
+  expiraEn  DateTime
+  creadoAt  DateTime @default(now())
+}

@@ -1,0 +1,785 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: 210 40% 98%;
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --radius: 0.625rem;
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+  }
+
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: 210 40% 98%;
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+  }
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .font-auth-display {
+    font-family: 'Bricolage Grotesque', 'Inter', 'Geist Variable', sans-serif;
+  }
+
+  .font-auth-body {
+    font-family: 'Inter', 'Geist Variable', sans-serif;
+  }
+}
+
+@layer components {
+  .aura-profile-page {
+    min-height: calc(100vh - 88px);
+    background: #FAF6F8;
+    color: #1c1b1d;
+  }
+
+  .aura-profile-shell {
+    width: min(calc(100% - 32px), 1120px);
+    margin: 0 auto;
+    padding: 32px 0 48px;
+    display: grid;
+    grid-template-columns: 360px minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+
+  .aura-profile-sidebar,
+  .aura-profile-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .aura-profile-card,
+  .aura-voice-card,
+  .aura-orders-card,
+  .aura-address-card,
+  .aura-address-add {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(82, 69, 53, 0.06);
+  }
+
+  .aura-profile-card {
+    border: 1px solid rgba(214, 195, 176, 0.22);
+    background: #fff;
+    padding: 24px;
+  }
+
+  .aura-profile-saved,
+  .aura-profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .aura-profile-avatar-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .aura-profile-avatar {
+    position: relative;
+    width: 96px;
+    height: 96px;
+  }
+
+  .aura-profile-avatar-edit {
+    width: 128px;
+    height: 128px;
+  }
+
+  .aura-profile-avatar-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 3px solid #ffb347;
+    background: #ffddb6;
+    color: #845400;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(82, 69, 53, 0.12);
+  }
+
+  .aura-profile-avatar-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .aura-profile-avatar-edit .aura-profile-avatar-inner {
+    border-width: 4px;
+    font-size: 38px;
+  }
+
+  .aura-profile-check,
+  .aura-profile-avatar-action {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(82, 69, 53, 0.18);
+  }
+
+  .aura-profile-check {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    background: #006b5b;
+  }
+
+  .aura-profile-avatar-action {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    background: #845400;
+  }
+
+  .aura-profile-check,
+  .aura-profile-avatar-action {
+    cursor: pointer;
+  }
+
+  .aura-profile-identity {
+    text-align: center;
+  }
+
+  .aura-profile-identity h1 {
+    margin: 0;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 28px;
+    line-height: 36px;
+    font-weight: 700;
+    color: #1c1b1d;
+  }
+
+  .aura-profile-identity p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #524535;
+  }
+
+  .aura-profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(214, 195, 176, 0.2);
+  }
+
+  .aura-profile-info-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .aura-profile-info-row span {
+    font-size: 13px;
+    color: #524535;
+  }
+
+  .aura-profile-info-row strong {
+    min-width: 0;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    color: #1c1b1d;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .aura-profile-edit,
+  .aura-profile-save {
+    width: 100%;
+    border-radius: 8px;
+    transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  }
+
+  .aura-profile-edit {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid rgba(214, 195, 176, 0.45);
+    color: #524535;
+    background: #fff;
+    font-size: 14px;
+  }
+
+  .aura-profile-edit:hover {
+    background: #f6f2f4;
+    color: #845400;
+  }
+
+  .aura-profile-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .aura-profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .aura-profile-field span {
+    margin-left: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #524535;
+  }
+
+  .aura-profile-input {
+    height: 40px;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid rgba(214, 195, 176, 0.35);
+    background: #fff;
+    padding: 0 16px;
+    font-size: 13px;
+    color: #1c1b1d;
+    outline: none;
+  }
+
+  .aura-profile-input:focus {
+    border-color: #845400;
+  }
+
+  .aura-profile-input:disabled {
+    color: #524535;
+    opacity: 0.72;
+  }
+
+  .aura-profile-save {
+    height: 48px;
+    border: 0;
+    background: #845400;
+    color: #fff;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .aura-profile-save:hover {
+    background: #704700;
+  }
+
+  .aura-voice-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #4A2F52;
+    background: #2E1C36;
+    padding: 20px;
+    color: #F5EEF0;
+  }
+
+  .aura-voice-glow {
+    position: absolute;
+    top: -32px;
+    right: -32px;
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    background: rgba(150, 240, 219, 0.12);
+    filter: blur(24px);
+  }
+
+  .aura-voice-card h2 {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .aura-voice-rows {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .aura-voice-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #F5EEF0;
+    font-size: 12px;
+  }
+
+  .aura-voice-row-border {
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(74, 47, 82, 0.85);
+  }
+
+  .aura-voice-row strong {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #7dd7c2;
+  }
+
+  .aura-voice-toggle {
+    width: 40px;
+    height: 24px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    border-radius: 999px;
+    background: #006b5b;
+  }
+
+  .aura-voice-toggle span {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #fff;
+  }
+
+  .aura-profile-main {
+    gap: 28px;
+  }
+
+  .aura-profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .aura-profile-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .aura-profile-section-head h2,
+  .aura-profile-section-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 17px;
+    line-height: 24px;
+    font-weight: 700;
+    color: #1c1b1d;
+  }
+
+  .aura-profile-section-head a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: #845400;
+  }
+
+  .aura-orders-card {
+    overflow: hidden;
+    border: 1px solid rgba(214, 195, 176, 0.14);
+    background: #fff;
+  }
+
+  .aura-order-row {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    transition: background-color 160ms ease;
+  }
+
+  .aura-order-row:hover {
+    background: #f6f2f4;
+  }
+
+  .aura-order-row-border {
+    border-top: 1px solid rgba(214, 195, 176, 0.14);
+  }
+
+  .aura-order-thumb {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #ebe7e9;
+    color: #524535;
+  }
+
+  .aura-order-copy {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .aura-order-copy p {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 700;
+    color: #1c1b1d;
+  }
+
+  .aura-order-copy span {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    color: #524535;
+  }
+
+  .aura-order-status {
+    flex: 0 0 auto;
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .aura-empty-state {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .aura-address-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .aura-address-edit-card {
+    min-height: 248px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border: 2px solid #845400;
+    border-radius: 12px;
+    background: #fff;
+    padding: 28px;
+    box-shadow: 0 2px 10px rgba(82, 69, 53, 0.08);
+  }
+
+  .aura-address-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .aura-address-edit-field span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #845400;
+  }
+
+  .aura-address-edit-field input,
+  .aura-address-edit-field textarea {
+    width: 100%;
+    border: 0;
+    border-radius: 6px;
+    background: #f6f2f4;
+    color: #1c1b1d;
+    outline: none;
+    font-family: 'Inter', 'Geist Variable', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .aura-address-edit-field input {
+    height: 40px;
+    padding: 0 12px;
+    font-weight: 600;
+  }
+
+  .aura-address-edit-field textarea {
+    min-height: 68px;
+    resize: vertical;
+    padding: 8px 12px;
+  }
+
+  .aura-address-edit-field input:focus,
+  .aura-address-edit-field textarea:focus {
+    box-shadow: 0 0 0 2px rgba(132, 84, 0, 0.18);
+  }
+
+  .aura-address-edit-actions {
+    margin-top: auto;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .aura-address-default-pill {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    border: 1px solid #845400;
+    border-radius: 5px;
+    padding: 0 10px;
+    color: #845400;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .aura-address-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #524535;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+
+  .aura-address-delete:hover {
+    background: #ffdad6;
+    color: #93000a;
+  }
+
+  .aura-address-save {
+    min-width: 108px;
+    height: 48px;
+    border: 0;
+    border-radius: 9px;
+    background: #845400;
+    color: #fff;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    transition: background-color 160ms ease;
+  }
+
+  .aura-address-save:hover {
+    background: #704700;
+  }
+
+  .aura-address-save:disabled {
+    cursor: wait;
+    opacity: 0.7;
+  }
+
+  .aura-address-error {
+    margin: -4px 0 0;
+    color: #93000a;
+    font-size: 13px;
+  }
+
+  .aura-address-card {
+    min-height: 144px;
+    display: block;
+    border: 1px solid rgba(214, 195, 176, 0.18);
+    background: #fff;
+    padding: 26px 28px;
+    color: #1c1b1d;
+  }
+
+  .aura-address-head {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .aura-address-head h3 {
+    margin: 0;
+    font-family: 'Bricolage Grotesque', 'Inter', sans-serif;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 700;
+  }
+
+  .aura-address-head button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #d6c3b0;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+
+  .aura-address-head button:hover {
+    background: #f6f2f4;
+    color: #845400;
+  }
+
+  .aura-address-head svg {
+    color: #d6c3b0;
+  }
+
+  .aura-address-card p {
+    margin: 0 0 18px;
+    font-size: 20px;
+    line-height: 28px;
+    color: #1c1b1d;
+  }
+
+  .aura-address-card span {
+    display: inline-flex;
+    border: 1px solid #d6c3b0;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #524535;
+  }
+
+  .aura-address-add {
+    min-height: 144px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 2px dashed rgba(214, 195, 176, 0.65);
+    color: #524535;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .aura-address-add:hover {
+    border-color: #845400;
+    background: rgba(255, 221, 182, 0.2);
+    color: #845400;
+  }
+
+  @media (max-width: 960px) {
+    .aura-profile-shell {
+      grid-template-columns: 1fr;
+      max-width: 560px;
+    }
+
+    .aura-address-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

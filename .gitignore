@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Build outputs
+dist/
+backend/dist/
+frontend/dist/
+
+# Runtime logs
+*.log
+*.err.log
+.codex-run-logs/
+
+# Test and tooling output
+coverage/
+playwright-report/
+test-results/
+frontend/playwright-report/
+frontend/test-results/
+
+# Local agent/tool metadata
+.agents/
+.codex/
+
+# OS/editor files
+.DS_Store
+Thumbs.db

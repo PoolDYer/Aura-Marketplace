@@ -1,0 +1,15 @@
+name = "ecommerce-frontend"
+compatibility_date = "2023-01-01"
+
+[build]
+command = "npm install && npm run build"
+output_dir = "dist"
+
+[site]
+bucket = "./dist"
+
+[env.production]
+name = "ecommerce-frontend"
+
+# Environment variables can be configured via Cloudflare Dashboard
+# e.g., VITE_API_URL=https://ecommerce-api.onrender.com/api
