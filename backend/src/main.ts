@@ -19,16 +19,24 @@ async function bootstrap() {
   );
 
   // CORS
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  const allowedOrigins = new Set([
-    frontendUrl,
+  const configuredOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ALLOWED_ORIGINS,
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-  ]);
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const allowedOrigins = new Set(configuredOrigins);
+  const allowedVercelPreviewOrigin =
+    /^https:\/\/aura-marketplace-[a-z0-9-]+-pooldyers-projects\.vercel\.app$/;
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) {
+      if (!origin || allowedOrigins.has(origin) || allowedVercelPreviewOrigin.test(origin)) {
         callback(null, true);
         return;
       }

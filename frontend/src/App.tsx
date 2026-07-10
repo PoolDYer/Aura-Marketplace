@@ -2,6 +2,7 @@ import { Navigate, Outlet, Routes, Route, useLocation, useNavigate } from 'react
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import { ProtectedLayout, RoleRoute } from './layouts/ProtectedLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -103,6 +104,7 @@ function App() {
         </Route>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
       <Route element={<RoleRoute role="COMPRADOR" />}>
         <Route path="/cart" element={<CartPage />} />

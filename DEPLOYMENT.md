@@ -35,6 +35,7 @@ Variables de entorno:
 ```env
 NODE_ENV=production
 FRONTEND_URL=https://TU-FRONTEND.vercel.app
+CORS_ALLOWED_ORIGINS=https://TU-FRONTEND.vercel.app,https://TU-DOMINIO-PREVIEW.vercel.app
 BACKEND_URL=https://TU-BACKEND.onrender.com
 PUBLIC_API_URL=https://TU-BACKEND.onrender.com
 DATABASE_URL=postgresql://...
@@ -46,6 +47,8 @@ MERCADOPAGO_ACCESS_TOKEN=...
 MERCADOPAGO_CURRENCY=PEN
 MERCADOPAGO_WEBHOOK_SECRET=...
 GEMINI_API_KEY=...
+RESEND_API_KEY=...
+EMAIL_FROM=Aura <no-reply@tudominio.com>
 JWT_SECRET=...
 JWT_REFRESH_SECRET=...
 CLOUDINARY_CLOUD_NAME=...
@@ -57,7 +60,8 @@ CLOUDINARY_FOLDER=Aura
 Notas:
 
 - No necesitas `REDIS_URL` con el codigo actual; se usa Upstash REST.
-- `FRONTEND_URL` debe coincidir exactamente con el origen de Vercel para CORS.
+- `FRONTEND_URL` debe coincidir con el dominio principal del frontend.
+- `CORS_ALLOWED_ORIGINS` permite agregar varios dominios separados por coma, util para previews de Vercel o dominios personalizados.
 - `BACKEND_URL` se usa en callbacks/webhooks de Mercado Pago.
 - `PUBLIC_API_URL` solo es relevante si Cloudinary no esta configurado y el backend guarda archivos locales.
 

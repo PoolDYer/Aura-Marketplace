@@ -20,20 +20,26 @@ export default function LoginPage() {
   const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [error, setError] = useState('');
+  const [resendMessage, setResendMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
   });
 
+  const emailValue = watch('email');
+
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
     setError('');
+    setResendMessage('');
 
     try {
       const response = await api.post('/auth/login', data);
@@ -50,6 +56,10 @@ export default function LoginPage() {
           setError(
             'Tu cuenta ha sido bloqueada temporalmente por demasiados intentos fallidos. Intenta en 15 minutos.',
           );
+        } else if (err.response.data.message === 'EMAIL_NOT_VERIFIED') {
+          setError('Debes verificar tu correo antes de iniciar sesion.');
+        } else if (err.response.data.message === 'ACCOUNT_SUSPENDED') {
+          setError('Tu cuenta esta suspendida. Contacta con soporte.');
         } else {
           setError('Credenciales inválidas');
         }
@@ -58,6 +68,26 @@ export default function LoginPage() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    if (!emailValue) {
+      setError('Ingresa tu correo para reenviar la verificacion.');
+      return;
+    }
+
+    setIsResending(true);
+    setError('');
+    setResendMessage('');
+
+    try {
+      const response = await api.post('/auth/resend-verification', { email: emailValue });
+      setResendMessage(response.data?.message || 'Revisa tu bandeja de entrada.');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'No pudimos reenviar el correo.');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -74,6 +104,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         {error ? <AuthMessage tone="error">{error}</AuthMessage> : null}
+        {resendMessage ? <AuthMessage tone="success">{resendMessage}</AuthMessage> : null}
 
         <AuthField
           label="Correo Electrónico"
@@ -117,6 +148,17 @@ export default function LoginPage() {
           <span>{isLoading ? 'Iniciando...' : 'Entrar'}</span>
           {!isLoading ? <ArrowRight className="h-5 w-5" /> : null}
         </button>
+
+        {error === 'Debes verificar tu correo antes de iniciar sesion.' ? (
+          <button
+            type="button"
+            onClick={resendVerification}
+            disabled={isResending}
+            className="text-sm font-semibold text-[#845400] underline-offset-4 transition-colors hover:text-[#704700] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isResending ? 'Reenviando correo...' : 'Reenviar correo de verificacion'}
+          </button>
+        ) : null}
       </form>
 
       <div className="mt-6 text-center">

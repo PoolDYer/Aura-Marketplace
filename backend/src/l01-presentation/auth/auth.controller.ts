@@ -4,6 +4,7 @@ import { AuthService } from '../../l03-application/auth/auth.service';
 import { RegisterDto } from '../../l03-application/auth/dto/register.dto';
 import { LoginDto } from '../../l03-application/auth/dto/login.dto';
 import { RefreshDto } from '../../l03-application/auth/dto/refresh.dto';
+import { ResendVerificationDto, VerifyEmailDto } from '../../l03-application/auth/dto/verify-email.dto';
 import { Public } from '../../l03-application/auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../../l03-application/auth/guards/jwt-auth.guard';
 
@@ -28,6 +29,22 @@ export class AuthController {
   @ApiResponse({ status: 403, description: 'Cuenta bloqueada (ACCOUNT_LOCKED).' })
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Public()
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verificar correo electronico' })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
+  }
+
+  @Public()
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reenviar correo de verificacion' })
+  resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(dto.email);
   }
 
   @Public()

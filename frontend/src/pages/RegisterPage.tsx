@@ -83,7 +83,7 @@ export default function RegisterPage() {
     try {
       await api.post('/auth/register', payload);
       setSuccess('Registro exitoso. Verifique su correo electrónico antes de iniciar sesión.');
-      setTimeout(() => navigate('/'), 3000);
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al registrar usuario');
     } finally {

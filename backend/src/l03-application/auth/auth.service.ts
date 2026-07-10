@@ -32,7 +32,7 @@ export class AuthService {
       },
     });
 
-    const token = this.jwtService.sign({ sub: user.id }, { expiresIn: '1h' });
+    const token = this.createEmailVerificationToken(user.id);
     await this.mailService.sendVerificationEmail(user.email, token);
 
     return { message: 'Registro exitoso. Verifique su correo.' };
@@ -43,6 +43,14 @@ export class AuthService {
     if (!userData) throw new UnauthorizedException('Credenciales inválidas');
 
     const user = new UsuarioEntity(userData);
+
+    if (user.estado === 'PENDIENTE') {
+      throw new HttpException('EMAIL_NOT_VERIFIED', HttpStatus.FORBIDDEN);
+    }
+
+    if (user.estado === 'SUSPENDIDO') {
+      throw new HttpException('ACCOUNT_SUSPENDED', HttpStatus.FORBIDDEN);
+    }
 
     if (user.isBloqueado()) {
       throw new HttpException('ACCOUNT_LOCKED', HttpStatus.FORBIDDEN);
@@ -71,6 +79,53 @@ export class AuthService {
     });
 
     return this.generateTokens(user);
+  }
+
+  async verifyEmail(token: string) {
+    let payload: { sub?: string; purpose?: string };
+
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+    } catch (error) {
+      throw new BadRequestException('El enlace de verificacion es invalido o expiro');
+    }
+
+    if (!payload.sub || payload.purpose !== 'email_verification') {
+      throw new BadRequestException('El enlace de verificacion es invalido');
+    }
+
+    const user = await this.prisma.usuario.findUnique({ where: { id: payload.sub } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (user.estado === 'ACTIVO') {
+      return { message: 'Tu correo ya estaba verificado.' };
+    }
+
+    if (user.estado === 'SUSPENDIDO') {
+      throw new BadRequestException('La cuenta esta suspendida');
+    }
+
+    await this.prisma.usuario.update({
+      where: { id: user.id },
+      data: { estado: 'ACTIVO' },
+    });
+
+    return { message: 'Correo verificado correctamente. Ya puedes iniciar sesion.' };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.prisma.usuario.findUnique({ where: { email } });
+
+    if (!user || user.estado !== 'PENDIENTE') {
+      return { message: 'Si la cuenta requiere verificacion, enviaremos un nuevo correo.' };
+    }
+
+    const token = this.createEmailVerificationToken(user.id);
+    await this.mailService.sendVerificationEmail(user.email, token);
+
+    return { message: 'Si la cuenta requiere verificacion, enviaremos un nuevo correo.' };
   }
 
   async refresh(refreshTokenStr: string) {
@@ -141,5 +196,15 @@ export class AuthService {
         rol: user.rol
       }
     };
+  }
+
+  private createEmailVerificationToken(userId: string) {
+    return this.jwtService.sign(
+      { sub: userId, purpose: 'email_verification' },
+      {
+        secret: this.configService.get('JWT_SECRET'),
+        expiresIn: '1h',
+      },
+    );
   }
 }
