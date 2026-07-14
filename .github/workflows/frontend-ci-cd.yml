@@ -88,13 +88,16 @@ jobs:
           npm exec vite -- --version
 
       - name: Pull Vercel environment
+        working-directory: ${{ github.workspace }}
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Vercel artifact
+        working-directory: ${{ github.workspace }}
         run: |
           which vite
           vite --version
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Vercel artifact
+        working-directory: ${{ github.workspace }}
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
