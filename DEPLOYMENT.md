@@ -49,6 +49,8 @@ MERCADOPAGO_WEBHOOK_SECRET=...
 GEMINI_API_KEY=...
 RESEND_API_KEY=...
 EMAIL_FROM=Aura <no-reply@tudominio.com>
+NEON_AUTH_BASE_URL=https://ep-red-darkness-acsr0yn8.neonauth.sa-east-1.aws.neon.tech/neondb/auth
+NEON_AUTH_JWKS_URL=https://ep-red-darkness-acsr0yn8.neonauth.sa-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json
 JWT_SECRET=...
 JWT_REFRESH_SECRET=...
 CLOUDINARY_CLOUD_NAME=...
@@ -80,9 +82,12 @@ Variables de entorno:
 ```env
 VITE_API_URL=https://TU-BACKEND.onrender.com
 VITE_MERCADOPAGO_PUBLIC_KEY=...
+VITE_NEON_AUTH_URL=https://ep-red-darkness-acsr0yn8.neonauth.sa-east-1.aws.neon.tech/neondb/auth
 ```
 
 El archivo `frontend/vercel.json` hace que las rutas SPA como `/catalog`, `/profile/orders` y `/orders/success` funcionen al refrescar la pagina.
+
+En Neon Auth, confirma que el dominio de Vercel este permitido para los callbacks de OAuth. El frontend usa `/auth/callback` como retorno de Google.
 
 ## 4. Mercado Pago
 
@@ -118,3 +123,32 @@ npx prisma validate
 cd ../frontend
 npm run build
 ```
+
+## 7. CI/CD con GitHub Actions
+
+Los workflows activos deben vivir en `.github/workflows` en la raiz del repositorio.
+
+Secretos requeridos en GitHub Actions:
+
+```env
+VERCEL_TOKEN=...
+VERCEL_ORG_ID=...
+VERCEL_PROJECT_ID=...
+RENDER_DEPLOY_HOOK=...
+```
+
+Variables opcionales para validar el build del frontend en Actions:
+
+```env
+VITE_API_URL=https://TU-BACKEND.onrender.com
+VITE_MERCADOPAGO_PUBLIC_KEY=...
+VITE_NEON_AUTH_URL=https://ep-red-darkness-acsr0yn8.neonauth.sa-east-1.aws.neon.tech/neondb/auth
+```
+
+Flujo configurado:
+
+- Pull requests a `main`: validan los cambios de frontend o backend sin publicar.
+- Push a `main` con cambios en `frontend`: valida el build y publica en Vercel.
+- Push a `main` con cambios en `backend`: valida Prisma, build y tests, luego dispara el deploy hook de Render.
+
+Para evitar despliegues duplicados, `frontend/vercel.json` desactiva los deploys automaticos directos de Vercel Git y `render.yaml` desactiva el auto deploy directo de Render. GitHub Actions queda como punto unico de control.
