@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus, Inject, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { createHash } from 'crypto';
@@ -14,6 +14,8 @@ import { UsuarioEntity } from '../../l04-domain/auth/usuario.entity';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @Inject('IUserRepository') private userRepo: IUserRepository,
     @Inject('IRefreshTokenRepository') private refreshTokenRepo: IRefreshTokenRepository,
@@ -98,6 +100,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('Usuario no encontrado');
 
     if (user.estado === 'ACTIVO') {
+      await this.syncVerifiedUserWithNeonAuth(user);
       return { message: 'Tu correo ya estaba verificado.' };
     }
 
@@ -105,7 +108,8 @@ export class AuthService {
       throw new BadRequestException('La cuenta esta suspendida');
     }
 
-    await this.userRepo.update(user.id, { estado: 'ACTIVO' });
+    const verifiedUser = await this.userRepo.update(user.id, { estado: 'ACTIVO' });
+    await this.syncVerifiedUserWithNeonAuth(verifiedUser);
 
     return { message: 'Correo verificado correctamente. Ya puedes iniciar sesion.' };
   }
@@ -249,5 +253,44 @@ export class AuthService {
 
   private createPasswordVersion(passwordHash: string) {
     return createHash('sha256').update(passwordHash).digest('hex').slice(0, 24);
+  }
+
+  private async syncVerifiedUserWithNeonAuth(user: { email: string; nombre?: string | null }) {
+    const apiKey = process.env.NEON_API_KEY;
+    const projectId = process.env.NEON_PROJECT_ID;
+    const branchId = process.env.NEON_BRANCH_ID;
+    const syncRequired = process.env.NEON_AUTH_SYNC_REQUIRED === 'true';
+
+    if (!apiKey || !projectId || !branchId) {
+      const message = 'Neon Auth sync is not configured. Set NEON_API_KEY, NEON_PROJECT_ID and NEON_BRANCH_ID.';
+      if (syncRequired) {
+        throw new BadRequestException(message);
+      }
+
+      this.logger.warn(message);
+      return;
+    }
+
+    const response = await fetch(
+      `https://console.neon.tech/api/v2/projects/${projectId}/branches/${branchId}/auth/users`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.nombre || user.email.split('@')[0],
+        }),
+      },
+    );
+
+    if (response.ok || response.status === 409) {
+      return;
+    }
+
+    const body = await response.text();
+    throw new BadRequestException(`No se pudo registrar el usuario en Neon Auth: ${response.status} ${body}`);
   }
 }

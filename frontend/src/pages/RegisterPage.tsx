@@ -6,17 +6,15 @@ import { ArrowRight, CheckCircle2, Lock, Mail, Store, UserRound, type LucideIcon
 
 import { registerSchema, RegisterData, UserRole } from '../lib/validations';
 import {
-  authClient,
   completeGoogleRegistration,
   getNeonRegistrationStatus,
-  rememberPendingRole,
-  syncNeonSession,
 } from '../lib/neonAuth';
 import { useAuthStore } from '../store/authStore';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthField } from '../components/auth/AuthField';
 import { AuthMessage } from '../components/auth/AuthMessage';
 import { cn } from '../lib/utils';
+import api from '../lib/axios';
 
 const registerHero =
   'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626783/Aura/assets/frontend/src/assets/auth/register-hero.jpg';
@@ -137,28 +135,9 @@ export default function RegisterPage() {
         return;
       }
 
-      const result = await authClient.signUp.email({
-        name: payload.nombre,
-        email: payload.email,
-        password: payload.password,
-        callbackURL: `${window.location.origin}/auth/callback`,
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message || 'Error al registrar usuario');
-      }
-
-      rememberPendingRole(payload.email, rol);
-
-      try {
-        const synced = await syncNeonSession({ nombre: payload.nombre, rol });
-        setAuth(synced.user, synced.accessToken);
-        navigate(rol === 'VENDEDOR' ? '/vendor/catalog' : '/');
-        return;
-      } catch {
-        setSuccess('Registro exitoso. Verifique su correo electronico antes de iniciar sesion.');
-        setTimeout(() => navigate('/login'), 3000);
-      }
+      await api.post('/auth/register', { ...payload, rol });
+      setSuccess('Registro exitoso. Verifique su correo electronico antes de iniciar sesion.');
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al registrar usuario');
     } finally {

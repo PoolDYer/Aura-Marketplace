@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
@@ -41,9 +41,12 @@ function GoogleIcon() {
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [error, setError] = useState('');
-  const [resendMessage, setResendMessage] = useState('');
+  const [resendMessage, setResendMessage] = useState(
+    searchParams.get('verified') === '1' ? 'Correo verificado correctamente. Ya puedes iniciar sesion.' : '',
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -134,18 +137,14 @@ export default function LoginPage() {
     setResendMessage('');
 
     try {
-      const result = await authClient.sendVerificationEmail({
-        email: emailValue,
-        callbackURL: `${window.location.origin}/auth/callback`,
-      });
-
-      if (result.error) {
-        throw new Error(result.error.message || 'No pudimos reenviar el correo.');
-      }
-
+      await api.post('/auth/resend-verification', { email: emailValue });
       setResendMessage('Revisa tu bandeja de entrada.');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'No pudimos reenviar el correo.');
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as any).response?.data?.message
+          : undefined;
+      setError(message || (err instanceof Error ? err.message : 'No pudimos reenviar el correo.'));
     } finally {
       setIsResending(false);
     }

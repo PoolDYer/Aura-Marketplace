@@ -13,7 +13,8 @@ const loginHero =
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
-  const [error, setError] = useState('');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const finishSignIn = async () => {
@@ -38,7 +39,15 @@ export default function AuthCallbackPage() {
         setAuth(status.user, status.accessToken);
         navigate(status.user.rol === 'VENDEDOR' ? '/vendor/catalog' : '/', { replace: true });
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'No pudimos completar el inicio de sesion.');
+        const message = err instanceof Error ? err.message : '';
+        if (message.toLowerCase().includes('no hay sesion activa en neon')) {
+          setStatus('success');
+          setMessage('Correo verificado correctamente. Inicia sesion para continuar.');
+          return;
+        }
+
+        setStatus('error');
+        setMessage(message || 'No pudimos completar el inicio de sesion.');
       }
     };
 
@@ -49,7 +58,7 @@ export default function AuthCallbackPage() {
     <AuthLayout imageSrc={loginHero} imageAlt="Persona sosteniendo un telefono con la interfaz de Aura">
       <div className="text-center">
         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#fff3df] text-[#845400]">
-          {error ? <MailWarning className="h-7 w-7" /> : <Loader2 className="h-7 w-7 animate-spin" />}
+          {status === 'loading' ? <Loader2 className="h-7 w-7 animate-spin" /> : <MailWarning className="h-7 w-7" />}
         </div>
         <h2 className="font-auth-display text-[28px] font-semibold leading-9 text-[#211527]">
           Conectando tu cuenta
@@ -59,10 +68,10 @@ export default function AuthCallbackPage() {
         </p>
       </div>
 
-      {error ? (
+      {status !== 'loading' ? (
         <>
           <div className="mt-6">
-            <AuthMessage tone="error">{error}</AuthMessage>
+            <AuthMessage tone={status === 'success' ? 'success' : 'error'}>{message}</AuthMessage>
           </div>
           <Link
             to="/login"
