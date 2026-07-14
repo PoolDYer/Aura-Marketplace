@@ -88,6 +88,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/test-setup.ts"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 100,

@@ -59,7 +59,7 @@ describe('CloudinaryService', () => {
       format: 'png',
     });
 
-    expect(mkdir).toHaveBeenCalledWith(expect.stringContaining('uploads\\products'), { recursive: true });
+    expect(mkdir).toHaveBeenCalledWith(expect.stringMatching(/uploads[\\/]products/), { recursive: true });
     expect(writeFile).toHaveBeenCalledWith(expect.stringContaining('uuid-1.png'), Buffer.from('image'));
     nowSpy.mockRestore();
   });
