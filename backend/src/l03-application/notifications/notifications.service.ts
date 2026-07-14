@@ -1,37 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
-import { MockNotificationProvider } from '../../l05-infrastructure/notifications/mock-notification.provider';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { INotificationRepository } from '../../l04-domain/ports/notification-repository.interface';
+import { INotificationProvider } from '../../l04-domain/ports/notification-provider.interface';
+import { IUserRepository } from '../../l04-domain/ports/user-repository.interface';
 
 @Injectable()
 export class NotificationsService {
   constructor(
-    private prisma: PrismaService,
-    private notificationProvider: MockNotificationProvider,
+    @Inject('INotificationRepository') private readonly notificationRepo: INotificationRepository,
+    @Inject('INotificationProvider') private readonly notificationProvider: INotificationProvider,
+    @Inject('IUserRepository') private readonly userRepo: IUserRepository,
   ) {}
 
   async getMyNotifications(usuarioId: string) {
-    return this.prisma.notificacion.findMany({
-      where: { usuarioId },
-      orderBy: { createdAt: 'desc' },
-    });
+    return this.notificationRepo.findManyByUser(usuarioId);
   }
 
   async markAsRead(usuarioId: string, id: string) {
-    const notificacion = await this.prisma.notificacion.findUnique({ where: { id } });
+    const notificacion = await this.notificationRepo.findById(id);
     if (!notificacion || notificacion.usuarioId !== usuarioId) {
       throw new NotFoundException('Notificación no encontrada');
     }
 
-    return this.prisma.notificacion.update({
-      where: { id },
-      data: { estado: 'ENVIADA' } // Consideramos 'ENVIADA' como leída o podríamos añadir campo 'leida'
-    });
+    return this.notificationRepo.updateStatus(id, 'ENVIADA'); // Consideramos 'ENVIADA' como leída
   }
 
   async sendNotification(usuarioId: string, tipo: 'SEGURIDAD' | 'ORDEN_NUEVA' | 'ORDEN_ESTADO' | 'MARKETING', contenido: string) {
-    const preferencias = await this.prisma.preferenciasUsuario.findUnique({
-      where: { usuarioId }
-    });
+    const preferencias = await this.userRepo.findPreferencesByUserId(usuarioId);
 
     let send = false;
     let canal = 'EMAIL'; // Default canal
@@ -45,24 +39,19 @@ export class NotificationsService {
 
     if (!send) return null;
 
-    const notif = await this.prisma.notificacion.create({
-      data: {
-        usuarioId,
-        tipo,
-        contenido,
-        canal,
-        estado: 'PENDIENTE',
-      }
+    const notif = await this.notificationRepo.create({
+      usuarioId,
+      tipo,
+      contenido,
+      canal,
+      estado: 'PENDIENTE',
     });
 
     const success = await this.notificationProvider.sendNotification(usuarioId, canal, tipo, contenido);
     
-    return this.prisma.notificacion.update({
-      where: { id: notif.id },
-      data: {
-        estado: success ? 'ENVIADA' : 'FALLIDA',
-        enviadaAt: success ? new Date() : null,
-      }
+    return this.notificationRepo.update(notif.id, {
+      estado: success ? 'ENVIADA' : 'FALLIDA',
+      enviadaAt: success ? new Date() : null,
     });
   }
 }

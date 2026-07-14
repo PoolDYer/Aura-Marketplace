@@ -2,7 +2,9 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Mic, Search, ShoppingCart } from 'lucide-react';
 
+import { BrandLogo } from './BrandLogo';
 import { useAgentStore } from '../store/agentStore';
+import { authClient } from '../lib/neonAuth';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useProfilePhotoStore } from '../store/profilePhotoStore';
@@ -72,17 +74,17 @@ export function AuraHeader({ searchValue, onSearchChange, onSearchSubmit }: Aura
     navigate(`${target}${query ? `?q=${encodeURIComponent(query)}` : ''}`);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await authClient.signOut().catch(() => undefined);
     logout();
-    localStorage.removeItem('refresh_token');
     navigate('/login', { replace: true });
   };
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#d6c3b0]/30 bg-[#FAF6F8]/90 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 md:px-8">
-        <Link to="/" className="-translate-x-[50px] font-auth-display text-[30px] font-bold leading-none tracking-tight text-[#845400] md:text-[34px]">
-          Aura
+        <Link to="/" className="flex shrink-0 items-center" aria-label="Aura Marketplace">
+          <BrandLogo />
         </Link>
 
         <nav className="hidden items-center gap-[34px] md:flex">

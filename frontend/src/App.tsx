@@ -2,7 +2,10 @@ import { Navigate, Outlet, Routes, Route, useLocation, useNavigate } from 'react
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import { ProtectedLayout, RoleRoute } from './layouts/ProtectedLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -32,6 +35,7 @@ import { useCartStore } from './store/cartStore';
 import { Sparkles } from 'lucide-react';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
+import { getNeonRegistrationStatus } from './lib/neonAuth';
 
 function StorefrontRoute() {
   const { user, hasHydrated } = useAuthStore();
@@ -54,7 +58,7 @@ function StorefrontRoute() {
 function App() {
   const { toggleChat, fetchHistory } = useAgentStore();
   const { addItem } = useCartStore();
-  const { user } = useAuthStore();
+  const { user, hasHydrated, setAuth, logout } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const hideGlobalBot =
@@ -70,6 +74,40 @@ function App() {
       fetchHistory();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+
+    getNeonRegistrationStatus()
+      .then((status) => {
+        if (status.registered && status.user) {
+          setAuth(status.user, status.accessToken);
+          return;
+        }
+
+        const isAuthRoute =
+          location.pathname === '/login' ||
+          location.pathname === '/forgot-password' ||
+          location.pathname === '/reset-password' ||
+          location.pathname === '/auth/callback' ||
+          location.pathname.startsWith('/register');
+
+        if (!isAuthRoute) {
+          navigate('/register?provider=google', {
+            replace: true,
+            state: {
+              verifiedEmail: status.neonUser.email,
+              suggestedName: status.neonUser.nombre,
+            },
+          });
+        }
+      })
+      .catch(() => {
+        if (user) {
+          logout();
+        }
+      });
+  }, [hasHydrated, location.pathname, logout, navigate, setAuth, user]);
 
   // Register navigation callback for the copilot
   useEffect(() => {
@@ -103,7 +141,10 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage />} />
         </Route>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
 
       <Route element={<RoleRoute role="COMPRADOR" />}>

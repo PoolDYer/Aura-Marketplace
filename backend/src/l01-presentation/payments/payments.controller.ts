@@ -2,19 +2,19 @@ import { Body, Controller, Get, Headers, Param, Post, Query, RawBodyRequest, Req
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../l03-application/auth/guards/jwt-auth.guard';
 import { Public } from '../../l03-application/auth/decorators/public.decorator';
-import { MercadoPagoService } from '../../l05-infrastructure/payments/mercadopago.service';
+import { PaymentsService } from '../../l03-application/payments/payments.service';
 
 @ApiTags('Payments')
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly mercadoPagoService: MercadoPagoService) {}
+  constructor(private readonly paymentsService: PaymentsService) {}
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('checkout/:orderId')
   @ApiOperation({ summary: 'Crear preferencia de pago con Mercado Pago Checkout Pro' })
   createCheckoutPreference(@Request() req, @Param('orderId') orderId: string) {
-    return this.mercadoPagoService.createCheckoutPreference(req.user.sub, orderId);
+    return this.paymentsService.createCheckoutPreference(req.user.sub, orderId);
   }
 
   @ApiBearerAuth()
@@ -22,7 +22,7 @@ export class PaymentsController {
   @Post('brick/:orderId')
   @ApiOperation({ summary: 'Inicializar Payment Brick de Mercado Pago' })
   createBrickInitialization(@Request() req, @Param('orderId') orderId: string) {
-    return this.mercadoPagoService.createBrickInitialization(req.user.sub, orderId);
+    return this.paymentsService.createBrickInitialization(req.user.sub, orderId);
   }
 
   @ApiBearerAuth()
@@ -30,7 +30,7 @@ export class PaymentsController {
   @Post('process/:orderId')
   @ApiOperation({ summary: 'Procesar pago enviado desde Payment Brick' })
   processBrickPayment(@Request() req, @Param('orderId') orderId: string, @Body() body: any) {
-    return this.mercadoPagoService.processBrickPayment(req.user.sub, orderId, body);
+    return this.paymentsService.processBrickPayment(req.user.sub, orderId, body);
   }
 
   @Public()
@@ -43,7 +43,7 @@ export class PaymentsController {
     @Req() req: RawBodyRequest<Request>,
   ) {
     const body = (req as any).rawBody || (req as any).body;
-    return this.mercadoPagoService.handleWebhook(xSignature, xRequestId, dataId, body);
+    return this.paymentsService.handleWebhook(xSignature, xRequestId, dataId, body);
   }
 
   @ApiBearerAuth()
@@ -55,7 +55,7 @@ export class PaymentsController {
     @Query('collection_id') collectionId: string,
     @Query('order_id') orderId: string,
   ) {
-    return this.mercadoPagoService.verifyPayment(paymentId || collectionId, orderId);
+    return this.paymentsService.verifyPayment(paymentId || collectionId, orderId);
   }
 
   @ApiBearerAuth()
@@ -63,6 +63,6 @@ export class PaymentsController {
   @Get(':ordenId')
   @ApiOperation({ summary: 'Obtener estado del pago de una orden' })
   getPaymentStatus(@Request() req, @Param('ordenId') orderId: string) {
-    return this.mercadoPagoService.getPaymentStatus(req.user.sub, orderId);
+    return this.paymentsService.getPaymentStatus(req.user.sub, orderId);
   }
 }

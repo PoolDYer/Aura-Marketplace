@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Redis } from '@upstash/redis';
+import { ICacheProvider } from '../../l04-domain/ports/cache-provider.interface';
 
 type CacheEntry<T> = {
   expiresAt: number;
@@ -7,7 +8,7 @@ type CacheEntry<T> = {
 };
 
 @Injectable()
-export class SimpleCacheService {
+export class SimpleCacheService implements ICacheProvider {
   private readonly logger = new Logger(SimpleCacheService.name);
   private readonly entries = new Map<string, CacheEntry<unknown>>();
   private readonly redis?: Redis;

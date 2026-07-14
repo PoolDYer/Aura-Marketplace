@@ -10,8 +10,9 @@ import {
 } from 'lucide-react';
 
 import { AuraHeader } from '../components/AuraHeader';
+import { BrandLogo } from '../components/BrandLogo';
 import { productsApi } from '../api/products';
-import api from '../lib/axios';
+import { authClient } from '../lib/neonAuth';
 import { useAgentStore } from '../store/agentStore';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
@@ -106,13 +107,11 @@ export default function HomePage() {
 
   const handleLogout = async () => {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
-      await api.post('/auth/logout', { refreshToken });
+      await authClient.signOut();
     } catch (error) {
       console.error(error);
     } finally {
       logout();
-      localStorage.removeItem('refresh_token');
     }
   };
 
@@ -262,7 +261,7 @@ export default function HomePage() {
 
       <footer className="mt-6 border-t border-[#d6c3b0]/20 bg-[#f1edef] px-4 py-10 md:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 text-center">
-          <span className="font-auth-display text-[40px] font-bold leading-none text-[#845400]">Aura</span>
+          <BrandLogo variant="footer" />
           <div className="flex flex-wrap items-center justify-center gap-5">
             <Link to="/catalog" className="text-[12px] font-medium text-[#524535]">Privacidad</Link>
             <Link to="/catalog" className="text-[12px] font-medium text-[#524535]">Terminos</Link>

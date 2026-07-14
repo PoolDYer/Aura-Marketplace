@@ -1,12 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 const API_URL = 'http://localhost:3000';
+type E2ePrisma = Pick<PrismaClient, 'orden' | '$disconnect'>;
+type FetchLike = typeof fetch;
 
-async function runTest() {
+export async function runTest(
+  prisma: E2ePrisma = new PrismaClient(),
+  fetchImpl: FetchLike = fetch,
+  apiUrl = API_URL,
+) {
   console.log('--- Iniciando prueba de flujo de compra E2E con productos reales de la API ---');
 
-  const loginRes = await fetch(`${API_URL}/auth/login`, {
+  const loginRes = await fetchImpl(`${apiUrl}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -30,7 +35,7 @@ async function runTest() {
     Authorization: `Bearer ${token}`,
   };
 
-  const productRes = await fetch(`${API_URL}/products`);
+  const productRes = await fetchImpl(`${apiUrl}/products`);
   if (!productRes.ok) throw new Error('Error al obtener productos');
 
   const productData = await productRes.json() as any[];
@@ -40,14 +45,14 @@ async function runTest() {
   }
   console.log(`2. Producto encontrado: ${prod.nombre} - Precio: $${prod.precio} - ID: ${prod.id}`);
 
-  const clearCartRes = await fetch(`${API_URL}/cart`, {
+  const clearCartRes = await fetchImpl(`${apiUrl}/cart`, {
     method: 'DELETE',
     headers,
   });
   if (!clearCartRes.ok) console.log('Aviso: error o carrito ya estaba vacio');
   else console.log('3. Carrito anterior vaciado.');
 
-  const cartAddRes = await fetch(`${API_URL}/cart/items`, {
+  const cartAddRes = await fetchImpl(`${apiUrl}/cart/items`, {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -61,12 +66,12 @@ async function runTest() {
   }
   console.log('4. Producto agregado al carrito.');
 
-  const cartRes = await fetch(`${API_URL}/cart`, { headers });
+  const cartRes = await fetchImpl(`${apiUrl}/cart`, { headers });
   if (!cartRes.ok) throw new Error('Error al obtener carrito');
   const cartData = await cartRes.json() as any;
   console.log(`5. Carrito recuperado. Items: ${cartData.items.length}`);
 
-  const addressesRes = await fetch(`${API_URL}/users/me/addresses`, { headers });
+  const addressesRes = await fetchImpl(`${apiUrl}/users/me/addresses`, { headers });
   if (!addressesRes.ok) throw new Error('Error al obtener direcciones');
   const addressesData = await addressesRes.json() as any[];
   const address = addressesData[0];
@@ -75,7 +80,7 @@ async function runTest() {
   }
   console.log(`6. Direccion guardada recuperada: ${address.calle}`);
 
-  const orderRes = await fetch(`${API_URL}/orders`, {
+  const orderRes = await fetchImpl(`${apiUrl}/orders`, {
     method: 'POST',
     headers,
     body: JSON.stringify({
@@ -113,6 +118,10 @@ async function runTest() {
   console.log(`Total registrado en DB: $${dbOrder.total}`);
 }
 
-runTest()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+/* istanbul ignore next */
+if (require.main === module) {
+  const prisma = new PrismaClient();
+  runTest(prisma)
+    .catch(console.error)
+    .finally(() => prisma.$disconnect());
+}

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Payment, Preference, WebhookSignatureValidator } from 'mercadopago';
 import { PrismaService } from '../database/prisma.service';
+import { IPaymentGateway } from '../../l04-domain/ports/payment-gateway.interface';
 
 type MercadoPagoWebhookPayload = {
   action?: string;
@@ -14,7 +15,7 @@ type MercadoPagoWebhookPayload = {
 type BrickPaymentPayload = Record<string, any>;
 
 @Injectable()
-export class MercadoPagoService {
+export class MercadoPagoService implements IPaymentGateway {
   private readonly preference: Preference;
   private readonly payment: Payment;
 

@@ -1,14 +1,14 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
+import { IPromotionRepository } from '../../l04-domain/ports/promotion-repository.interface';
 
 @Injectable()
 export class PromotionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('IPromotionRepository') private readonly promotionRepo: IPromotionRepository,
+  ) {}
 
   async validateCoupon(codigo: string) {
-    const cupon = await this.prisma.cupon.findUnique({
-      where: { codigo }
-    });
+    const cupon = await this.promotionRepo.findCuponByCodigo(codigo);
 
     if (!cupon) {
       throw new NotFoundException('Cupón no encontrado');
@@ -39,13 +39,6 @@ export class PromotionsService {
 
   async getActivePromotions(publicacionIds: string[]) {
     const now = new Date();
-    return this.prisma.promocion.findMany({
-      where: {
-        publicacionId: { in: publicacionIds },
-        activa: true,
-        inicio: { lte: now },
-        fin: { gte: now }
-      }
-    });
+    return this.promotionRepo.findActivePromotionsForProducts(publicacionIds, now);
   }
 }

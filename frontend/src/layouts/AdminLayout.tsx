@@ -1,5 +1,7 @@
 import { Bell, LogOut, Search } from 'lucide-react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo';
+import { authClient } from '../lib/neonAuth';
 import { useAuthStore } from '../store/authStore';
 import { useProfilePhotoStore } from '../store/profilePhotoStore';
 
@@ -23,9 +25,9 @@ export const AdminLayout = () => {
   const navigate = useNavigate();
   const profilePhoto = useProfilePhotoStore((state) => (user?.id ? state.photos[user.id] : undefined));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await authClient.signOut().catch(() => undefined);
     logout();
-    localStorage.removeItem('refresh_token');
     navigate('/login', { replace: true });
   };
 
@@ -41,11 +43,11 @@ export const AdminLayout = () => {
     <div className="min-h-screen bg-[#fcf8fa] text-[#1c1b1d]">
       <header className="sticky top-0 z-50 border-b border-[#d6c3b0]/35 bg-[#fcf8fa]/95 shadow-sm backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-8 px-4 sm:px-6 lg:px-8">
-          <Link to="/admin/orders" className="shrink-0 font-auth-display text-[39px] font-bold leading-none tracking-tight text-[#845400]">
-            Aura
+          <Link to="/admin/orders" className="flex shrink-0 items-center" aria-label="Aura Marketplace">
+            <BrandLogo />
           </Link>
 
-          <nav className="ml-[60px] hidden min-w-0 flex-1 items-center gap-[52px] lg:flex" aria-label="Navegación administrativa">
+          <nav className="ml-8 hidden min-w-0 flex-1 items-center gap-[52px] lg:flex" aria-label="Navegación administrativa">
             {links.map((link) => {
               const active = pathname === link.to;
               return (
@@ -101,3 +103,4 @@ export const AdminLayout = () => {
     </div>
   );
 };
+

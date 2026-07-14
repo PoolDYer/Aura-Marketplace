@@ -49,8 +49,15 @@ export function AuthField({
           </div>
         ) : null}
       </div>
-      {helperText ? <p className="ml-1 text-[12px] leading-4 text-[#524535]">{helperText}</p> : null}
-      {error ? <p className="ml-1 text-[12px] leading-4 text-[#A84B2F]">{error}</p> : null}
+      <p
+        className={cn(
+          'ml-1 min-h-4 text-[12px] leading-4',
+          error ? 'text-[#A84B2F]' : 'text-[#524535]',
+        )}
+        aria-live="polite"
+      >
+        {error || helperText || '\u00a0'}
+      </p>
     </div>
   );
 }

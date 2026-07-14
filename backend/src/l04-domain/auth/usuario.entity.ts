@@ -1,4 +1,14 @@
-import { RolUsuario, EstadoUsuario } from '@prisma/client';
+export enum RolUsuario {
+  COMPRADOR = 'COMPRADOR',
+  VENDEDOR = 'VENDEDOR',
+  ADMINISTRADOR = 'ADMINISTRADOR',
+}
+
+export enum EstadoUsuario {
+  PENDIENTE = 'PENDIENTE',
+  ACTIVO = 'ACTIVO',
+  SUSPENDIDO = 'SUSPENDIDO',
+}
 
 export class UsuarioEntity {
   id: string;

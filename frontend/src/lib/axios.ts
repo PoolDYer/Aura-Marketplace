@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
+import { getCurrentNeonToken, syncNeonSession } from './neonAuth';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -36,24 +37,19 @@ const shouldRefreshToken = (token: string) => {
   return expiresAt - Date.now() <= refreshWindowMs;
 };
 
-const isRefreshRequest = (url?: string) => {
-  if (!url) return false;
-  return new URL(url, api.defaults.baseURL).pathname === '/auth/refresh';
-};
-
 const refreshAccessToken = async () => {
   if (!refreshRequest) {
     refreshRequest = (async () => {
-      const refreshToken = localStorage.getItem('refresh_token');
-      if (!refreshToken) throw new Error('No refresh token');
-
-      const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });
       const authStore = useAuthStore.getState();
+      const accessToken = authStore.user
+        ? await getCurrentNeonToken()
+        : (await syncNeonSession()).accessToken;
 
-      authStore.setAuth(data.user, data.accessToken);
-      localStorage.setItem('refresh_token', data.refreshToken);
+      if (authStore.user) {
+        authStore.setAuth(authStore.user, accessToken);
+      }
 
-      return data.accessToken as string;
+      return accessToken;
     })().finally(() => {
       refreshRequest = null;
     });
@@ -66,7 +62,7 @@ api.interceptors.request.use(
   async (config) => {
     let { accessToken } = useAuthStore.getState();
 
-    if (accessToken && shouldRefreshToken(accessToken) && !isRefreshRequest(config.url)) {
+    if (accessToken && shouldRefreshToken(accessToken)) {
       accessToken = await refreshAccessToken();
     }
 
@@ -96,7 +92,6 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         useAuthStore.getState().logout();
-        localStorage.removeItem('refresh_token');
         return Promise.reject(refreshError);
       }
     }

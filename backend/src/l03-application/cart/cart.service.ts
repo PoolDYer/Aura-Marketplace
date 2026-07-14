@@ -1,34 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { ICartRepository } from '../../l04-domain/ports/cart-repository.interface';
+import { IProductRepository } from '../../l04-domain/ports/product-repository.interface';
 
 @Injectable()
 export class CartService {
-  constructor(private prisma: PrismaService) {}
-
-  private cartInclude = {
-    items: {
-      include: {
-        publicacion: {
-          include: {
-            inventario: true,
-            imagenes: { take: 1 }
-          }
-        }
-      }
-    }
-  } as const;
+  constructor(
+    @Inject('ICartRepository') private readonly cartRepo: ICartRepository,
+    @Inject('IProductRepository') private readonly productRepo: IProductRepository,
+  ) {}
 
   async getCart(userId: string) {
-    let cart = await this.prisma.carrito.findUnique({
-      where: { compradorId: userId },
-      include: this.cartInclude
-    });
+    let cart = await this.cartRepo.findUnique(userId);
 
     if (!cart) {
-      cart = await this.prisma.carrito.create({
-        data: { compradorId: userId },
-        include: this.cartInclude
-      });
+      cart = await this.cartRepo.create(userId);
     }
 
     return cart;
@@ -41,10 +26,7 @@ export class CartService {
     const cart = await this.getCart(userId);
 
     // Validate product and stock
-    const product = await this.prisma.publicacion.findUnique({
-      where: { id: publicacionId },
-      include: { inventario: true }
-    });
+    const product = await this.productRepo.findProductById(publicacionId);
 
     if (!product) throw new NotFoundException('Publicación no encontrada');
     if (product.estado !== 'ACTIVA') throw new BadRequestException('La publicación no está activa');
@@ -58,14 +40,7 @@ export class CartService {
     }
     
     // Check if item already in cart
-    const existingItem = await this.prisma.itemCarrito.findUnique({
-      where: {
-        carritoId_publicacionId: {
-          carritoId: cart.id,
-          publicacionId: publicacionId
-        }
-      }
-    });
+    const existingItem = await this.cartRepo.findItemInCart(cart.id, publicacionId);
 
     const newQuantity = existingItem ? existingItem.cantidad + cantidad : cantidad;
 
@@ -74,18 +49,9 @@ export class CartService {
     }
 
     if (existingItem) {
-      return this.prisma.itemCarrito.update({
-        where: { id: existingItem.id },
-        data: { cantidad: newQuantity }
-      });
+      return this.cartRepo.updateItem(existingItem.id, newQuantity);
     } else {
-      return this.prisma.itemCarrito.create({
-        data: {
-          carritoId: cart.id,
-          publicacionId,
-          cantidad
-        }
-      });
+      return this.cartRepo.createItem(cart.id, publicacionId, cantidad);
     }
   }
 
@@ -94,10 +60,7 @@ export class CartService {
 
     const cart = await this.getCart(userId);
     
-    const item = await this.prisma.itemCarrito.findFirst({
-      where: { id: itemId, carritoId: cart.id },
-      include: { publicacion: { include: { inventario: true } } }
-    });
+    const item = await this.cartRepo.findItemById(itemId, cart.id);
 
     if (!item) throw new NotFoundException('Ítem no encontrado en el carrito');
 
@@ -114,24 +77,17 @@ export class CartService {
       throw new BadRequestException(`Stock insuficiente. Stock disponible: ${availableStock}`);
     }
 
-    return this.prisma.itemCarrito.update({
-      where: { id: itemId },
-      data: { cantidad }
-    });
+    return this.cartRepo.updateItem(itemId, cantidad);
   }
 
   async removeItem(userId: string, itemId: string) {
     const cart = await this.getCart(userId);
     
-    const item = await this.prisma.itemCarrito.findFirst({
-      where: { id: itemId, carritoId: cart.id }
-    });
+    const item = await this.cartRepo.findItemById(itemId, cart.id);
 
     if (!item) throw new NotFoundException('Ítem no encontrado en el carrito');
 
-    await this.prisma.itemCarrito.delete({
-      where: { id: itemId }
-    });
+    await this.cartRepo.deleteItem(itemId);
 
     return { success: true };
   }
@@ -139,9 +95,7 @@ export class CartService {
   async clearCart(userId: string) {
     const cart = await this.getCart(userId);
     
-    await this.prisma.itemCarrito.deleteMany({
-      where: { carritoId: cart.id }
-    });
+    await this.cartRepo.deleteManyItems(cart.id);
 
     return { success: true };
   }

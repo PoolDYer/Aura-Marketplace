@@ -1,15 +1,16 @@
-import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Injectable, ExecutionContext, UnauthorizedException, CanActivate } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { NeonAuthService } from '../neon-auth.service';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private neonAuthService: NeonAuthService,
+  ) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -17,13 +18,21 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
-    return super.canActivate(context);
-  }
 
-  handleRequest(err, user, info) {
-    if (err || !user) {
-      throw err || new UnauthorizedException('No autorizado');
+    const request = context.switchToHttp().getRequest();
+    const authorization = request.headers.authorization as string | undefined;
+    const [scheme, token] = authorization?.split(' ') ?? [];
+
+    if (scheme !== 'Bearer' || !token) {
+      throw new UnauthorizedException('No autorizado');
     }
-    return user;
+
+    try {
+      request.user = await this.neonAuthService.validateAccessToken(token);
+    } catch (neonError) {
+      request.user = await this.neonAuthService.validateLocalAccessToken(token);
+    }
+
+    return true;
   }
 }

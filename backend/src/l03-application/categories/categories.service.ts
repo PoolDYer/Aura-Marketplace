@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { ICategoriaRepository } from '../../l04-domain/ports/categoria-repository.interface';
+import { ICacheProvider } from '../../l04-domain/ports/cache-provider.interface';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-import { SimpleCacheService } from '../../l05-infrastructure/cache/simple-cache.service';
 
 @Injectable()
 export class CategoriesService {
@@ -9,43 +9,36 @@ export class CategoriesService {
   private readonly cacheTtlMs = 60_000;
 
   constructor(
-    private prisma: PrismaService,
-    private cache: SimpleCacheService,
+    @Inject('ICategoriaRepository') private readonly categoryRepo: ICategoriaRepository,
+    @Inject('ICacheProvider') private readonly cache: ICacheProvider,
   ) {}
 
   async findAll() {
     return this.cache.getOrSet(this.cacheKey, this.cacheTtlMs, () =>
-      this.prisma.categoria.findMany({
-        where: { activa: true, parentId: null },
-        include: {
-          children: {
-            include: { children: true },
-          },
-        },
-      }),
+      this.categoryRepo.findActiveRootCategories(),
     );
   }
 
   async create(dto: CreateCategoryDto) {
     if (dto.parentId) {
-      const parent = await this.prisma.categoria.findUnique({ where: { id: dto.parentId } });
+      const parent = await this.categoryRepo.findById(dto.parentId);
       if (!parent) throw new NotFoundException('Categoría padre no encontrada');
     }
-    const category = await this.prisma.categoria.create({ data: dto });
+    const category = await this.categoryRepo.create(dto);
     this.cache.delete(this.cacheKey);
     return category;
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    const cat = await this.prisma.categoria.findUnique({ where: { id } });
+    const cat = await this.categoryRepo.findById(id);
     if (!cat) throw new NotFoundException('Categoría no encontrada');
     
     if (dto.parentId) {
-      const parent = await this.prisma.categoria.findUnique({ where: { id: dto.parentId } });
+      const parent = await this.categoryRepo.findById(dto.parentId);
       if (!parent) throw new NotFoundException('Categoría padre no encontrada');
     }
 
-    const category = await this.prisma.categoria.update({ where: { id }, data: dto });
+    const category = await this.categoryRepo.update(id, dto);
     this.cache.delete(this.cacheKey);
     return category;
   }

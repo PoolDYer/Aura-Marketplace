@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { IAuditRepository } from '../../l04-domain/ports/audit-repository.interface';
 
 interface CreateAuditDto {
   usuarioId?: string;
@@ -13,18 +13,18 @@ interface CreateAuditDto {
 export class AuditService {
   private readonly logger = new Logger(AuditService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject('IAuditRepository') private readonly auditRepo: IAuditRepository,
+  ) {}
 
   async logEvent(dto: CreateAuditDto) {
     try {
-      await this.prisma.auditoria.create({
-        data: {
-          usuarioId: dto.usuarioId,
-          accion: dto.accion,
-          modulo: dto.modulo,
-          resultado: dto.resultado,
-          ipCliente: dto.ipCliente,
-        },
+      await this.auditRepo.create({
+        usuarioId: dto.usuarioId,
+        accion: dto.accion,
+        modulo: dto.modulo,
+        resultado: dto.resultado,
+        ipCliente: dto.ipCliente,
       });
     } catch (error) {
       // We don't want audit failures to break the main application flow

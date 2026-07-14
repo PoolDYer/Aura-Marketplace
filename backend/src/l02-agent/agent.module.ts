@@ -8,8 +8,6 @@ import { GeminiSpeechToTextProvider } from '../l05-infrastructure/ai/gemini-stt.
 import {
   MockTextToSpeechProvider
 } from '../l05-infrastructure/ai/mock-ai.providers';
-import { PrismaService } from '../l05-infrastructure/database/prisma.service';
-import { ProductsService } from '../l03-application/products/products.service';
 import { InfrastructureModule } from '../l05-infrastructure/infrastructure.module';
 
 @Module({
@@ -18,8 +16,6 @@ import { InfrastructureModule } from '../l05-infrastructure/infrastructure.modul
   providers: [
     AgentService,
     ConversationsService,
-    PrismaService,
-    ProductsService,
     {
       provide: 'LanguageModelProvider',
       useClass: GeminiLanguageModelProvider

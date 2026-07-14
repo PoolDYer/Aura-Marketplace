@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 
 import { AuraHeader } from '../components/AuraHeader';
+import { BrandLogo } from '../components/BrandLogo';
 import { productsApi } from '../api/products';
 import { useAgentStore } from '../store/agentStore';
 import { useAuthStore } from '../store/authStore';
@@ -335,7 +336,7 @@ export default function CatalogPage() {
 
       <footer className="mt-8 border-t border-[#d6c3b0]/20 bg-[#f1edef] px-4 py-10 md:px-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-4 text-center">
-          <span className="font-auth-display text-[40px] font-bold leading-none text-[#845400]">Aura</span>
+          <BrandLogo variant="footer" />
           <p className="text-[12px] text-[#524535]">© 2024 Aura Commerce.</p>
         </div>
       </footer>

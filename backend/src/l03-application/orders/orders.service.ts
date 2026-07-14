@@ -1,35 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, NotFoundException, BadRequestException, Logger, Inject } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { IOrderRepository } from '../../l04-domain/ports/order-repository.interface';
+import { ICartRepository } from '../../l04-domain/ports/cart-repository.interface';
+import { IUserRepository } from '../../l04-domain/ports/user-repository.interface';
 
 @Injectable()
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('IOrderRepository') private readonly orderRepo: IOrderRepository,
+    @Inject('ICartRepository') private readonly cartRepo: ICartRepository,
+    @Inject('IUserRepository') private readonly userRepo: IUserRepository,
+  ) {}
 
   async createOrder(userId: string, direccionId: string, cuponCodigo?: string) {
-    const cart = await this.prisma.carrito.findUnique({
-      where: { compradorId: userId },
-      include: {
-        items: {
-          include: {
-            publicacion: {
-              include: { inventario: true, vendedor: true }
-            }
-          }
-        }
-      }
-    });
+    const cart = await this.cartRepo.findUnique(userId);
 
     if (!cart || cart.items.length === 0) {
       throw new BadRequestException('El carrito está vacío');
     }
 
-    const direccion = await this.prisma.direccion.findFirst({
-      where: { id: direccionId, usuarioId: userId }
-    });
-
+    const direccion = await this.userRepo.findAddressByIdAndUserId(direccionId, userId);
     if (!direccion) {
       throw new NotFoundException('Dirección no encontrada');
     }
@@ -50,7 +42,7 @@ export class OrdersService {
 
     let cuponAplicado = null;
     if (cuponCodigo) {
-      const cupon = await this.prisma.cupon.findUnique({ where: { codigo: cuponCodigo } });
+      const cupon = await this.orderRepo.findCuponByCodigo(cuponCodigo);
       if (!cupon) throw new NotFoundException('Cupón no encontrado');
       if (cupon.vigenciaHasta < new Date()) throw new BadRequestException('El cupón ha expirado');
       if (cupon.usos >= cupon.usosMaximos) throw new BadRequestException('El cupón ha superado su límite de usos');
@@ -68,69 +60,29 @@ export class OrdersService {
     // Generate unique order number
     const numeroConfirmacion = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // Transaction
-    return this.prisma.$transaction(async (tx) => {
-      // Create Order
-      const orden = await tx.orden.create({
-        data: {
-          compradorId: userId,
-          direccionId: direccionId,
-          total: total,
-          numeroConfirmacion: numeroConfirmacion,
-          estado: 'PENDIENTE',
-        }
-      });
+    const orden = await this.orderRepo.createOrderFromCart(
+      userId,
+      cart,
+      direccionId,
+      cuponAplicado,
+      total,
+      numeroConfirmacion,
+    );
 
-      if (cuponAplicado) {
-        await tx.cupon.update({
-          where: { id: cuponAplicado.id },
-          data: { usos: { increment: 1 } }
-        });
+    // Basic Notification to Vendor (Simulated)
+    const vendorsNotified = new Set<string>();
+    for (const item of cart.items) {
+      const pub = item.publicacion;
+      if (!vendorsNotified.has(pub.vendedorId)) {
+        this.logger.log(`[NOTIFICACIÓN] Vendedor ${pub.vendedorId}: Tienes una nueva orden de compra parcial o total de la orden ${orden.numeroConfirmacion}.`);
+        vendorsNotified.add(pub.vendedorId);
       }
+    }
 
-      // Create Order Lines and Decrement Inventory
-      const vendorsNotified = new Set<string>();
+    // Basic Notification to Buyer (Simulated)
+    this.logger.log(`[NOTIFICACIÓN] Comprador ${userId}: Tu orden ${orden.numeroConfirmacion} ha sido registrada y está pendiente de pago.`);
 
-      for (const item of cart.items) {
-        const pub = item.publicacion;
-        
-        await tx.lineaOrden.create({
-          data: {
-            ordenId: orden.id,
-            publicacionId: pub.id,
-            nombreProducto: pub.nombre,
-            precioUnitario: pub.precio,
-            cantidad: item.cantidad,
-            subtotal: Number(pub.precio) * item.cantidad
-          }
-        });
-
-        await tx.inventario.update({
-          where: { publicacionId: pub.id },
-          data: {
-            cantidadReservada: {
-              increment: item.cantidad
-            }
-          }
-        });
-
-        // Basic Notification to Vendor (Simulated)
-        if (!vendorsNotified.has(pub.vendedorId)) {
-          this.logger.log(`[NOTIFICACIÓN] Vendedor ${pub.vendedorId}: Tienes una nueva orden de compra parcial o total de la orden ${orden.numeroConfirmacion}.`);
-          vendorsNotified.add(pub.vendedorId);
-        }
-      }
-
-      // Basic Notification to Buyer (Simulated)
-      this.logger.log(`[NOTIFICACIÓN] Comprador ${userId}: Tu orden ${orden.numeroConfirmacion} ha sido registrada y está pendiente de pago.`);
-
-      // Empty Cart
-      await tx.itemCarrito.deleteMany({
-        where: { carritoId: cart.id }
-      });
-
-      return orden;
-    });
+    return orden;
   }
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -140,48 +92,19 @@ export class OrdersService {
     const twentyFourHoursAgo = new Date();
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
 
-    const oldOrders = await this.prisma.orden.findMany({
-      where: {
-        estado: 'PENDIENTE',
-        createdAt: {
-          lt: twentyFourHoursAgo
-        }
-      }
-    });
+    const oldOrders = await this.orderRepo.escalateOldPendingOrders(twentyFourHoursAgo);
 
     for (const order of oldOrders) {
-      await this.prisma.orden.update({
-        where: { id: order.id },
-        data: { estado: 'ESCALADA' }
-      });
       this.logger.log(`Orden ${order.id} escalada automáticamente (sin atención por 24h).`);
     }
   }
 
   async getMyOrders(userId: string) {
-    return this.prisma.orden.findMany({
-      where: { compradorId: userId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } }
-        },
-        pago: true
-      }
-    });
+    return this.orderRepo.findMyOrders(userId);
   }
 
   async getOrderById(userId: string, orderId: string) {
-    const order = await this.prisma.orden.findFirst({
-      where: { id: orderId, compradorId: userId },
-      include: {
-        lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } }
-        },
-        pago: true,
-        direccion: true
-      }
-    });
+    const order = await this.orderRepo.findOrderById(userId, orderId);
 
     if (!order) throw new NotFoundException('Orden no encontrada');
     return order;
@@ -189,42 +112,14 @@ export class OrdersService {
 
   // VENDOR ENDPOINTS
   async getVendorOrders(vendorId: string) {
-    return this.prisma.orden.findMany({
-      where: {
-        lineas: {
-          some: {
-            publicacion: {
-              vendedorId: vendorId
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } }
-        },
-        comprador: {
-          select: { nombre: true, email: true, telefono: true }
-        },
-        direccion: true
-      }
-    });
+    return this.orderRepo.findVendorOrders(vendorId);
   }
 
   async updateOrderStatus(vendorId: string, orderId: string, newStatus: any) {
-    const order = await this.prisma.orden.findFirst({
-      where: {
-        id: orderId,
-        lineas: { some: { publicacion: { vendedorId: vendorId } } }
-      }
-    });
+    const order = await this.orderRepo.findFirstOrder(orderId, vendorId);
 
     if (!order) throw new NotFoundException('Orden no encontrada o sin permiso');
 
-    return this.prisma.orden.update({
-      where: { id: orderId },
-      data: { estado: newStatus }
-    });
+    return this.orderRepo.updateOrderStatus(orderId, newStatus);
   }
 }

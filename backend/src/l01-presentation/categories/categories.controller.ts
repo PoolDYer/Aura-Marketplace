@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../../l03-application/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../l03-application/auth/guards/roles.guard';
 import { Roles } from '../../l03-application/auth/decorators/roles.decorator';
 import { Public } from '../../l03-application/auth/decorators/public.decorator';
-import { RolUsuario } from '@prisma/client';
+import { RolUsuario } from '../../l04-domain/auth/usuario.entity';
 
 @ApiTags('Categories')
 @Controller('categories')

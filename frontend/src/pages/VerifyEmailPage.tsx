@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, Loader2, MailWarning } from 'lucide-react';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { AuthMessage } from '../components/auth/AuthMessage';
-import api from '../lib/axios';
+import { authClient, syncNeonSession } from '../lib/neonAuth';
+import { useAuthStore } from '../store/authStore';
 
 const loginHero =
   'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626782/Aura/assets/frontend/src/assets/auth/login-hero.jpg';
@@ -12,6 +13,7 @@ type VerifyState = 'loading' | 'success' | 'error';
 
 export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
+  const setAuth = useAuthStore((state) => state.setAuth);
   const [state, setState] = useState<VerifyState>('loading');
   const [message, setMessage] = useState('Verificando tu correo...');
 
@@ -26,17 +28,34 @@ export default function VerifyEmailPage() {
 
     const verify = async () => {
       try {
-        const response = await api.post('/auth/verify-email', { token });
+        const response = await authClient.verifyEmail({
+          query: {
+            token,
+            callbackURL: `${window.location.origin}/auth/callback`,
+          },
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message || 'No pudimos verificar tu correo.');
+        }
+
+        try {
+          const synced = await syncNeonSession();
+          setAuth(synced.user, synced.accessToken);
+        } catch {
+          // Neon may verify email without opening a session; login remains available below.
+        }
+
         setState('success');
-        setMessage(response.data?.message || 'Correo verificado correctamente.');
+        setMessage('Correo verificado correctamente.');
       } catch (err: any) {
         setState('error');
-        setMessage(err.response?.data?.message || 'No pudimos verificar tu correo.');
+        setMessage(err.message || 'No pudimos verificar tu correo.');
       }
     };
 
     verify();
-  }, [searchParams]);
+  }, [searchParams, setAuth]);
 
   const isLoading = state === 'loading';
   const isSuccess = state === 'success';

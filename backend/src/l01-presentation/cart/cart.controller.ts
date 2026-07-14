@@ -6,10 +6,12 @@ import { Roles } from '../../l03-application/auth/decorators/roles.decorator';
 import { CartService } from '../../l03-application/cart/cart.service';
 import { AddItemDto, UpdateItemDto } from '../../l03-application/cart/dto/cart.dto';
 
+import { RolUsuario } from '../../l04-domain/auth/usuario.entity';
+
 @ApiTags('Cart')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('COMPRADOR')
+@Roles(RolUsuario.COMPRADOR)
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}

@@ -6,10 +6,12 @@ import { Roles } from '../../l03-application/auth/decorators/roles.decorator';
 import { OrdersService } from '../../l03-application/orders/orders.service';
 import { CreateOrderDto } from '../../l03-application/orders/dto/orders.dto';
 
+import { RolUsuario } from '../../l04-domain/auth/usuario.entity';
+
 @ApiTags('Orders')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('COMPRADOR')
+@Roles(RolUsuario.COMPRADOR)
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}

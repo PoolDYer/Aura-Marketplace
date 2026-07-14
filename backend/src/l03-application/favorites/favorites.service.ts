@@ -1,45 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../l05-infrastructure/database/prisma.service';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { IFavoriteRepository } from '../../l04-domain/ports/favorite-repository.interface';
+import { IProductRepository } from '../../l04-domain/ports/product-repository.interface';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @Inject('IFavoriteRepository') private readonly favoriteRepo: IFavoriteRepository,
+    @Inject('IProductRepository') private readonly productRepo: IProductRepository,
+  ) {}
 
   async getFavorites(compradorId: string) {
-    return this.prisma.favorito.findMany({
-      where: { compradorId },
-      include: {
-        publicacion: {
-          include: {
-            imagenes: true,
-            inventario: true,
-          }
-        }
-      }
-    });
+    return this.favoriteRepo.findManyByUser(compradorId);
   }
 
   async addFavorite(compradorId: string, publicacionId: string) {
     // Verificamos si la publicación existe
-    const pub = await this.prisma.publicacion.findUnique({ where: { id: publicacionId } });
+    const pub = await this.productRepo.findProductById(publicacionId);
     if (!pub) throw new NotFoundException('Publicación no encontrada');
 
-    return this.prisma.favorito.create({
-      data: {
-        compradorId,
-        publicacionId,
-      }
-    });
+    return this.favoriteRepo.create(compradorId, publicacionId);
   }
 
   async removeFavorite(compradorId: string, publicacionId: string) {
-    return this.prisma.favorito.delete({
-      where: {
-        compradorId_publicacionId: {
-          compradorId,
-          publicacionId,
-        }
-      }
-    });
+    return this.favoriteRepo.delete(compradorId, publicacionId);
   }
 }

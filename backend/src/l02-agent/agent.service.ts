@@ -6,8 +6,9 @@ import {
   TextToSpeechProvider,
   CopilotProduct,
 } from '../l04-domain/ai/ai.interfaces';
-import { PrismaService } from '../l05-infrastructure/database/prisma.service';
-import { EstadoPublicacion } from '@prisma/client';
+import { IProductRepository } from '../l04-domain/ports/product-repository.interface';
+import { IConversationRepository } from '../l04-domain/ports/conversation-repository.interface';
+import { EstadoPublicacion } from '../l04-domain/products/product.enums';
 
 @Injectable()
 export class AgentService {
@@ -15,7 +16,8 @@ export class AgentService {
 
   constructor(
     private conversationsService: ConversationsService,
-    private prisma: PrismaService,
+    @Inject('IProductRepository') private readonly productRepo: IProductRepository,
+    @Inject('IConversationRepository') private readonly conversationRepo: IConversationRepository,
     @Inject('LanguageModelProvider') private llm: LanguageModelProvider,
     @Inject('SpeechToTextProvider') private stt: SpeechToTextProvider,
     @Inject('TextToSpeechProvider') private tts: TextToSpeechProvider,
@@ -26,18 +28,7 @@ export class AgentService {
    */
   private async getProductContext(): Promise<CopilotProduct[]> {
     try {
-      const products = await this.prisma.publicacion.findMany({
-        where: { estado: EstadoPublicacion.ACTIVA },
-        include: {
-          categoria: true,
-          inventario: true,
-          imagenes: {
-            where: { activa: true },
-            orderBy: { orden: 'asc' },
-            take: 1,
-          },
-        },
-      });
+      const products = await this.productRepo.findActiveProducts();
 
       return products.map((p) => ({
         id: p.id,
@@ -64,11 +55,7 @@ export class AgentService {
     conversationId: string,
   ): Promise<Array<{ role: string; content: string }>> {
     try {
-      const messages = await this.prisma.mensaje.findMany({
-        where: { conversacionId: conversationId },
-        orderBy: { createdAt: 'asc' },
-        take: 20,
-      });
+      const messages = await this.conversationRepo.findMessagesByConversation(conversationId, 20);
 
       return messages.map((m) => ({
         role: m.rol,

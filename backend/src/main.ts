@@ -5,7 +5,30 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+export function getConfiguredOrigins() {
+  return [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ALLOWED_ORIGINS,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5174',
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value.split(','))
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+export function isAllowedOrigin(origin?: string) {
+  const allowedOrigins = new Set(getConfiguredOrigins());
+  const allowedVercelPreviewOrigin =
+    /^https:\/\/aura-marketplace-[a-z0-9-]+-pooldyers-projects\.vercel\.app$/;
+
+  return !origin || allowedOrigins.has(origin) || allowedVercelPreviewOrigin.test(origin);
+}
+
+export async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
   const logger = new Logger('Bootstrap');
 
@@ -19,24 +42,9 @@ async function bootstrap() {
   );
 
   // CORS
-  const configuredOrigins = [
-    process.env.FRONTEND_URL,
-    process.env.CORS_ALLOWED_ORIGINS,
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-  ]
-    .filter(Boolean)
-    .flatMap((value) => value.split(','))
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  const allowedOrigins = new Set(configuredOrigins);
-  const allowedVercelPreviewOrigin =
-    /^https:\/\/aura-marketplace-[a-z0-9-]+-pooldyers-projects\.vercel\.app$/;
-
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin) || allowedVercelPreviewOrigin.test(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
         return;
       }
@@ -67,4 +75,7 @@ async function bootstrap() {
   logger.log(`📚 Swagger documentation: http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+/* istanbul ignore next */
+if (require.main === module) {
+  bootstrap();
+}

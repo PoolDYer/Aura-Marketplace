@@ -1,8 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+type DbCheckPrisma = Pick<PrismaClient, 'publicacion' | '$disconnect'>;
 
-async function main() {
+export function formatProductSummary(product: any) {
+  const stock = Math.max(
+    (product.inventario?.cantidad ?? 0) - (product.inventario?.cantidadReservada ?? 0),
+    0,
+  );
+
+  return `- ${product.nombre} | ${product.id} | ${product.estado} | ${product.categoria.nombre} | stock ${stock} | imagenes ${product.imagenes.length}`;
+}
+
+export async function main(prisma: DbCheckPrisma = new PrismaClient()) {
   const products = await prisma.publicacion.findMany({
     where: { estado: 'ACTIVA' },
     select: {
@@ -21,17 +30,13 @@ async function main() {
   });
 
   console.log(`Productos activos en base de datos: ${products.length}`);
-  products.forEach((product) => {
-    const stock = Math.max(
-      (product.inventario?.cantidad ?? 0) - (product.inventario?.cantidadReservada ?? 0),
-      0,
-    );
-    console.log(
-      `- ${product.nombre} | ${product.id} | ${product.estado} | ${product.categoria.nombre} | stock ${stock} | imagenes ${product.imagenes.length}`,
-    );
-  });
+  products.forEach((product) => console.log(formatProductSummary(product)));
 }
 
-main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+/* istanbul ignore next */
+if (require.main === module) {
+  const prisma = new PrismaClient();
+  main(prisma)
+    .catch(console.error)
+    .finally(() => prisma.$disconnect());
+}
