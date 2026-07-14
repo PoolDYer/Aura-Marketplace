@@ -139,7 +139,11 @@ export default function RegisterPage() {
       setSuccess('Registro exitoso. Verifique su correo electronico antes de iniciar sesion.');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
+      const apiMessage =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as any).response?.data?.message
+          : undefined;
+      setError(apiMessage || (err instanceof Error ? err.message : 'No pudimos registrar tu cuenta.'));
     } finally {
       setIsLoading(false);
     }
