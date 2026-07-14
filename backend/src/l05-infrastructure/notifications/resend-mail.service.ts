@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
 
 import { IMailSender } from '../../l04-domain/ports/mail-sender.interface';
 
@@ -81,7 +81,7 @@ export class ResendMailService implements IMailSender {
     if (!response.ok) {
       const body = await response.text();
       this.logger.error(`Resend rejected ${params.errorContext} email: ${response.status} ${body}`);
-      throw new Error(params.errorMessage);
+      throw new BadGatewayException(params.errorMessage);
     }
   }
 

@@ -28,6 +28,19 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const existing = await this.userRepo.findByEmail(dto.email);
+    if (existing?.estado === 'PENDIENTE') {
+      const passwordHash = await this.hasher.hash(dto.password);
+      const pendingUser = await this.userRepo.update(existing.id, {
+        nombre: dto.nombre,
+        passwordHash,
+        rol: dto.rol ?? existing.rol ?? 'COMPRADOR',
+      });
+
+      const token = this.createEmailVerificationToken(pendingUser.id);
+      await this.mailService.sendVerificationEmail(pendingUser.email, token);
+
+      return { message: 'Ya existia una cuenta pendiente. Enviamos un nuevo correo de verificacion.' };
+    }
     if (existing) throw new BadRequestException('El correo ya está registrado');
 
     const passwordHash = await this.hasher.hash(dto.password);

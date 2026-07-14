@@ -2,6 +2,24 @@ import { BadRequestException, HttpException, UnauthorizedException } from '@nest
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
+  const originalNeonSyncRequired = process.env.NEON_AUTH_SYNC_REQUIRED;
+
+  beforeEach(() => {
+    process.env.NEON_AUTH_SYNC_REQUIRED = 'false';
+    delete process.env.NEON_API_KEY;
+    delete process.env.NEON_PROJECT_ID;
+    delete process.env.NEON_BRANCH_ID;
+  });
+
+  afterAll(() => {
+    if (originalNeonSyncRequired === undefined) {
+      delete process.env.NEON_AUTH_SYNC_REQUIRED;
+      return;
+    }
+
+    process.env.NEON_AUTH_SYNC_REQUIRED = originalNeonSyncRequired;
+  });
+
   const createService = () => {
     const userRepo = {
       findById: jest.fn(),
@@ -82,6 +100,25 @@ describe('AuthService', () => {
     userRepo.findByEmail.mockResolvedValue(activeUser);
 
     await expect(service.register({ email: 'ada@test.dev' } as any)).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('resends verification when registering an existing pending user', async () => {
+    const { service, userRepo, hasher, mail } = createService();
+    userRepo.findByEmail.mockResolvedValue({ ...activeUser, estado: 'PENDIENTE' });
+    userRepo.update.mockResolvedValue({ ...activeUser, estado: 'PENDIENTE' });
+    hasher.hash.mockResolvedValue('new-hash');
+
+    await expect(
+      service.register({ nombre: 'Ada Nueva', email: 'ada@test.dev', password: 'Secret123', rol: 'VENDEDOR' } as any),
+    ).resolves.toEqual({
+      message: 'Ya existia una cuenta pendiente. Enviamos un nuevo correo de verificacion.',
+    });
+    expect(userRepo.update).toHaveBeenCalledWith('user-1', {
+      nombre: 'Ada Nueva',
+      passwordHash: 'new-hash',
+      rol: 'VENDEDOR',
+    });
+    expect(mail.sendVerificationEmail).toHaveBeenCalledWith('ada@test.dev', 'user-1-1h');
   });
 
   it('logs in active users and persists refresh tokens', async () => {
