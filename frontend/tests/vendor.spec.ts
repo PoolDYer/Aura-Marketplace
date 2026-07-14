@@ -5,7 +5,7 @@ test.describe('Vendedor - Gestión', () => {
     await page.goto('/profile');
     // Si no está autenticado, redirige a login
     if (page.url().includes('/login')) {
-      await expect(page.locator('h2')).toContainText('Iniciar Sesión');
+      await expect(page.locator('h2')).toContainText('Iniciar Sesion');
     } else {
       await expect(page.locator('h1')).toBeVisible();
     }

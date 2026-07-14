@@ -86,16 +86,20 @@ export default function LoginPage() {
       setAuth(user, accessToken);
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from || '/');
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : '';
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || '';
       const normalized = message.toLowerCase();
 
-      if (normalized.includes('verify') || normalized.includes('verification')) {
+      if (normalized.includes('verify') || normalized.includes('verification') || normalized.includes('email_not_verified')) {
         setError('Debes verificar tu correo antes de iniciar sesion.');
       } else if (message === 'ACCOUNT_SUSPENDED') {
         setError('Tu cuenta esta suspendida. Contacta con soporte.');
+      } else if (message === 'ACCOUNT_LOCKED') {
+        setError('Tu cuenta esta bloqueada temporalmente por intentos fallidos.');
+      } else if (normalized.includes('credenciales') || normalized.includes('invalid') || normalized.includes('401')) {
+        setError('Credenciales inválidas');
       } else {
-        setError(message || 'Credenciales invalidas');
+        setError(message || 'Credenciales inválidas');
       }
     } finally {
       setIsLoading(false);
