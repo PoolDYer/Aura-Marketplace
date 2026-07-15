@@ -12,6 +12,7 @@ const api = axios.create({
 
 type JwtPayload = {
   exp?: number;
+  iss?: string;
 };
 
 let refreshRequest: Promise<string> | null = null;
@@ -37,25 +38,19 @@ const shouldRefreshToken = (token: string) => {
   return expiresAt - Date.now() <= refreshWindowMs;
 };
 
+const isLocalAccessToken = (token: string) => {
+  const payload = decodeJwtPayload(token);
+  return Boolean(payload && (!payload.iss || !payload.iss.includes('neonauth')));
+};
+
 const refreshAccessToken = async () => {
   if (!refreshRequest) {
     refreshRequest = (async () => {
       const authStore = useAuthStore.getState();
 
       const currentToken = authStore.accessToken;
-      if (currentToken) {
-        try {
-          const payloadStr = currentToken.split('.')[1];
-          if (payloadStr) {
-            const payload = JSON.parse(window.atob(payloadStr.replace(/-/g, '+').replace(/_/g, '/')));
-            if (!payload.iss || !payload.iss.includes('neonauth')) {
-              // Local token, return as-is
-              return currentToken;
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
+      if (currentToken && isLocalAccessToken(currentToken)) {
+        return currentToken;
       }
 
       const accessToken = authStore.user
@@ -80,7 +75,12 @@ api.interceptors.request.use(
     let { accessToken } = useAuthStore.getState();
 
     if (accessToken && shouldRefreshToken(accessToken)) {
-      accessToken = await refreshAccessToken();
+      try {
+        accessToken = await refreshAccessToken();
+      } catch {
+        // Never clear the local session during background refresh.
+        // The user should stay logged in until they press the logout button.
+      }
     }
 
     if (accessToken) {
@@ -108,7 +108,6 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        useAuthStore.getState().logout();
         return Promise.reject(refreshError);
       }
     }
