@@ -85,9 +85,12 @@ function StorefrontRoute() {
 }
 
 function App() {
-  const { toggleChat, fetchHistory } = useAgentStore();
-  const { addItem } = useCartStore();
-  const { user, hasHydrated, setAuth } = useAuthStore();
+  const toggleChat = useAgentStore((state) => state.toggleChat);
+  const fetchHistory = useAgentStore((state) => state.fetchHistory);
+  const addItem = useCartStore((state) => state.addItem);
+  const user = useAuthStore((state) => state.user);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const setAuth = useAuthStore((state) => state.setAuth);
   const location = useLocation();
   const navigate = useNavigate();
   const initialPathnameRef = useRef(location.pathname);

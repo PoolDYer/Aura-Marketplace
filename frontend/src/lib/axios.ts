@@ -53,15 +53,12 @@ const refreshAccessToken = async () => {
         return currentToken;
       }
 
-      const accessToken = authStore.user
-        ? await getCurrentNeonToken()
-        : (await syncNeonSession()).accessToken;
+      const result = authStore.user
+        ? { user: authStore.user, accessToken: await getCurrentNeonToken() }
+        : await syncNeonSession();
 
-      if (authStore.user) {
-        authStore.setAuth(authStore.user, accessToken);
-      }
-
-      return accessToken;
+      authStore.setAuth(result.user, result.accessToken);
+      return result.accessToken;
     })().finally(() => {
       refreshRequest = null;
     });
