@@ -1,8 +1,8 @@
-# Arquitectura General — Marketplace Inteligente Asistido por IA
+# Arquitectura General — Aura Marketplace
 
 ## 1. Objetivos de la Arquitectura
 
-La arquitectura del Marketplace Inteligente busca satisfacer los siguientes objetivos estructurales:
+La arquitectura de Aura Marketplace busca satisfacer los siguientes objetivos estructurales:
 
 - **Escalabilidad horizontal**: soportar hasta 2.000 usuarios concurrentes activos sin degradar los tiempos de respuesta definidos en RNF-11, y crecer más allá de ese umbral con cambios de configuración, no de diseño.
 - **Alta disponibilidad**: garantizar una disponibilidad mensual mínima del 99,5 % (RNF-05), equivalente a no más de 3 horas y 40 minutos de inactividad no planificada por mes.
@@ -31,9 +31,9 @@ La arquitectura del Marketplace Inteligente busca satisfacer los siguientes obje
 
 ## 3. Estilo Arquitectónico Seleccionado
 
-El sistema adopta una **Arquitectura en Capas con separación por dominios funcionales**. Las integraciones con servicios externos se gestionan a través de **puertos y adaptadores**, de modo que el núcleo del sistema no depende de ninguna implementación concreta de los servicios de terceros.
+El sistema adopta una **Arquitectura Hexagonal (Puertos y Adaptadores)**. Las integraciones con servicios externos se gestionan a través de puertos definidos en el dominio y adaptadores en la capa de infraestructura, de modo que el núcleo de la aplicación (dominio y casos de uso) no depende de ninguna implementación concreta de los servicios de terceros ni de detalles como la base de datos o frameworks.
 
-Este estilo organiza el sistema en capas horizontales con dirección de dependencia de afuera hacia adentro: las capas exteriores conocen a las interiores, pero nunca al revés. Dentro de cada capa, el sistema se organiza en módulos funcionales verticales (dominios), cada uno con su propia lógica de aplicación y de dominio.
+Este estilo organiza el sistema en capas concéntricas con dirección de dependencia hacia el centro: las capas exteriores conocen a las interiores, pero el dominio y la aplicación son puros y no conocen detalles de la infraestructura.
 
 ---
 
@@ -41,7 +41,7 @@ Este estilo organiza el sistema en capas horizontales con dirección de dependen
 
 | Requisito | Necesidad que origina la decisión |
 |---|---|
-| RNF-05 | La disponibilidad del 99,5 % exige que los módulos puedan reiniciarse o reemplazarse sin detener el sistema completo. La arquitectura en capas con módulos independientes lo habilita. |
+| RNF-05 | La disponibilidad del 99,5 % exige que los módulos puedan reiniciarse o reemplazarse sin detener el sistema completo. La arquitectura modular lo habilita. |
 | RNF-06 | La degradación controlada requiere que las integraciones externas estén aisladas detrás de adaptadores; si el adaptador falla, el núcleo no se ve afectado. |
 | RNF-11 | La escalabilidad ante 2.000 usuarios concurrentes requiere que cada capa pueda escalar de forma independiente. |
 | RNF-12 | La escalabilidad del Catálogo requiere que el módulo de búsqueda sea independiente y pueda optimizarse sin afectar al resto del sistema. |
@@ -55,9 +55,9 @@ Este estilo organiza el sistema en capas horizontales con dirección de dependen
 |---|---|---|
 | L-01 | Presentación e Interacción | Recibe las solicitudes de los usuarios (texto, voz, formularios) y presenta las respuestas. No contiene lógica de negocio. |
 | L-02 | Agente Inteligente | Interpreta instrucciones en lenguaje natural, identifica intenciones y entidades, mantiene el Contexto de Sesión y coordina la ejecución de acciones. |
-| L-03 | Lógica de Aplicación | Orquesta los flujos de negocio, coordina los módulos funcionales y aplica las reglas de autorización. |
-| L-04 | Dominio | Contiene las entidades, los objetos de valor, los agregados y los servicios de dominio. Es el núcleo del sistema y no depende de ninguna capa exterior. |
-| L-05 | Infraestructura e Integraciones | Gestiona la persistencia de datos y la comunicación con los servicios externos mediante adaptadores. |
+| L-03 | Lógica de Aplicación | Orquesta los flujos de negocio, ejecuta los casos de uso inyectando los puertos del dominio. |
+| L-04 | Dominio | Contiene las entidades, los objetos de valor y las interfaces de los puertos. Es el núcleo del sistema y no depende de ninguna capa exterior. |
+| L-05 | Infraestructura e Integraciones | Implementa los adaptadores concretos para persistencia (Prisma/Neon DB) y servicios externos (Resend, Cloudinary, Mercado Pago, Gemini). |
 
 
 ---
@@ -66,12 +66,12 @@ Este estilo organiza el sistema en capas horizontales con dirección de dependen
 
 | Grupo | Módulos que lo componen | Descripción |
 |---|---|---|
-| Gestión de Identidad | Autenticación, Usuarios | Registro, autenticación, gestión de sesiones y control de acceso por rol. |
+| Gestión de Identidad | Autenticación, Usuarios | Registro, autenticación local/Neon Auth, gestión de sesiones y control de acceso por rol. |
 | Catálogo y Búsqueda | Productos, Categorías, Inventario, Búsquedas | Publicación, descubrimiento, filtrado y ordenamiento de productos. |
 | Agente Conversacional | Conversaciones, Agente Inteligente | Interpretación de lenguaje natural, gestión de contexto, ejecución de acciones. |
-| Transacciones | Carrito, Pedidos, Pagos | Gestión del carrito, proceso de compra y coordinación con la Pasarela de Pago. |
-| Administración | Administración, Vendedores, Compradores | Gestión de cuentas, moderación de publicaciones, reportes y resolución de escalamientos. |
-| Observabilidad | Auditoría, Notificaciones | Registro de eventos, trazabilidad de operaciones, entrega de notificaciones a usuarios. |
+| Transacciones | Carrito, Pedidos, Pagos | Gestión del carrito, proceso de compra y coordinación con la Pasarela de Pago de Mercado Pago. |
+| Administración | Administración, Vendedores, Compradores | Panel de control, moderación de publicaciones, reportes y resolución de escalamientos. |
+| Observabilidad | Auditoría, Notificaciones | Registro de eventos, trazabilidad de operaciones, entrega de notificaciones (Resend) a usuarios. |
 
 ---
 
@@ -79,31 +79,30 @@ Este estilo organiza el sistema en capas horizontales con dirección de dependen
 
 Desde una perspectiva de despliegue, el sistema se organiza en tres zonas conceptuales:
 
-**Zona de Frontera**: componentes que reciben solicitudes de los usuarios (texto y voz) y de los servicios externos (pasarela de pago, STT, TTS). Esta zona expone las interfaces de entrada al sistema y aplica los primeros controles de seguridad.
+**Zona de Frontera**: componentes que reciben solicitudes de los usuarios (texto y voz) y de los servicios externos (pasarela de pago, webhooks). Esta zona expone las interfaces de entrada al sistema (frontend SPA y controladores REST API) y aplica los primeros controles de seguridad.
 
-**Zona de Procesamiento**: componentes que ejecutan la lógica de aplicación y de dominio. Aquí reside el Agente Inteligente, los módulos funcionales y los servicios de dominio. Esta zona no es directamente accesible desde el exterior.
+**Zona de Procesamiento**: componentes que ejecutan la lógica de aplicación y de dominio (casos de uso de NestJS). Aquí reside el Agente Inteligente y los servicios de aplicación. Esta zona no es directamente accesible desde el exterior excepto a través de la API REST.
 
-**Zona de Persistencia e Integración**: componentes que almacenan el estado del sistema y los adaptadores que se comunican con los servicios externos. Las dependencias externas (NLP, STT, TTS, Pasarela de Pago, Notificaciones) se acceden únicamente desde esta zona.
+**Zona de Persistencia e Integración**: componentes que almacenan el estado del sistema y los adaptadores que se comunican con los servicios externos. Las dependencias externas (Gemini, Cloudinary, Mercado Pago, Resend, DB) se acceden únicamente desde esta zona mediante adaptadores de infraestructura.
 
 ---
 
 ## 8. Separación por Capas — Detalle de Responsabilidades
 
 **Capa de Presentación e Interacción (L-01)**
-Responsable de capturar la entrada del usuario (texto escrito, audio de voz, formularios) y de presentar la respuesta del sistema (resultados, confirmaciones, mensajes de error). No toma decisiones de negocio. Aplica controles de accesibilidad (RNF-15, RNF-16) y provee retroalimentación visual durante el procesamiento (RNF-14).
+Responsable de la interfaz gráfica y la interactividad en el cliente. Captura la entrada del usuario (texto escrito, audio de voz, formularios) y presenta la respuesta del sistema. Provee retroalimentación visual en tiempo real y ejecuta la síntesis de voz (TTS) de forma nativa en el navegador.
 
 **Capa del Agente Inteligente (L-02)**
-Responsable de interpretar las instrucciones del usuario en lenguaje natural. Recibe texto (desde L-01 directamente o tras transcripción STT), determina la intención, extrae entidades y restricciones, mantiene el Contexto de Sesión y delega la ejecución a la Capa de Aplicación (L-03). Gestiona la expiración de sesión por inactividad (RN-14) y verifica el umbral de confianza del STT (RN-11).
+Orquestador conversacional en el backend (NestJS AgentModule) apoyado por Gemini. Recibe las consultas, identifica intenciones y entidades estructuradas, gestiona el historial conversacional persistente y delega las operaciones del sistema a los servicios de aplicación.
 
 **Capa de Lógica de Aplicación (L-03)**
-Responsable de orquestar los flujos de negocio. Recibe instrucciones del Agente o solicitudes directas de los actores, aplica las reglas de autorización por rol, coordina los módulos funcionales y delega las reglas de negocio a la Capa de Dominio (L-04).
+Contiene los servicios de casos de uso (ej. `OrdersService`, `ProductsService`). Orquesta la ejecución del negocio invocando a las entidades de dominio y guardando los cambios a través de los puertos de persistencia (interfaces).
 
 **Capa de Dominio (L-04)**
-Responsable de las invariantes del negocio. Contiene las entidades (Usuario, Publicación, Orden, Carrito), los objetos de valor, los agregados y los servicios de dominio. No conoce cómo se presentan los datos ni cómo se persisten.
+Núcleo puro del negocio. Contiene las entidades puras de TypeScript (ej. `UsuarioEntity`, `ProductoEntity`), las constantes del negocio y las interfaces de los puertos (ej. `IUserRepository`). No tiene dependencias de infraestructura ni frameworks.
 
 **Capa de Infraestructura e Integraciones (L-05)**
-Responsable de la persistencia de datos y de la comunicación con los servicios externos. Los adaptadores de esta capa implementan los puertos definidos en la Capa de Dominio, desacoplando el núcleo de las tecnologías de soporte.
-
+Contiene los adaptadores que implementan las interfaces del dominio. Gestiona la base de datos a través de Prisma ORM, la autenticación, el envío de emails con Resend, el procesamiento de pagos con Mercado Pago, la subida de imágenes con Cloudinary y el cliente Gemini.
 
 ---
 
@@ -114,12 +113,11 @@ El flujo de solicitudes sigue una dirección única de afuera hacia adentro:
 ```
 Usuario
   └─► Capa de Presentación (L-01)
-        └─► Capa del Agente Inteligente (L-02)
-              └─► Capa de Lógica de Aplicación (L-03)
+        └─► API REST Controllers (L-01/L-03)
+              └─► Capa del Agente Inteligente / Servicios de Aplicación (L-02/L-03)
                     └─► Capa de Dominio (L-04)
                           └─► Capa de Infraestructura e Integraciones (L-05)
-                                └─► Servicios Externos
-                                    (NLP, STT, TTS, Pasarela de Pago, Notificaciones)
+                                └─► Servicios Externos (Mercado Pago, Resend, Cloudinary, Gemini)
 ```
 
 La respuesta recorre el camino inverso: cada capa retorna el resultado a la capa que la invocó. Ninguna capa interna invoca directamente a una capa más externa.
@@ -128,15 +126,14 @@ La respuesta recorre el camino inverso: cada capa retorna el resultado a la capa
 
 ## 10. Flujo de Dependencias
 
-Las dependencias de compilación y ejecución siguen la regla de dependencia estricta: las capas externas dependen de las internas, nunca al revés.
+Las dependencias de compilación y ejecución siguen la regla de dependencia de la arquitectura limpia/hexagonal: las capas externas dependen de las internas (hacia el núcleo), nunca al revés.
 
-- L-01 depende de L-02 y L-03.
-- L-02 depende de L-03.
-- L-03 depende de L-04.
-- L-04 no depende de ninguna otra capa del sistema.
-- L-05 depende de L-04 (implementa los puertos definidos en el dominio) y expone adaptadores a los servicios externos.
+- Dominio (L-04) no depende de ninguna otra capa del sistema.
+- Aplicación (L-03) depende de Dominio (L-04).
+- Presentación (L-01/REST API) depende de Aplicación (L-03) y Dominio (L-04).
+- Infraestructura (L-05) depende de Dominio (L-04) al implementar sus puertos.
 
-Este diseño garantiza que el núcleo del dominio (L-04) pueda ser probado de forma aislada y que los adaptadores externos (L-05) puedan reemplazarse sin modificar la lógica de negocio.
+Este diseño garantiza que el núcleo de la aplicación (L-04) pueda ser probado de forma aislada y que los adaptadores externos (L-05) puedan reemplazarse sin modificar la lógica de negocio.
 
 ---
 
@@ -144,7 +141,7 @@ Este diseño garantiza que el núcleo del dominio (L-04) pueda ser probado de fo
 
 | ID | Restricción | Origen |
 |---|---|---|
-| RA-01 | Ningún módulo accede directamente a la capa de persistencia de otro módulo. | P-02 |
+| RA-01 | Ningún módulo accede directamente a la base de datos; lo hace mediante adaptadores de persistencia (Prisma). | P-02 |
 | RA-02 | Los servicios externos solo son invocados desde los adaptadores de la Capa de Infraestructura. | RNF-06 |
 | RA-03 | Los datos de tarjetas de pago nunca se almacenan en el sistema; solo se conservan identificadores de referencia de la Pasarela. | RNF-10 |
 | RA-04 | Las contraseñas nunca se transmiten ni almacenan en texto plano. | RNF-07, RNF-08 |
@@ -152,7 +149,6 @@ Este diseño garantiza que el núcleo del dominio (L-04) pueda ser probado de fo
 | RA-06 | El Contexto de Sesión del Agente expira tras 30 minutos de inactividad. | RN-14 |
 | RA-07 | La compra requiere confirmación explícita del Comprador antes de invocar la Pasarela de Pago. | RN-01 |
 | RA-08 | El decremento de stock y el registro de la Orden son operaciones atómicas dentro del mismo proceso. | RN-04 |
-
 
 ---
 
@@ -172,10 +168,10 @@ Para soportar RNF-11 (2.000 usuarios concurrentes) y RNF-12 (Catálogo con hasta
 Para satisfacer RNF-05 (99,5 % mensual) y RNF-06 (degradación controlada):
 
 - **Módulos aislados por fallo**: la falla de un módulo no se propaga en cascada. El módulo de Pagos puede fallar sin afectar la capacidad de búsqueda del Catálogo.
-- **Adaptadores con manejo de fallo**: los adaptadores de servicios externos (STT, TTS, NLP, Pasarela) implementan lógica de degradación: si el servicio no responde, el adaptador retorna una señal de fallo controlada y el sistema activa el modo degradado correspondiente.
+- **Adaptadores con manejo de fallo**: los adaptadores de servicios externos (STT, NLP, Pasarela) implementan lógica de degradación: si el servicio no responde, el adaptador retorna una señal de fallo controlada y el sistema activa el modo degradado correspondiente.
 - **Modo degradado por servicio externo**:
   - Si STT no está disponible: la modalidad de texto continúa funcionando con normalidad.
-  - Si TTS no está disponible: el Agente responde solo en texto.
+  - Si la API de síntesis del navegador no está disponible: el Agente responde solo en texto.
   - Si el Proveedor de NLP no está disponible: el Agente informa el estado y el Marketplace opera mediante navegación manual.
   - Si la Pasarela de Pago no está disponible: el flujo de compra queda en espera con el Carrito preservado.
 
@@ -202,7 +198,6 @@ Cada módulo funcional (Autenticación, Catálogo, Agente, Carrito, Pedidos, Pag
 2. **Independencia de implementación**: el módulo puede ser reemplazado por una implementación diferente sin modificar los módulos que lo consumen.
 3. **Responsabilidad única**: el módulo tiene un único propósito funcional claramente delimitado por las especificaciones del dominio.
 
-
 ---
 
 ## 16. Mantenibilidad
@@ -224,7 +219,7 @@ El sistema registra como mínimo los siguientes eventos, tal como establece RNF-
 - Instrucciones recibidas por el Agente Inteligente, intención identificada y resultado de la ejecución.
 - Creación, modificación y cambio de estado de Publicaciones.
 - Registro de Órdenes, cambios de estado y escalamientos.
-- Errores en integraciones con servicios externos (NLP, STT, TTS, Pasarela de Pago, Notificaciones).
+- Errores en integraciones con servicios externos (NLP, STT, Pasarela de Pago, Notificaciones).
 
 Cada registro incluye marca temporal e identificador de usuario. Los datos personales, contraseñas y datos de pago están excluidos de los registros.
 
@@ -255,19 +250,17 @@ La trazabilidad de sesiones permite reconstruir el flujo completo de una interac
 
 ## 19. Decisiones Tecnológicas por Capa
 
-> Esta sección fue agregada durante la actualización tecnológica de la Fase 2. Detalla las tecnologías asignadas a cada capa arquitectónica. La justificación completa se encuentra en `11-ArquitecturaTecnologica.md`.
-
 | Capa | Tecnologías |
 |---|---|
 | L-01 — Presentación e Interacción | React 19, TypeScript, Vite, Tailwind CSS, Shadcn/ui, Zustand, TanStack Query, React Hook Form, Zod (cliente), Axios, React Router DOM |
 | L-02 — Agente Inteligente | Implementado como módulo NestJS (AgentModule) en el backend; estado del Agente gestionado con Zustand en el frontend |
 | L-03 — Lógica de Aplicación | NestJS (services, controllers, RBAC Guards), class-validator, class-transformer, JWT validation |
 | L-04 — Dominio | NestJS (domain entities y domain services sin dependencias externas), TypeScript |
-| L-05 — Infraestructura | Prisma ORM, Neon PostgreSQL, Argon2, JWT (emisión), adaptadores LanguageModelProvider / SpeechToTextProvider / TextToSpeechProvider, Cloudflare R2 |
+| L-05 — Infraestructura | Prisma ORM, Neon PostgreSQL (DB), Argon2, JWT (emisión), adaptadores LanguageModelProvider / SpeechToTextProvider, Cloudinary (imágenes), Resend (emails) |
 | Despliegue L-01 | Cloudflare Pages (CDN global) |
 | Despliegue L-03/L-04/L-05 | Render (PaaS Node.js) |
 | Base de datos | Neon PostgreSQL (serverless) |
-| Almacenamiento | Cloudflare R2 (compatible S3) |
+| Almacenamiento | Cloudinary (imágenes y assets) |
 
 **Nueva restricción arquitectónica agregada (RA-09):**
-El nombre de ningún proveedor de IA (NLP, STT, TTS) puede aparecer en las capas L-02, L-03 o L-04. Solo los adaptadores de L-05 conocen el proveedor concreto. Toda sustitución de proveedor ocurre únicamente en L-05.
+El nombre de ningún proveedor de IA (NLP, STT) puede aparecer en las capas L-02, L-03 o L-04. Solo los adaptadores de L-05 conocen el proveedor concreto. Toda sustitución de proveedor ocurre únicamente en L-05.

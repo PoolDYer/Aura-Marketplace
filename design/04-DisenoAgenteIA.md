@@ -1,4 +1,4 @@
-# Diseño del Agente Inteligente — Marketplace Inteligente Asistido por IA
+# Diseño del Agente Inteligente — Aura Marketplace
 
 ## 1. Objetivos
 
@@ -8,7 +8,7 @@ Derivados de los objetivos estratégicos del sistema:
 |---|---|---|
 | OBJ-01 | Permitir que el Comprador exprese sus necesidades mediante instrucciones en lenguaje natural en texto y voz, sin necesidad de aprender comandos ni navegar manualmente la interfaz. | OBJ-01 |
 | OBJ-02 | Ejecutar búsquedas, filtros, ordenamientos y comparaciones sobre el Catálogo manteniendo el contexto entre instrucciones sucesivas. | OBJ-02 |
-| OBJ-03 | Permitir la gestión del Carrito y la ejecución completa del proceso de compra mediante instrucciones en lenguaje natural, coordinando con la Pasarela de Pago. | OBJ-03 |
+| OBJ-03 | Permitir la gestión del Carrito y la ejecución completa del proceso de compra mediante instrucciones en lenguaje natural, coordinando con la Pasarela de Pago de Mercado Pago. | OBJ-03 |
 | OBJ-04 | Garantizar que todas las funciones del Agente son igualmente accesibles mediante la modalidad de voz, cumpliendo WCAG 2.1 nivel AA. | OBJ-04 |
 
 ---
@@ -18,7 +18,7 @@ Derivados de los objetivos estratégicos del sistema:
 | Requisito | Responsabilidad del Agente |
 |---|---|
 | RF-01 | Interpretar instrucciones en texto, identificar intención, extraer entidades y restricciones, y ejecutar la acción correspondiente. |
-| RF-02 | Capturar audio, coordinarse con STT, verificar el umbral de confianza, procesar la transcripción y coordinar con TTS para la respuesta. |
+| RF-02 | Capturar audio, coordinarse con STT, verificar el umbral de confianza, procesar la transcripción y reproducir la respuesta con la síntesis de voz nativa del navegador. |
 | RF-03 | Coordinar la búsqueda de productos en el Catálogo con las entidades y restricciones extraídas. |
 | RF-04 | Aplicar filtros sobre el conjunto de resultados activo sin perder el contexto previo. |
 | RF-05 | Reordenar el conjunto de resultados activo según el criterio indicado, conservando los filtros activos. |
@@ -34,11 +34,11 @@ El Agente Inteligente se organiza internamente en cinco capas funcionales:
 
 | Capa | Nombre | Función |
 |---|---|---|
-| CA-01 | Capa de Entrada | Recibe la instrucción del usuario en texto escrito o en audio. Para audio, coordina con el servicio STT para obtener la transcripción. Verifica el umbral de confianza (RN-11). |
-| CA-02 | Capa de Comprensión (NLP) | Procesa el texto de la instrucción para identificar la intención, extraer entidades y restricciones. Coordina con el Proveedor de NLP externo. |
-| CA-03 | Capa de Gestión de Contexto | Mantiene el ContextoSesion activo: historial de instrucciones, conjunto de resultados activo, filtros activos, referencias a objetos anteriores. Gestiona la expiración por inactividad. |
-| CA-04 | Capa de Ejecución de Acciones | Coordina con los módulos funcionales del sistema (Búsquedas, Carrito, Pedidos) para ejecutar la acción identificada. Gestiona el flujo de confirmación para acciones irreversibles. |
-| CA-05 | Capa de Respuesta | Formula la respuesta en lenguaje natural a partir del resultado de la ejecución. Para modalidad de voz, coordina con el servicio TTS para sintetizar el audio de respuesta. |
+| CA-01 | Capa de Entrada | Recibe la instrucción del usuario en texto escrito o en audio. Para audio, coordina con el servicio STT del backend para obtener la transcripción. Verifica el umbral de confianza (RN-11). |
+| CA-02 | Capa de Comprensión (NLP) | Procesa el texto de la instrucción para identificar la intención, extraer entidades y restricciones. Coordina con la API de NLP (Gemini). |
+| CA-03 | Capa de Gestión de Contexto | Mantiene el ContextoSesion activo: historial de instrucciones, conjunto de resultados activo, filtros activos, referencias a objetos anteriores. |
+| CA-04 | Capa de Ejecución de Acciones | Coordina con los módulos funcionales del sistema (Búsquedas, Carrito, Pedidos) para ejecutar la acción identificada. |
+| CA-05 | Capa de Respuesta | Formula la respuesta en lenguaje natural a partir del resultado. En modo voz, coordina con la API nativa de síntesis de voz del navegador (window.speechSynthesis) en el cliente. |
 
 ---
 
@@ -46,17 +46,17 @@ El Agente Inteligente se organiza internamente en cinco capas funcionales:
 
 | Componente | Descripción |
 |---|---|
-| Receptor de Entrada | Acepta texto escrito o audio. Para audio, invoca al adaptador STT y recibe la transcripción con su nivel de confianza. |
-| Verificador de Confianza | Evalúa el nivel de confianza de la transcripción contra el umbral configurado (RN-11). Si está por debajo, solicita que el usuario repita o escriba la instrucción. |
+| Receptor de Entrada | Acepta texto escrito o audio. Para audio, invoca al backend para STT y recibe la transcripción con su nivel de confianza. |
+| Verificador de Confianza | Evalúa el nivel de confianza de la transcripción contra el umbral configurado (RN-11). |
 | Clasificador de Intención | Determina el propósito del usuario a partir del texto: buscar, filtrar, ordenar, comparar, agregar al carrito, comprar, ver carrito. |
 | Extractor de Entidades | Identifica los elementos de información de la instrucción: nombre de producto, marca, categoría, precio, condición de envío. |
 | Extractor de Restricciones | Identifica las condiciones limitantes de la instrucción: "menor a $50", "con envío gratis", "solo Nike". |
-| Gestor de Contexto | Mantiene y actualiza el ContextoSesion. Resuelve referencias contextuales ("ordénalos", "la primera"). Gestiona la expiración de sesión. |
+| Gestor de Contexto | Mantiene y actualiza el ContextoSesion. Resuelve referencias contextuales ("ordénalos", "la primera"). |
 | Resolvedor de Ambigüedad | Detecta instrucciones cuya intención no puede determinarse con certeza y formula solicitudes de aclaración específicas. |
 | Orquestador de Acciones | Coordina con los módulos funcionales del sistema para ejecutar la acción identificada. |
 | Gestor de Confirmaciones | Presenta el resumen de acciones irreversibles y espera la confirmación explícita del usuario antes de ejecutar. |
 | Formateador de Respuesta | Genera la respuesta en lenguaje natural claro, informando qué acción se ejecutó y cuál fue el resultado (RNF-13). |
-| Sintetizador de Voz | Cuando el modo de voz está activo, envía la respuesta al adaptador TTS para obtener el audio de respuesta. |
+| Sintetizador de Voz | Cuando el modo de voz está activo, utiliza la API nativa Web Speech (window.speechSynthesis) en el navegador del cliente. |
 
 
 ---
@@ -97,8 +97,8 @@ Instrucción del usuario (texto o audio)
 [CA-05] Capa de Respuesta
   ├─ Formatear resultado en lenguaje natural
   ├─ Texto → presentar al usuario
-  └─ Voz → adaptador TTS → audio de respuesta
-              └─ si TTS no disponible → presentar solo texto (RNF-06)
+  └─ Voz → API nativa Web Speech (cliente) → audio de respuesta
+              └─ si API no disponible → presentar solo texto (RNF-06)
 ```
 
 ---
@@ -122,15 +122,15 @@ Instrucción del usuario (texto o audio)
 
 1. El Comprador activa el modo de voz; el sistema muestra el indicador visual de escucha activa (RNF-14).
 2. El Comprador habla su instrucción.
-3. El audio es capturado y enviado al adaptador STT.
+3. El audio es capturado y enviado al backend, el cual invoca el adaptador STT (Gemini AI).
 4. El adaptador STT retorna la transcripción en texto y el nivel de confianza.
 5. El Verificador de Confianza compara el nivel con el umbral configurado (RN-11).
    - Si el nivel es inferior al umbral: el Agente informa al Comprador y solicita que repita la instrucción o cambie al modo texto. No se ejecuta ninguna acción.
    - Si el nivel supera el umbral: la transcripción pasa a la Capa de Comprensión.
 6. El flujo continúa exactamente igual al procesamiento por texto (pasos 3–9 de la sección 6).
-7. La respuesta del Agente se envía al adaptador TTS para síntesis de audio.
-8. El audio de respuesta es reproducido al Comprador.
-9. Si el servicio TTS no está disponible: el Agente presenta la respuesta solo en texto y continúa operando (RNF-06).
+7. La respuesta de texto del Agente es enviada a la API nativa de síntesis de voz en el frontend.
+8. El audio de respuesta es reproducido al Comprador en el navegador.
+9. Si la API Web Speech no está disponible o falla: el Agente presenta la respuesta solo en texto y continúa operando (RNF-06).
 
 ---
 
@@ -353,7 +353,7 @@ El Agente implementa estrategias de recuperación controlada ante fallos de serv
 |---|---|
 | Proveedor de NLP | Informa al usuario que la interpretación de lenguaje natural no está disponible. El Marketplace continúa operable mediante navegación manual. |
 | Servicio STT | Informa que el reconocimiento de voz no está disponible y sugiere usar el modo texto. La modalidad de texto continúa funcionando con normalidad. |
-| Servicio TTS | La respuesta se presenta solo en texto. El flujo funcional no se interrumpe. |
+| API de voz (frontend) | La API Web Speech del navegador no está disponible o no responde. La respuesta se presenta solo en texto. El flujo funcional no se interrumpe. |
 | Pasarela de Pago | El Agente informa el motivo del rechazo o la indisponibilidad y ofrece la opción de usar otro método de pago o reintentar. El Carrito se conserva. |
 | Módulo de Búsquedas (timeout) | Si la búsqueda supera el tiempo límite, el Agente muestra un indicador de carga (RNF-14) e informa si la demora persiste. |
 
@@ -481,8 +481,6 @@ Expirado ──nueva instrucción──► Procesando (sin contexto previo)
 
 ## 31. Implementación Tecnológica del Agente Inteligente
 
-> Esta sección fue agregada durante la actualización tecnológica de la Fase 2.
-
 ### 31.1 Mapeo de Capas del Agente a Tecnologías
 
 | Capa del Agente | Tecnología | Ubicación en la arquitectura |
@@ -493,16 +491,15 @@ Expirado ──nueva instrucción──► Procesando (sin contexto previo)
 | CA-03 — Gestión de Contexto | Zustand (estado cliente) + Neon PostgreSQL (historial persistido vía Prisma) | L-01 (estado de sesión efímero) + L-05 (historial de conversaciones) |
 | CA-04 — Ejecución de Acciones | NestJS AgentModule → llamadas a módulos funcionales (Búsquedas, Carrito, Pedidos) | L-02/L-03 |
 | CA-05 — Respuesta (texto) | Zustand + React + Shadcn/ui | L-01 — presentación de respuesta |
-| CA-05 — Respuesta (voz) | Adaptador TextToSpeechProvider | L-05 — síntesis; degradación a texto si no disponible |
+| CA-05 — Respuesta (voz) | API nativa Web Speech (window.speechSynthesis) | L-01 — síntesis en el navegador del cliente |
 
 ### 31.2 Independencia del Proveedor de IA
 
 El Agente en L-02 invoca únicamente las interfaces:
 - `LanguageModelProvider.interpret(text, context)` — para NLP
 - `SpeechToTextProvider.transcribe(audio)` — para STT
-- `TextToSpeechProvider.synthesize(text)` — para TTS
 
-Ningún nombre de proveedor específico aparece en el código de L-02, L-03 o L-04. Esta restricción se formaliza como la restricción arquitectónica RA-09 (ver `01-ArquitecturaGeneral.md` sec. 19).
+Ningún nombre de proveedor específico aparece en el código de L-02 o L-04. Esta restricción se formaliza como la restricción arquitectónica RA-09 (ver `01-ArquitecturaGeneral.md` sec. 19).
 
 ### 31.3 Estado Conversacional
 

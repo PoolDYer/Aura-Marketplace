@@ -1,8 +1,8 @@
-# Requisitos Funcionales — Marketplace Inteligente Asistido por IA
+# Requisitos Funcionales — Aura Marketplace
 
 ## 1. Introducción
 
-Este documento describe con detalle todos los requisitos funcionales del sistema. Cada requisito está identificado con un código único, e incluye actor principal, prioridad, descripción, entradas, salidas, precondiciones, postcondiciones, flujo principal, flujos de excepción, dependencias y criterios de aceptación en formato Given/When/Then.
+Este documento describe con detalle todos los requisitos funcionales de Aura Marketplace. Cada requisito está identificado con un código único, e incluye actor principal, prioridad, descripción, entradas, salidas, precondiciones, postcondiciones, flujo principal, flujos de excepción, dependencias y criterios de aceptación en formato Given/When/Then.
 
 ---
 
@@ -41,24 +41,22 @@ Este documento describe con detalle todos los requisitos funcionales del sistema
 |---|---|
 | **ID** | RF-02 |
 | **Nombre** | Interpretación de instrucciones en lenguaje natural mediante voz |
-| **Actor principal** | Comprador |
-| **Prioridad** | Alta |
-| **Descripción** | El Agente Inteligente captura el audio del Comprador, lo envía al servicio STT para obtener la transcripción, y luego procesa la transcripción con las mismas reglas que una instrucción de texto. La respuesta es sintetizada por el servicio TTS. |
+| | **Descripción** | El Agente Inteligente captura el audio del Comprador, lo envía al servicio STT para obtener la transcripción, y luego procesa la transcripción con las mismas reglas que una instrucción de texto. La respuesta es sintetizada en el frontend utilizando la API nativa Web Speech (window.speechSynthesis) del navegador. |
 | **Entradas** | Audio capturado del micrófono del Comprador |
 | **Salidas** | Acción ejecutada, respuesta en texto y respuesta en audio al Comprador |
-| **Precondiciones** | El Comprador tiene una Sesión activa. El Comprador ha activado el modo de voz. Los servicios STT y TTS están disponibles. |
+| **Precondiciones** | El Comprador tiene una Sesión activa. El Comprador ha activado el modo de voz. El servicio STT (Gemini AI) y la API de síntesis de voz del navegador están disponibles. |
 | **Postcondiciones** | La acción identificada es ejecutada. El resultado es presentado en texto y audio. El Contexto de Sesión es actualizado. |
-| **Flujo principal** | 1. El Comprador activa el modo de voz. 2. El sistema muestra el indicador visual de escucha activa. 3. El Comprador habla su instrucción. 4. El audio es capturado y enviado al servicio STT. 5. El STT retorna la transcripción con su nivel de confianza. 6. El Agente verifica que el nivel de confianza supera el umbral (RN-11). 7. El Agente procesa la transcripción como si fuera una instrucción de texto. 8. El resultado es enviado al servicio TTS. 9. El audio de respuesta es reproducido al Comprador. |
-| **Flujos de excepción** | E1: El nivel de confianza del STT está por debajo del umbral → El Agente informa al Comprador y solicita que repita o escriba la instrucción. E2: El servicio STT no responde → El Agente informa el error y sugiere usar el modo texto. E3: El servicio TTS no responde → El Agente presenta la respuesta solo en texto. |
+| **Flujo principal** | 1. El Comprador activa el modo de voz. 2. El sistema muestra el indicador visual de escucha activa. 3. El Comprador habla su instrucción. 4. El audio es capturado y enviado al backend, el cual utiliza Gemini AI para STT. 5. El backend retorna la transcripción con su nivel de confianza. 6. El Agente verifica que el nivel de confianza supera el umbral (RN-11). 7. El Agente procesa la transcripción como si fuera una instrucción de texto. 8. La respuesta es enviada al módulo Web Speech en el frontend. 9. El audio de respuesta es reproducido al Comprador. |
+| **Flujos de excepción** | E1: El nivel de confianza del STT está por debajo del umbral → El Agente informa al Comprador y solicita que repita o escriba la instrucción. E2: El servicio STT no responde → El Agente informa el error y sugiere usar el modo texto. E3: La API Web Speech del navegador no está disponible o no responde → El Agente presenta la respuesta solo en texto. |
 | **Dependencias** | RF-01, RN-11 |
-
+ 
 #### Criterios de Aceptación — RF-02
-
+ 
 | ID | Criterio |
 |---|---|
 | CA-RF02-01 | **Given** el modo de voz está activo, **When** el Comprador dice "Muéstrame zapatillas Nike", **Then** el sistema transcribe el audio, ejecuta la búsqueda y reproduce la confirmación en audio. |
 | CA-RF02-02 | **Given** el modo de voz está activo, **When** el STT retorna una transcripción con confianza inferior al umbral, **Then** el Agente no ejecuta ninguna acción y solicita repetir o escribir la instrucción. |
-| CA-RF02-03 | **Given** el modo de voz está activo, **When** el TTS no está disponible, **Then** el Agente presenta la respuesta solo en texto sin interrumpir el flujo funcional. |
+| CA-RF02-03 | **Given** el modo de voz está activo, **When** la API Web Speech del navegador no está disponible o no tiene soporte, **Then** el Agente presenta la respuesta solo en texto sin interrumpir el flujo funcional. |le, **Then** el Agente presenta la respuesta solo en texto sin interrumpir el flujo funcional. |
 
 ---
 
@@ -342,3 +340,83 @@ Este documento describe con detalle todos los requisitos funcionales del sistema
 | CA-RF12-02 | **Given** un usuario intenta autenticarse con credenciales incorrectas tres veces consecutivas, **When** el tercer intento falla, **Then** el Marketplace bloquea la cuenta por 15 minutos e informa al usuario. |
 | CA-RF12-03 | **Given** un usuario intenta registrar una contraseña sin mayúscula ni dígito, **When** el Marketplace valida, **Then** rechaza la contraseña e indica los criterios no cumplidos. |
 | CA-RF12-04 | **Given** un usuario autenticado solicita cerrar sesión, **When** la acción se ejecuta, **Then** la Sesión es invalidada y los tokens de acceso son eliminados. |
+
+---
+
+## 8. Módulo: Contexto y Accesibilidad
+
+### RF-13 — Gestión de Sesión del Agente
+
+| Campo | Descripción |
+|---|---|
+| **ID** | RF-13 |
+| **Nombre** | Gestión de Sesión y contexto del Agente Inteligente |
+| **Actor principal** | Comprador |
+| **Prioridad** | Alta |
+| **Descripción** | El sistema gestiona la persistencia del Contexto de Sesión del Agente, limpiándolo tras 30 minutos de inactividad del usuario (RN-14). |
+| **Entradas** | Acciones o mensajes del usuario; tiempo de inactividad |
+| **Salidas** | Sesión expirada y contexto borrado o sesión renovada |
+| **Precondiciones** | La Sesión está activa. |
+| **Postcondiciones** | Tras 30 minutos de inactividad, el contexto se destruye automáticamente. |
+| **Flujo principal** | 1. El usuario realiza una acción. 2. El temporizador de inactividad de la sesión se reinicia. 3. Si pasan 30 minutos sin interacciones, el sistema destruye el Contexto de Sesión. |
+| **Flujos de excepción** | Ninguno. |
+| **Dependencias** | RN-14 |
+
+#### Criterios de Aceptación — RF-13
+
+| ID | Criterio |
+|---|---|
+| CA-RF13-01 | **Given** una sesión activa del Agente, **When** transcurren 30 minutos de inactividad del usuario, **Then** el Contexto de Sesión es destruido automáticamente. |
+| CA-RF13-02 | **Given** una sesión activa del Agente, **When** el usuario realiza una nueva consulta antes de los 30 minutos, **Then** el tiempo de inactividad se reinicia. |
+
+---
+
+### RF-14 — Accesibilidad e Inclusión
+
+| Campo | Descripción |
+|---|---|
+| **ID** | RF-14 |
+| **Nombre** | Accesibilidad e Inclusión conforme a WCAG 2.1 AA |
+| **Actor principal** | Comprador, Vendedor, Administrador |
+| **Prioridad** | Alta |
+| **Descripción** | El Marketplace ofrece interfaces accesibles cumpliendo las WCAG 2.1 AA, incluyendo lectores de pantalla y alternativas visuales. |
+| **Entradas** | Navegación del usuario, uso de lectores de pantalla |
+| **Salidas** | Elementos UI estructurados semánticamente y con soporte de accesibilidad |
+| **Precondiciones** | Ninguna. |
+| **Postcondiciones** | La UI permite la correcta navegación para usuarios con capacidades diferentes. |
+| **Flujo principal** | 1. El usuario con discapacidad accede al sitio. 2. Navega por las secciones utilizando teclado o lector de pantalla. 3. Los elementos y etiquetas semánticos exponen correctamente su estado e información. |
+| **Flujos de excepción** | Ninguno. |
+| **Dependencias** | RNF-15, RNF-16 |
+
+#### Criterios de Aceptación — RF-14
+
+| ID | Criterio |
+|---|---|
+| CA-RF14-01 | **Given** la interfaz de la plataforma, **When** se navega usando lector de pantalla, **Then** todos los elementos interactivos cuentan con etiquetas descriptivas accesibles. |
+| CA-RF14-02 | **Given** el Marketplace, **When** el Agente está procesando una consulta, **Then** se muestran indicadores visuales claros del estado de procesamiento. |
+
+---
+
+### RF-15 — Notificaciones al Usuario
+
+| Campo | Descripción |
+|---|---|
+| **ID** | RF-15 |
+| **Nombre** | Envío de notificaciones al usuario por email |
+| **Actor principal** | Comprador, Vendedor |
+| **Prioridad** | Media |
+| **Descripción** | El sistema envía notificaciones oportunas mediante correo electrónico (vía Resend) a los usuarios según sus preferencias (RN-12). |
+| **Entradas** | Eventos del sistema (nueva orden, cambio de estado de orden, restablecimiento de contraseña) |
+| **Salidas** | Correo electrónico enviado al usuario |
+| **Precondiciones** | El usuario tiene sus preferencias de notificación activas (RN-12). |
+| **Postcondiciones** | El correo es entregado con los datos de la notificación. |
+| **Flujo principal** | 1. Ocurre un evento en el sistema (ej. confirmación de orden). 2. El sistema consulta las preferencias del usuario. 3. Si las notificaciones están permitidas, el sistema envía el correo transaccional utilizando el servicio Resend. |
+| **Flujos de excepción** | E1: Falla el servicio de correo → Se encola el envío para reintento automático. |
+| **Dependencias** | RN-12 |
+
+#### Criterios de Aceptación — RF-15
+
+| ID | Criterio |
+|---|---|
+| CA-RF15-01 | **Given** un Comprador completa una compra, **When** el pago es aprobado, **Then** el sistema envía una notificación por correo electrónico con los detalles de su orden. |
+| CA-RF15-02 | **Given** un Vendedor recibe una nueva orden, **When** la transacción es confirmada, **Then** el Vendedor recibe un email de notificación dentro de 60 segundos. |

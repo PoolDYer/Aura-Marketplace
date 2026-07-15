@@ -1,4 +1,4 @@
-# Requisitos No Funcionales — Marketplace Inteligente Asistido por IA
+# Requisitos No Funcionales — Aura Marketplace
 
 ## 1. Introducción
 
@@ -79,9 +79,9 @@ Los requisitos no funcionales definen las restricciones de calidad que el sistem
 | Campo | Descripción |
 |---|---|
 | **ID** | RNF-06 |
-| **Nombre** | Operación en modo degradado ante fallos de dependencias externas |
-| **Descripción** | Cuando un servicio externo (STT, TTS, Proveedor de IA) no está disponible, el sistema debe continuar operando con las funcionalidades que no dependan de dicho servicio. |
-| **Métrica** | Si el servicio STT o TTS no está disponible, la modalidad de texto del Agente Inteligente debe continuar funcionando con normalidad. Si el servicio de IA no está disponible, el Agente informa el estado y el Marketplace continúa operable mediante navegación manual. |
+| **Nombre** | Operación en modo degradado ante fallos de dependencias |
+| **Descripción** | Cuando un servicio externo (STT, Proveedor de IA) o la API nativa de síntesis de voz (TTS) no están disponibles, el sistema debe continuar operando con las funcionalidades que no dependan de dicho servicio. |
+| **Métrica** | Si el servicio STT no está disponible, la modalidad de texto del Agente Inteligente debe continuar funcionando con normalidad. Si la API de IA no está disponible, el Agente informa el estado y el Marketplace continúa operable mediante navegación manual. Si la API Web Speech no está disponible en el navegador, el Agente presenta la respuesta en texto. |
 | **Prioridad** | Alta |
 
 ---
@@ -94,8 +94,8 @@ Los requisitos no funcionales definen las restricciones de calidad que el sistem
 |---|---|
 | **ID** | RNF-07 |
 | **Nombre** | Cifrado de contraseñas en reposo |
-| **Descripción** | Las contraseñas de los usuarios nunca deben almacenarse en texto plano. Deben almacenarse como el resultado de una función de derivación de clave con sal. |
-| **Métrica** | El 100% de las contraseñas almacenadas en el sistema deben estar en forma de hash con sal. Ningún proceso del sistema debe tener acceso a la contraseña original. |
+| **Descripción** | Las contraseñas de los usuarios nunca deben almacenarse en texto plano. Deben almacenarse de forma segura utilizando hashes criptográficos de alta entropía. |
+| **Métrica** | El 100% de las contraseñas locales almacenadas en el sistema deben estar en forma de hash utilizando el algoritmo Argon2. Ningún proceso del sistema debe tener acceso a la contraseña original. |
 | **Prioridad** | Alta |
 
 ---
@@ -118,8 +118,8 @@ Los requisitos no funcionales definen las restricciones de calidad que el sistem
 |---|---|
 | **ID** | RNF-09 |
 | **Nombre** | Seguridad en la gestión de sesiones |
-| **Descripción** | Los tokens de acceso de las sesiones de usuario deben tener una vida útil limitada y deben ser invalidados al cerrar sesión. |
-| **Métrica** | Los tokens de acceso deben expirar después de un máximo de 24 horas de emisión o al cerrar sesión, lo que ocurra primero. Los tokens invalidados no pueden reutilizarse. |
+| **Descripción** | Los tokens de acceso de las sesiones de usuario deben tener una vida útil limitada y deben ser invalidados en la lista de tokens revocados al cerrar sesión. |
+| **Métrica** | Los tokens de acceso (Access Tokens) locales expiran después de 15 minutos en producción (extendidos temporalmente en desarrollo) y los Refresh Tokens expiran después de 7 días. El cierre de sesión registra el token como inactivo de manera persistente (TokenRevocado) impidiendo su reutilización. |
 | **Prioridad** | Alta |
 
 ---

@@ -1,8 +1,10 @@
-# Catálogo de Casos de Uso — Marketplace Inteligente Asistido por IA
+# Catálogo de Casos de Uso — Aura Marketplace
 
 ## 1. Introducción
 
-Este documento presenta el inventario completo de casos de uso del Marketplace Inteligente. Para cada caso de uso se indica su identificador único, nombre, actor principal, descripción breve y prioridad. Los casos de uso se detallan a nivel de flujo completo en el documento `07-RequisitosFuncionales.md`.
+Este documento presenta el inventario completo de casos de uso de Aura Marketplace. Para cada caso de uso se indica su identificador único, nombre, actor principal, descripción breve y prioridad. Los casos de uso se detallan a nivel de flujo completo en el documento `07-RequisitosFuncionales.md`.
+
+*Última revisión de alineación con producción: 14 de Julio de 2026*
 
 ---
 

@@ -1,8 +1,10 @@
-# Actores del Sistema — Marketplace Inteligente Asistido por IA
+# Actores del Sistema — Aura Marketplace
 
 ## 1. Introducción
 
-Este documento define con precisión todos los actores del sistema, sus responsabilidades, permisos, acciones permitidas y restricciones. Los actores se clasifican en **actores internos** (interactúan directamente con el sistema) y **actores externos** (servicios externos con los que el sistema se integra).
+Este documento define con precisión todos los actores del sistema, sus responsabilidades, permisos, acciones permitidas y restricciones. Los actores se clasifican en **actores internos** (interactúan directamente con el sistema) y **actores externos** (servicios y APIs externas con las que el sistema se integra).
+
+*Última revisión de alineación con producción: 14 de Julio de 2026*
 
 ---
 
@@ -155,7 +157,7 @@ Este documento define con precisión todos los actores del sistema, sus responsa
 |---|---|
 | **ID** | ACT-05 |
 | **Nombre** | Proveedor de IA (NLP) |
-| **Definición** | Servicio externo que provee las capacidades de procesamiento de lenguaje natural. |
+| **Definición** | API externa de Google Gemini (Gemini Pro) que provee el procesamiento de lenguaje natural. |
 | **Interacción con el sistema** | Recibe el texto de las instrucciones del Comprador y retorna la intención identificada, las entidades extraídas y el nivel de confianza. |
 | **Dependencias** | RF-01, RF-02 |
 
@@ -167,20 +169,20 @@ Este documento define con precisión todos los actores del sistema, sus responsa
 |---|---|
 | **ID** | ACT-06 |
 | **Nombre** | Servicio STT (Speech-to-Text) |
-| **Definición** | Servicio externo que convierte el audio de voz del Comprador en texto. |
+| **Definición** | API externa de Google Gemini que convierte el audio de voz del Comprador en texto. |
 | **Interacción con el sistema** | Recibe el audio capturado y retorna la transcripción en texto con su nivel de confianza. |
 | **Dependencias** | RF-02, RN-11 |
 
 ---
 
-### ACT-07 — Servicio TTS
+### ACT-07 — Sintetizador TTS
 
 | Campo | Descripción |
 |---|---|
 | **ID** | ACT-07 |
-| **Nombre** | Servicio TTS (Text-to-Speech) |
-| **Definición** | Servicio externo que convierte el texto de las respuestas del Agente en audio. |
-| **Interacción con el sistema** | Recibe el texto de la respuesta del Agente y retorna el audio sintetizado para ser reproducido al Comprador. |
+| **Nombre** | Sintetizador TTS del Cliente |
+| **Definición** | API nativa Web Speech (window.speechSynthesis) disponible en el navegador del cliente frontend. |
+| **Interacción con el sistema** | Recibe el texto de la respuesta del Agente y lo reproduce directamente como audio de voz en el dispositivo del Comprador. |
 | **Dependencias** | RF-02 |
 
 ---
@@ -190,19 +192,19 @@ Este documento define con precisión todos los actores del sistema, sus responsa
 | Campo | Descripción |
 |---|---|
 | **ID** | ACT-08 |
-| **Nombre** | Pasarela de Pago |
-| **Definición** | Servicio externo que procesa las transacciones financieras. |
+| **Nombre** | Pasarela de Pago (Mercado Pago) |
+| **Definición** | Servicio externo que procesa de manera segura las transacciones financieras. |
 | **Interacción con el sistema** | Recibe la solicitud de cobro del Marketplace y retorna la confirmación o rechazo del pago. |
 | **Dependencias** | RF-08, RN-03 |
 
 ---
 
-### ACT-09 — Sistema de Notificaciones
+### ACT-09 — Servicio de Notificaciones (Resend)
 
 | Campo | Descripción |
 |---|---|
 | **ID** | ACT-09 |
-| **Nombre** | Sistema de Notificaciones externo |
-| **Definición** | Servicio externo (correo electrónico, mensajería) para la entrega de notificaciones a usuarios. |
-| **Interacción con el sistema** | Recibe las solicitudes de notificación del Marketplace y las entrega al destinatario. |
+| **Nombre** | Servicio de Notificaciones (Resend) |
+| **Definición** | API externa de correo electrónico utilizada para la entrega de correos transaccionales a usuarios. |
+| **Interacción con el sistema** | Recibe las solicitudes de notificación por correo (verificación de cuentas, restablecimiento de contraseñas) y las entrega al destinatario. |
 | **Dependencias** | RF-08, RF-10, RN-12 |

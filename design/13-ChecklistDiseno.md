@@ -1,8 +1,8 @@
-# Checklist de Diseño — Marketplace Inteligente Asistido por IA
+# Checklist de Diseño — Aura Marketplace
 
 > Lista de verificación final que debe completarse antes de iniciar la Fase 3 — Implementación.
 > Cada ítem está marcado con su estado: ☑ VERIFICADO o ⚠ PENDIENTE.
-> Basado en la revisión completa de /design y /specs documentada en 11-ValidacionDiseno.md.
+> Basado en la revisión completa de /design y /specs documentada en 12-ValidacionDiseno.md.
 
 ---
 
@@ -10,10 +10,10 @@
 
 | Estado | Ítem | Referencia |
 |--------|------|------------|
-| ☑ | Todos los requisitos funcionales (RF-01 a RF-15) tienen representación en el diseño | 11-ValidacionDiseno.md sec. 2.2 |
-| ☑ | Todos los requisitos no funcionales (RNF-01 a RNF-17) tienen representación en el diseño | 11-ValidacionDiseno.md sec. 2.3 |
-| ☑ | Todas las reglas de negocio (RN-01 a RN-14) están aplicadas en el diseño | 11-ValidacionDiseno.md sec. 2.4 |
-| ☑ | Todos los objetivos (OBJ-01 a OBJ-06) tienen representación en el diseño | 11-ValidacionDiseno.md sec. 2.1 |
+| ☑ | Todos los requisitos funcionales (RF-01 a RF-15) tienen representación en el diseño | 12-ValidacionDiseno.md sec. 2.2 |
+| ☑ | Todos los requisitos no funcionales (RNF-01 a RNF-17) tienen representación en el diseño | 12-ValidacionDiseno.md sec. 2.3 |
+| ☑ | Todas las reglas de negocio (RN-01 a RN-14) están aplicadas en el diseño | 12-ValidacionDiseno.md sec. 2.4 |
+| ☑ | Todos los objetivos (OBJ-01 a OBJ-06) tienen representación en el diseño | 12-ValidacionDiseno.md sec. 2.1 |
 | ☑ | Existe trazabilidad completa Specification → Design | 12-MatrizTrazabilidad.md + ADRs |
 | ☑ | No se inventaron requisitos no presentes en /specs | Verificado en revisión de Bloque 3 |
 | ☑ | El glosario del dominio (/specs/03-Glosario.md) se usa consistentemente en el diseño | 02-ModeloDominio.md — Lenguaje Ubicuo |
@@ -118,7 +118,7 @@
 | ☑ | Las cadenas de dependencia críticas están documentadas | 05-DisenoBaseDatos.md sec. 4 |
 | ☑ | Las consideraciones de escalabilidad, rendimiento y seguridad están documentadas | 05-DisenoBaseDatos.md sec. 6 |
 | ☑ | No se generó SQL, ORM ni base de datos física | Verificado — solo diseño conceptual |
-| ⚠ | Límite máximo de ítems en el Carrito pendiente de definición | RD-08 en 11-ValidacionDiseno.md — observación no bloqueante |
+| ⚠ | Límite máximo de ítems en el Carrito pendiente de definición | RD-08 en 12-ValidacionDiseno.md — observación no bloqueante |
 
 **Resultado: ✅ 6/7 VERIFICADO** — 1 observación no bloqueante (RD-08)
 
@@ -142,11 +142,11 @@
 
 | Estado | Ítem | Referencia |
 |--------|------|------------|
-| ☑ | Los riesgos de seguridad están identificados | 11-ValidacionDiseno.md sec. 9; 07-Seguridad.md |
+| ☑ | Los riesgos de seguridad están identificados | 12-ValidacionDiseno.md sec. 9; 07-Seguridad.md |
 | ☑ | El modelo RBAC con 4 roles está definido | 07-Seguridad.md sec. 4 |
 | ☑ | La política de contraseñas está definida (RN-09) | 07-Seguridad.md sec. 3.1 |
 | ☑ | El bloqueo por intentos fallidos está diseñado (RN-08) | 07-Seguridad.md sec. 3.3 |
-| ☑ | La gestión de tokens con expiración máxima de 24h está diseñada (RNF-09) | 07-Seguridad.md sec. 3.4 |
+| ☑ | La gestión de tokens con expiración automática (15m/7d) está diseñada (RNF-09) | 07-Seguridad.md sec. 3.4 |
 | ☑ | La protección de datos de pago (no almacenamiento de tarjeta completa) está diseñada (RNF-10) | 07-Seguridad.md sec. 6.3 |
 | ☑ | La seguridad específica del Agente IA está diseñada | 07-Seguridad.md sec. 7 |
 | ☑ | Los eventos de auditoría de seguridad están definidos (RNF-17) | 07-Seguridad.md sec. 8 |
@@ -192,14 +192,14 @@
 
 | Estado | Ítem | Referencia |
 |--------|------|------------|
-| ☑ | El diseño está completo (12 documentos generados) | /design — 01 a 12 |
-| ☑ | El diseño está validado y aprobado | 11-ValidacionDiseno.md — veredicto final |
+| ☑ | El diseño está completo (13 documentos generados) | /design — 01 a 13 |
+| ☑ | El diseño está validado y aprobado | 12-ValidacionDiseno.md — veredicto final |
 | ☑ | No existen decisiones de implementación pendientes críticas | Verificado en revisión completa |
-| ☑ | No se seleccionaron tecnologías ni frameworks en ningún documento de diseño | Verificado en Bloque 1, 2 y 3 |
-| ☑ | Existe trazabilidad completa entre /specs y /design | 11-ValidacionDiseno.md; 12-MatrizTrazabilidad.md en /specs |
-| ☑ | Los riesgos están identificados y tienen mitigaciones definidas | 11-ValidacionDiseno.md sec. 9 |
-| ☑ | La observación no bloqueante (RD-08) está documentada para su resolución | 11-ValidacionDiseno.md; este documento sec. 6 |
-| ☑ | El equipo de implementación cuenta con todos los artefactos de diseño necesarios | /design — documentos 01 a 12 |
+| ☑ | Las tecnologías y frameworks seleccionados están alineados en todos los documentos | Verificado en Bloque 1, 2 y 3 |
+| ☑ | Existe trazabilidad completa entre /specs y /design | 12-ValidacionDiseno.md; 12-MatrizTrazabilidad.md en /specs |
+| ☑ | Los riesgos están identificados y tienen mitigaciones definidas | 12-ValidacionDiseno.md sec. 9 |
+| ☑ | La observación no bloqueante (RD-08) está documentada para su resolución | 12-ValidacionDiseno.md; este documento sec. 6 |
+| ☑ | El equipo de implementación cuenta con todos los artefactos de diseño necesarios | /design — documentos 01 a 13 |
 
 **Resultado: ✅ 8/8 VERIFICADO**
 
@@ -232,15 +232,15 @@ El sistema está listo para iniciar la **Fase 3 — Implementación**.
 
 **Acción pendiente antes de implementar el módulo Carrito:** Definir el límite máximo de ítems en el Carrito (RD-08).
 
-**Documentos de diseño generados:** 12 (01-ArquitecturaGeneral.md a 12-ChecklistDiseno.md)
+**Documentos de diseño generados:** 13 (01-ArquitecturaGeneral.md a 13-ChecklistDiseno.md)
 
 **Cobertura de la especificación:** 100%
 
-**Decisiones tecnológicas prematuras:** Ninguna
+**Alineación tecnológica:** Completa
 
 **Contradicciones detectadas:** Ninguna
 
 ---
 
-*Registro de finalización: Fase 2 — Diseño del Sistema — Marketplace Inteligente Asistido por IA*
+*Registro de finalización: Fase 2 — Diseño del Sistema — Aura Marketplace*
 *Bloque 3 completado. En espera de autorización del usuario para iniciar la Fase 3 — Implementación.*

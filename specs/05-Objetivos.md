@@ -1,8 +1,8 @@
-# Objetivos del Sistema — Marketplace Inteligente Asistido por IA
+# Objetivos del Sistema — Aura Marketplace
 
 ## 1. Objetivo General
 
-Desarrollar un Marketplace de comercio electrónico que incorpore un Agente Inteligente capaz de comprender instrucciones en lenguaje natural —mediante texto y voz— y de ejecutar acciones funcionales dentro de la plataforma, con el propósito de reducir la fricción en el proceso de compra, ampliar la accesibilidad del sistema y aumentar la tasa de conversión de usuarios exploradores a compradores.
+Desarrollar Aura Marketplace, una plataforma de comercio electrónico multidireccional que incorpore un Agente Inteligente capaz de comprender instrucciones en lenguaje natural (texto y voz) y de ejecutar acciones funcionales dentro del sistema, con el propósito de reducir la fricción en el proceso de compra, ampliar la accesibilidad y aumentar la conversión.
 
 ---
 
@@ -77,8 +77,8 @@ Desarrollar un Marketplace de comercio electrónico que incorpore un Agente Inte
 **Motivación:** La confianza es un factor determinante en la adopción de plataformas de comercio electrónico. Un sistema inseguro o poco confiable genera abandono inmediato.
 
 **Indicadores de éxito:**
-- Las contraseñas de usuario se almacenan siempre en forma cifrada y nunca se transmiten en texto plano.
-- El sistema bloquea cuentas temporalmente ante intentos de autenticación fallidos repetidos.
+- Las contraseñas de usuario se almacenan siempre de manera segura utilizando hashes derivados con Argon2.
+- El sistema bloquea cuentas temporalmente ante intentos de autenticación fallidos repetidos y mantiene una lista de tokens revocados (Access y Refresh).
 - El sistema gestiona los errores de la Pasarela de Pago sin dejar Órdenes en estado inconsistente.
 
 ---

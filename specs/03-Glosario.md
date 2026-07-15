@@ -1,8 +1,8 @@
-# Glosario del Dominio — Marketplace Inteligente Asistido por IA
+# Glosario del Dominio — Aura Marketplace
 
 ## Propósito
 
-Este documento define formalmente todos los términos del dominio utilizados en la especificación del Marketplace Inteligente. Cualquier término que aparezca en los documentos de requisitos, reglas de negocio o casos de uso debe estar definido aquí. Los términos se presentan en orden alfabético.
+Este documento define formalmente todos los términos del dominio utilizados en la especificación de Aura Marketplace. Cualquier término que aparezca en los documentos de requisitos, reglas de negocio o casos de uso debe estar definido aquí. Los términos se presentan en orden alfabético.
 
 ---
 
@@ -23,6 +23,9 @@ Componente central del sistema que interpreta instrucciones en lenguaje natural 
 Característica que describe un producto dentro del Catálogo. Ejemplos: nombre, precio, marca, categoría, calificación, disponibilidad, condición de envío.
 
 ### C
+
+**Caché**
+Sistema de almacenamiento temporal de datos de alta frecuencia de acceso para reducir la latencia de respuesta. Implementado en el cliente mediante TanStack Query para el catálogo de productos y búsquedas recurrentes, y en memoria en el servidor.
 
 **Carrito**
 Contenedor temporal que acumula los productos seleccionados por el Comprador antes de finalizar el proceso de compra. El Carrito persiste durante la Sesión activa del Comprador.
@@ -45,6 +48,9 @@ Estado interno mantenido por el Agente Inteligente durante una Sesión activa. I
 **Criterio de Aceptación**
 Condición verificable y medible que un requisito debe satisfacer para ser considerado cumplido. Se expresa en formato Given/When/Then.
 
+**Cupón**
+Código promocional que otorga un descuento (porcentual o monto fijo) aplicable al total de una Orden. Los cupones tienen vigencia limitada y un número máximo de usos.
+
 ### E
 
 **Entidad**
@@ -54,6 +60,9 @@ Elemento de información extraído de una instrucción por el Agente Inteligente
 Fase en el ciclo de vida de una Orden. Los estados posibles son: pendiente, confirmada, en preparación, despachada, entregada, cancelada.
 
 ### F
+
+**Favorito**
+Marca o señal que un Comprador coloca sobre una Publicación para indicar interés y facilitar su acceso posterior. Los favoritos se almacenan en el perfil del usuario y pueden ser consultados en cualquier momento.
 
 **Filtro**
 Criterio aplicado sobre el conjunto de resultados activo para reducirlo a los productos que cumplen una condición específica. Los filtros soportados incluyen: precio, categoría, marca, disponibilidad, calificación y condición de envío.
@@ -93,12 +102,21 @@ Criterio aplicado sobre el conjunto de resultados activo para organizarlos en un
 ### P
 
 **Pasarela de Pago**
-Servicio externo que procesa las transacciones financieras entre Compradores y Vendedores. Es un actor externo del sistema.
+Servicio externo que procesa las transacciones financieras entre Compradores y Vendedores. Es un actor externo del sistema. En la implementación actual se utiliza MercadoPago.
+
+**Promoción**
+Descuento temporal aplicable a una Publicación específica. Las promociones tienen fecha de inicio y fin, un porcentaje de descuento, y pueden ser activadas o desactivadas por el Vendedor.
 
 **Publicación**
 Registro creado por un Vendedor en el Catálogo para poner un producto a disposición de los Compradores. Incluye nombre, descripción, precio, categoría, stock e imágenes.
 
 ### R
+
+**Refresh Token**
+Token de larga duración utilizado para obtener nuevos Access Tokens sin requerir que el usuario vuelva a autenticarse. Los Refresh Tokens tienen una validez de 7 días y pueden ser revocados explícitamente.
+
+**Reseña**
+Valoración y comentario que un Comprador realiza sobre un producto adquirido después de completar una Orden. Incluye una calificación numérica y opcionalmente un comentario de texto.
 
 **Restricción**
 Condición limitante expresada por el usuario en una instrucción que el Agente Inteligente debe aplicar al ejecutar la Acción. Ejemplos: "con envío gratis", "menor a $50", "solo Nike", "en stock".
@@ -117,13 +135,22 @@ Período activo de interacción de un usuario autenticado con el Marketplace. El
 **Stock**
 Cantidad disponible de unidades de un producto registrada en una Publicación.
 
+**Storage**
+Sistema de almacenamiento de objetos (imágenes, archivos) implementado con Cloudinary para gestionar las imágenes de las Publicaciones y otros recursos multimedia del sistema.
+
 **STT (Speech-to-Text)**
-Servicio externo que convierte el audio de voz del usuario en texto para ser procesado por el Agente Inteligente.
+Servicio externo que convierte el audio de voz del usuario en texto para ser procesado por el Agente Inteligente. En la implementación actual se utiliza Gemini AI.
 
 ### T
 
+**Token de Acceso (Access Token)**
+Token JWT de corta duración (15 minutos) que autoriza las solicitudes del cliente al servidor. Debe incluirse en el header de cada petición HTTP que requiera autenticación.
+
+**Token Revocado**
+Registro de tokens (Access Token o Refresh Token) que han sido explícitamente invalidados antes de su expiración natural, típicamente por logout del usuario o por detección de compromiso de seguridad.
+
 **TTS (Text-to-Speech)**
-Servicio externo que convierte el texto de las respuestas del Agente Inteligente en audio de voz para ser reproducido al usuario.
+Servicio en el cliente que convierte el texto de las respuestas del Agente Inteligente en audio de voz para ser reproducido al usuario. En la implementación actual se utiliza la API nativa Web Speech (window.speechSynthesis) en el navegador del frontend.
 
 **Trazabilidad**
 Capacidad de vincular cada requisito con los objetivos que lo motivan, las reglas de negocio que lo rigen, y los casos de uso que lo implementan.

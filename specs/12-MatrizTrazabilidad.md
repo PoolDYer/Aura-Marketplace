@@ -1,8 +1,8 @@
-# Matriz de Trazabilidad — Marketplace Inteligente Asistido por IA
+# Matriz de Trazabilidad — Aura Marketplace
 
 ## 1. Introducción
 
-La matriz de trazabilidad establece las relaciones entre los elementos de la especificación: **Objetivos → Requisitos Funcionales → Reglas de Negocio → Casos de Uso**. Esta trazabilidad garantiza que cada requisito tiene un objetivo que lo justifica, que cada regla de negocio está vinculada a los requisitos que rige, y que cada caso de uso está cubierto por al menos un requisito funcional.
+La matriz de trazabilidad establece las relaciones entre los elementos de la especificación de Aura Marketplace: **Objetivos → Requisitos Funcionales → Reglas de Negocio → Casos de Uso**. Esta trazabilidad garantiza que cada requisito tiene un objetivo que lo justifica, que cada regla de negocio está vinculada a los requisitos que rige, y que cada caso de uso está cubierto por al menos un requisito funcional.
 
 ---
 
@@ -13,9 +13,9 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | OBJ-01 | Habilitar la interacción mediante lenguaje natural | RF-01, RF-02 |
 | OBJ-02 | Proveer capacidades completas de exploración del Catálogo | RF-03, RF-04, RF-05, RF-06 |
 | OBJ-03 | Permitir la gestión del Carrito y ejecución de compras mediante el Agente | RF-07, RF-08 |
-| OBJ-04 | Garantizar la accesibilidad del Marketplace para todos los usuarios | RF-02, RNF-15, RNF-16 |
-| OBJ-05 | Proveer herramientas de gestión para Vendedores y Administradores | RF-09, RF-10, RF-11 |
-| OBJ-06 | Garantizar la seguridad y confiabilidad del sistema | RF-12, RNF-07, RNF-08, RNF-09, RNF-10 |
+| OBJ-04 | Garantizar la accesibilidad del Marketplace para todos los usuarios | RF-02, RF-14, RNF-15, RNF-16 |
+| OBJ-05 | Proveer herramientas de gestión para Vendedores y Administradores | RF-09, RF-10, RF-11, RF-15 |
+| OBJ-06 | Garantizar la seguridad y confiabilidad del sistema | RF-12, RF-13, RNF-07, RNF-08, RNF-09, RNF-10 |
 
 ---
 
@@ -35,6 +35,9 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | RF-10 | Gestión de Órdenes por el Vendedor | RN-07 |
 | RF-11 | Administración de usuarios y publicaciones | RN-10 |
 | RF-12 | Registro y autenticación de usuarios | RN-08, RN-09, RN-12 |
+| RF-13 | Gestión de Sesión del Agente | RN-14 |
+| RF-14 | Accesibilidad e Inclusión | RNF-15, RNF-16 |
+| RF-15 | Notificaciones al Usuario | RN-12 |
 
 ---
 
@@ -54,6 +57,9 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | RF-10 | Gestión de Órdenes por el Vendedor | CU-26, CU-27, CU-28 |
 | RF-11 | Administración de usuarios y publicaciones | CU-29, CU-30, CU-31, CU-32, CU-33 |
 | RF-12 | Registro y autenticación de usuarios | CU-34, CU-35, CU-36, CU-37, CU-38, CU-39, CU-40 |
+| RF-13 | Gestión de Sesión del Agente | CU-04 |
+| RF-14 | Accesibilidad e Inclusión | CU-06, CU-07 |
+| RF-15 | Notificaciones al Usuario | CU-28, CU-39 |
 
 ---
 
@@ -72,9 +78,9 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | RN-09 | Política de contraseña segura | RF-12 |
 | RN-10 | Suspensión de Publicaciones al suspender al Vendedor | RF-11 |
 | RN-11 | Umbral de confianza en transcripción STT | RF-02 |
-| RN-12 | Obligatoriedad de respetar preferencias de notificación | RF-08, RF-10 |
+| RN-12 | Obligatoriedad de respetar preferencias de notificación | RF-08, RF-10, RF-15 |
 | RN-13 | Límite de productos en vista comparativa | RF-06 |
-| RN-14 | Expiración del Contexto de Sesión por inactividad | RF-01, RF-02, RF-03, RF-04, RF-05 |
+| RN-14 | Expiración del Contexto de Sesión por inactividad | RF-01, RF-02, RF-03, RF-04, RF-05, RF-13 |
 
 ---
 
@@ -85,10 +91,10 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | CU-01 | Ingresar instrucción en texto | RF-01 |
 | CU-02 | Ingresar instrucción por voz | RF-02 |
 | CU-03 | Solicitar aclaración de instrucción ambigua | RF-01, RF-02 |
-| CU-04 | Mantener contexto de Sesión | RF-01, RF-02, RF-03, RF-04, RF-05 |
+| CU-04 | Mantener contexto de Sesión | RF-01, RF-02, RF-03, RF-04, RF-05, RF-13 |
 | CU-05 | Buscar productos | RF-03 |
-| CU-06 | Explorar Catálogo sin Agente | RF-03 |
-| CU-07 | Filtrar resultados de búsqueda | RF-04 |
+| CU-06 | Explorar Catálogo sin Agente | RF-03, RF-14 |
+| CU-07 | Filtrar resultados de búsqueda | RF-04, RF-14 |
 | CU-08 | Eliminar un filtro activo | RF-04 |
 | CU-09 | Ordenar resultados de búsqueda | RF-05 |
 | CU-10 | Comparar productos | RF-06 |
@@ -109,7 +115,7 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | CU-25 | Reactivar Publicación | RF-09 |
 | CU-26 | Ver Órdenes recibidas | RF-10 |
 | CU-27 | Actualizar estado de Orden | RF-10 |
-| CU-28 | Recibir notificación de nueva Orden | RF-10 |
+| CU-28 | Recibir notificación de nueva Orden | RF-10, RF-15 |
 | CU-29 | Suspender cuenta de usuario | RF-11 |
 | CU-30 | Reactivar cuenta de usuario | RF-11 |
 | CU-31 | Eliminar Publicación por incumplimiento | RF-11 |
@@ -120,7 +126,7 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | CU-36 | Verificar correo electrónico | RF-12 |
 | CU-37 | Iniciar sesión | RF-12 |
 | CU-38 | Cerrar sesión | RF-12 |
-| CU-39 | Configurar preferencias de notificación | RF-12 |
+| CU-39 | Configurar preferencias de notificación | RF-12, RF-15 |
 | CU-40 | Gestionar perfil de usuario | RF-12 |
 
 ---
@@ -130,9 +136,9 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | Elemento | Total | Cubiertos | Cobertura |
 |---|---|---|---|
 | Objetivos con al menos un requisito funcional | 6 | 6 | 100% |
-| Requisitos funcionales con al menos un objetivo | 12 | 12 | 100% |
-| Requisitos funcionales con al menos una regla de negocio | 12 | 12 | 100% |
-| Requisitos funcionales con al menos un caso de uso | 12 | 12 | 100% |
+| Requisitos funcionales con al menos un objetivo | 15 | 15 | 100% |
+| Requisitos funcionales con al menos una regla de negocio | 15 | 15 | 100% |
+| Requisitos funcionales con al menos un caso de uso | 15 | 15 | 100% |
 | Reglas de negocio con al menos un requisito que rigen | 14 | 14 | 100% |
 | Casos de uso con al menos un requisito funcional | 40 | 40 | 100% |
-| Requisitos funcionales con criterios de aceptación | 12 | 12 | 100% |
+| Requisitos funcionales con criterios de aceptación | 15 | 15 | 100% |

@@ -1,4 +1,4 @@
-# Criterios de Aceptación Consolidados — Marketplace Inteligente Asistido por IA
+# Criterios de Aceptación Consolidados — Aura Marketplace
 
 ## 1. Introducción
 
@@ -25,9 +25,9 @@ Formato del identificador: `CA-RFxx-yy` donde `xx` es el número del requisito f
 
 | ID | Dado (Given) | Cuando (When) | Entonces (Then) |
 |---|---|---|---|
-| CA-RF02-01 | El modo de voz está activo y los servicios STT y TTS están disponibles | El Comprador dice "Muéstrame zapatillas Nike" | El sistema transcribe el audio, ejecuta la búsqueda y reproduce la confirmación en audio al Comprador |
+| CA-RF02-01 | El modo de voz está activo, el servicio STT en backend y la síntesis en el cliente están disponibles | El Comprador dice "Muéstrame zapatillas Nike" | El sistema graba el audio, lo envía a transcribir, ejecuta la búsqueda y sintetiza la confirmación de voz en el navegador |
 | CA-RF02-02 | El modo de voz está activo | El servicio STT retorna una transcripción con nivel de confianza inferior al umbral configurado | El Agente no ejecuta ninguna acción y solicita al Comprador que repita o escriba la instrucción |
-| CA-RF02-03 | El modo de voz está activo | El servicio TTS no está disponible | El Agente presenta la respuesta únicamente en texto sin interrumpir el flujo funcional |
+| CA-RF02-03 | El modo de voz está activo | La API nativa Web Speech (window.speechSynthesis) del navegador no está disponible o tiene errores | El Agente presenta la respuesta únicamente en texto sin interrumpir el flujo funcional |
 | CA-RF02-04 | El modo de voz está activo | El Agente está escuchando al Comprador | El Marketplace muestra el indicador visual de escucha activa durante todo el tiempo que dura la captura del audio |
 
 ---
@@ -146,3 +146,32 @@ Formato del identificador: `CA-RFxx-yy` donde `xx` es el número del requisito f
 | CA-RF12-03 | Un usuario intenta autenticarse con credenciales incorrectas por tercera vez consecutiva | El tercer intento falla | El Marketplace bloquea temporalmente la cuenta por 15 minutos e informa al usuario sobre el bloqueo y la duración (RN-08) |
 | CA-RF12-04 | Un usuario registra una contraseña que no cumple la política de complejidad (ej. sin mayúscula) | El Marketplace valida la contraseña | El Marketplace rechaza la contraseña e indica al usuario los criterios de seguridad específicos que no se cumplen (RN-09) |
 | CA-RF12-05 | Un usuario autenticado hace clic en "cerrar sesión" | La acción de cierre de sesión se ejecuta | La Sesión activa es invalidada, los tokens de acceso son eliminados y el usuario no puede acceder a funciones protegidas sin autenticarse nuevamente |
+
+---
+
+## 8. Módulo: Contexto y Accesibilidad
+
+### RF-13 — Gestión de Sesión del Agente
+
+| ID | Dado (Given) | Cuando (When) | Entonces (Then) |
+|---|---|---|---|
+| CA-RF13-01 | Una sesión activa del Agente | Transcurren 30 minutos de inactividad del usuario | El Contexto de Sesión es destruido automáticamente y las instrucciones de seguimiento no pueden hacer referencia a resultados previos |
+| CA-RF13-02 | Una sesión activa del Agente | El usuario realiza una nueva consulta antes de los 30 minutos de inactividad | El temporizador de inactividad se reinicia y se mantiene el Contexto de Sesión |
+
+---
+
+### RF-14 — Accesibilidad e Inclusión
+
+| ID | Dado (Given) | Cuando (When) | Entonces (Then) |
+|---|---|---|---|
+| CA-RF14-01 | La interfaz de la plataforma | Se navega usando lector de pantalla o teclado | Todos los elementos interactivos cuentan con etiquetas descriptivas accesibles y son enfocables |
+| CA-RF14-02 | El Marketplace procesa una consulta larga del Agente | La latencia supera los 500ms | Se muestran indicadores visuales de procesamiento activo para el usuario (RNF-14) |
+
+---
+
+### RF-15 — Notificaciones al Usuario
+
+| ID | Dado (Given) | Cuando (When) | Entonces (Then) |
+|---|---|---|---|
+| CA-RF15-01 | Un Comprador completa una compra y el pago es aprobado | Se registra la orden en el sistema | El sistema envía una notificación por correo electrónico con los detalles de su orden utilizando el servicio Resend |
+| CA-RF15-02 | Un Vendedor recibe una nueva orden con sus productos | Se registra la transacción en el sistema | El Vendedor recibe un email de notificación de la nueva orden en un plazo máximo de 60 segundos (RN-12) |

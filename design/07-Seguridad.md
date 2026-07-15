@@ -1,4 +1,4 @@
-# Diseño de Seguridad — Marketplace Inteligente Asistido por IA
+# Diseño de Seguridad — Aura Marketplace
 
 ## 1. Objetivos de Seguridad
 
@@ -37,7 +37,7 @@ El proceso de registro crea una cuenta en estado pendiente de verificación. El 
 
 ### 3.2 Autenticación
 
-Al recibir las credenciales, el sistema verifica que el correo existe, que la cuenta está activa y que la contraseña proporcionada corresponde al hash almacenado. Si la verificación es exitosa, el sistema emite un token de acceso que contiene el identificador del usuario, su rol y la marca temporal de expiración. El token tiene una vida útil máxima de 24 horas desde su emisión (RNF-09). Cada token está asociado a una sesión específica.
+Al recibir las credenciales, el sistema verifica que el correo existe, que la cuenta está activa y que la contraseña proporcionada corresponde al hash almacenado. Si la verificación es exitosa, el sistema emite un token de acceso que contiene el identificador del usuario, su rol y la marca temporal de expiración. El token de acceso (Access Token) local expira después de 15 minutos en producción, y el Refresh Token expira después de 7 días (RNF-09). Cada token está asociado a una sesión específica.
 
 ### 3.3 Control de Bloqueo
 
@@ -45,7 +45,7 @@ El sistema contabiliza los intentos de autenticación fallidos consecutivos para
 
 ### 3.4 Gestión de Tokens
 
-El token de acceso contiene el identificador del usuario, su rol en el sistema y la marca temporal de expiración. Al cerrar sesión, el token es invalidado de forma inmediata e irrecuperable en el sistema. Un token invalidado no puede reutilizarse aunque su marca temporal de expiración aún no haya llegado (RNF-09). La invalidación es registrada en el sistema de auditoría.
+El token de acceso contiene el identificador del usuario, su rol en el sistema y la marca temporal de expiración. Al cerrar sesión, los tokens son invalidados de forma inmediata e irrecuperable en el sistema. Un token invalidado no puede reutilizarse aunque su marca temporal de expiración aún no haya llegado (RNF-09). La invalidación es registrada en el sistema de auditoría.
 
 ---
 
@@ -97,7 +97,7 @@ Los datos personales se almacenan únicamente en la medida necesaria para el fun
 
 ### 6.2 Contraseñas
 
-Las contraseñas se transforman mediante una función de derivación de clave con sal antes de su almacenamiento (RNF-07). El sistema nunca tiene acceso a la contraseña original tras su recepción en el punto de registro o autenticación. Las contraseñas no aparecen en registros de auditoría, respuestas de operaciones ni mensajes de error.
+Las contraseñas se almacenan de forma segura utilizando hashes derivados con Argon2 (RNF-07). El sistema nunca tiene acceso a la contraseña original en texto plano tras su recepción en el punto de registro o autenticación. Las contraseñas no aparecen en registros de auditoría, respuestas de operaciones ni mensajes de error.
 
 ### 6.3 Datos de pago
 
@@ -109,7 +109,7 @@ El historial de conversación del Agente Inteligente está vinculado exclusivame
 
 ### 6.5 Transmisión segura
 
-Toda comunicación entre la capa de presentación y el sistema, y entre el sistema y sus integraciones externas (proveedor de NLP, servicio STT, servicio TTS, pasarela de pago, servicio de notificaciones), se realiza mediante canales cifrados (RNF-08). Ningún dato sensible —credenciales, referencia de método de pago, datos personales— puede transmitirse en texto plano.
+Toda comunicación entre la capa de presentación y el sistema, y entre el sistema y sus integraciones externas (proveedor de NLP, servicio STT, API de síntesis de voz del navegador, pasarela de pago de Mercado Pago, servicio de notificaciones de Resend), se realiza mediante canales cifrados (RNF-08). Ningún dato sensible —credenciales, referencia de método de pago, datos personales— puede transmitirse en texto plano.
 
 ---
 
@@ -150,10 +150,8 @@ Los siguientes eventos generan registros de auditoría obligatorios en el sistem
 | Autenticación | Intento de autenticación exitoso, intento de autenticación fallido, cierre de sesión, emisión de token, invalidación de token. |
 | Control de acceso | Bloqueo de cuenta por intentos fallidos (RN-08), desbloqueo de cuenta por Administrador, asignación o modificación de rol. |
 | Publicaciones | Creación de publicación, modificación de atributos, desactivación, reactivación, eliminación por Administrador. |
-| Órdenes y pagos | Registro de orden, inicio de proceso de pago, confirmación de pago, rechazo de pago, cambio de estado de orden, escalamiento automático de orden (RN-07). |
-| Administración | Suspensión de cuenta de usuario, reactivación de cuenta, eliminación de publicación por incumplimiento. |
-| Agente Inteligente | Instrucción procesada con resultado, confirmación de acción irreversible, cancelación de acción pendiente. |
-| Integraciones externas | Error de comunicación con proveedor de NLP, con servicio STT, con servicio TTS, con pasarela de pago, con servicio de notificaciones. |
+| Órdenes y pagos | Registro de orden, inicio de proceso de pago, confirmación de pago, rechazo | Agente Inteligente | Instrucción procesada con resultado, confirmación de acción irreversible, cancelación de acción pendiente. |
+| Integraciones externas | Error de comunicación con proveedor de NLP, con servicio STT, con la API Web Speech del navegador, con pasarela de pago, con servicio de notificaciones. |
 
 **Estructura de cada registro de auditoría:** Marca temporal (fecha y hora con precisión de segundo), identificador del usuario que ejecutó la acción, tipo de acción, módulo de origen, resultado de la operación (exitoso / fallido) y, cuando aplique, identificador del recurso afectado (orden, publicación, cuenta).
 
@@ -163,7 +161,7 @@ Los siguientes eventos generan registros de auditoría obligatorios en el sistem
 
 ## 9. Disponibilidad y Resiliencia
 
-**Degradación controlada ante fallos externos (RNF-06):** Cuando el servicio NLP no está disponible, el Agente informa al usuario y el Marketplace continúa operativo mediante navegación manual. Cuando los servicios STT o TTS no responden, el modo de texto continúa funcionando con normalidad. El fallo de un servicio externo no bloquea la totalidad del sistema.
+**Degradación controlada ante fallos externos (RNF-06):** Cuando el servicio NLP no está disponible, el Agente informa al usuario y el Marketplace continúa operativo mediante navegación manual. Cuando el servicio STT o la API Web Speech no responden, el modo de texto continúa funcionando con normalidad. El fallo de un servicio externo no bloquea la totalidad del sistema.
 
 **Limitación de frecuencia:** Se aplica un control de frecuencia sobre operaciones susceptibles de abuso: intentos de autenticación, registro de cuentas y envío de instrucciones al Agente. Este control previene el agotamiento de recursos y los intentos de fuerza bruta.
 
@@ -191,10 +189,10 @@ Los registros de auditoría incluyen únicamente los identificadores mínimos ne
 
 | Decisión de seguridad | Fuente |
 |---|---|
-| Contraseñas almacenadas como hash con sal | RNF-07 |
+| Contraseñas almacenadas utilizando Argon2 | RNF-07 |
 | Comunicaciones en canales cifrados | RNF-08 |
 | Política de contraseña (8 chars, mayúscula, minúscula, dígito) | RN-09 |
-| Tokens de acceso con expiración máxima de 24 horas | RNF-09 |
+| Tokens de acceso (15m) y Refresh Tokens (7d) con expiración | RNF-09 |
 | No almacenamiento de datos completos de tarjeta | RNF-10 |
 | Registro de auditoría de operaciones críticas | RNF-17 |
 | Confirmación explícita antes de acciones irreversibles | RN-01 |

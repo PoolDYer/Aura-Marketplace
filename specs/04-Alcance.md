@@ -1,8 +1,8 @@
-# Alcance del Sistema — Marketplace Inteligente Asistido por IA
+# Alcance del Sistema — Aura Marketplace
 
 ## 1. Propósito del Documento
 
-Este documento delimita con precisión qué funcionalidades, capacidades e integraciones comprende el Marketplace Inteligente en su versión inicial, y cuáles quedan explícitamente fuera del alcance. Establecer estos límites es fundamental para controlar el alcance del proyecto, gestionar las expectativas de las partes interesadas y orientar la especificación de requisitos.
+Este documento delimita con precisión qué funcionalidades, capacidades e integraciones comprende Aura Marketplace en su versión actual, y cuáles quedan explícitamente fuera del alcance. Establecer estos límites es fundamental para controlar el alcance del proyecto, gestionar las expectativas de las partes interesadas y orientar la especificación de requisitos.
 
 ---
 
@@ -18,7 +18,7 @@ Este documento delimita con precisión qué funcionalidades, capacidades e integ
 ### 2.2 Agente Inteligente
 
 - Interpretación de instrucciones en lenguaje natural mediante texto.
-- Interpretación de instrucciones en lenguaje natural mediante voz, con apoyo de servicios externos STT y TTS.
+- Interpretación de instrucciones en lenguaje natural mediante voz, con apoyo de la API de Google Gemini (Gemini Pro y Gemini Speech-To-Text).
 - Reconocimiento de intenciones de: búsqueda, filtrado, ordenamiento, comparación, gestión de carrito y compra.
 - Extracción de entidades y restricciones de las instrucciones del usuario.
 - Mantenimiento del Contexto de Sesión durante la interacción activa.
@@ -45,7 +45,7 @@ Este documento delimita con precisión qué funcionalidades, capacidades e integ
 - Agregado de productos al Carrito mediante instrucción al Agente Inteligente o selección directa.
 - Modificación de cantidades y eliminación de productos del Carrito.
 - Verificación de disponibilidad de stock antes del pago.
-- Procesamiento del pago mediante la Pasarela de Pago externa.
+- Procesamiento del pago mediante la Pasarela de Pago de Mercado Pago.
 - Registro de la Orden y generación de número de confirmación único.
 - Actualización automática del stock de productos tras la confirmación de compra.
 
@@ -67,9 +67,27 @@ Este documento delimita con precisión qué funcionalidades, capacidades e integ
 
 - Notificaciones de nuevas órdenes a Compradores y Vendedores.
 - Notificaciones de cambio de estado de Orden a Compradores.
+- Envío de correos electrónicos transaccionales (verificación de correo, restablecimiento de contraseña) utilizando la integración real de Resend.
 - Configuración de preferencias de notificación por usuario.
 
-### 2.9 Accesibilidad
+### 2.9 Funcionalidades Complementarias
+
+- **Sistema de Favoritos**: Los Compradores pueden marcar Publicaciones como favoritas para acceso rápido posterior.
+- **Sistema de Reseñas y Valoraciones**: Los Compradores pueden calificar y comentar productos después de completar una Orden.
+- **Sistema de Promociones**: Los Vendedores pueden crear descuentos temporales con porcentaje de descuento y vigencia definida.
+- **Sistema de Cupones**: Los Administradores pueden crear códigos promocionales con descuentos (porcentuales o de monto fijo) aplicables al total de órdenes.
+- **Tokens de Autenticación**: Sistema dual de Access Token (15 minutos) y Refresh Token (7 días) para mayor seguridad.
+- **Lista de Tokens Revocados**: Gestión de tokens invalidados explícitamente para logout seguro y manejo de compromisos de seguridad.
+
+### 2.10 Infraestructura de Soporte
+
+- **Sistema de Caché**: Caching del lado del cliente mediante TanStack Query y caché en memoria del backend para consultas frecuentes.
+- **Almacenamiento de Imágenes**: Integración con Cloudinary para gestión y entrega optimizada de imágenes de Publicaciones.
+- **Procesamiento de Pagos**: Integración específica con Mercado Pago como pasarela de pago.
+- **Procesamiento de Lenguaje Natural**: Integración con Gemini AI para interpretación de instrucciones del Agente.
+- **Auditoría Completa**: Sistema de registro inmutable de eventos críticos del sistema.
+
+### 2.11 Accesibilidad
 
 - Cumplimiento del nivel AA de las Pautas de Accesibilidad para el Contenido Web WCAG 2.1.
 - Compatibilidad con lectores de pantalla para todos los elementos interactivos.
@@ -83,18 +101,17 @@ Los siguientes elementos quedan explícitamente excluidos de la versión inicial
 
 ### 3.1 Funcionalidades Diferidas
 
-| Elemento | Justificación |
-|---|---|
-| Recomendaciones proactivas sin instrucción del usuario | Requiere análisis de comportamiento e historial; se contempla en versiones futuras. |
-| Aprendizaje continuo del Agente basado en historial de usuario | Implica modelos de personalización que exceden el alcance inicial. |
-| Gestión de devoluciones y disputas post-venta | Proceso de negocio con alta complejidad regulatoria; se abordará por separado. |
-| Seguimiento de envíos en tiempo real mediante integración con logística | Depende de integraciones con transportistas que no forman parte del sistema. |
-| Marketplace multidivisa | Requiere lógica de conversión y cumplimiento regulatorio por país. |
-| Marketplace multiidioma | Requiere internacionalización y localización del contenido. |
-| Aplicación móvil nativa | Constituye un proyecto separado con su propia especificación. |
-| Chat entre Comprador y Vendedor | No corresponde al modelo de interacción del Marketplace inicial. |
-| Sistema de valoraciones y reseñas de usuarios | Se abordará como extensión funcional en una versión posterior. |
-| Suscripciones y planes de membresía | No contemplado en el modelo de negocio inicial. |
+| Elemento | Justificación | Estado Actual |
+|---|---|---|
+| Recomendaciones proactivas sin instrucción del usuario | Requiere análisis de comportamiento e historial; se contempla en versiones futuras. | Pendiente |
+| Aprendizaje continuo del Agente basado en historial de usuario | Implica modelos de personalización que exceden el alcance inicial. | Pendiente |
+| Gestión de devoluciones y disputas post-venta | Proceso de negocio con alta complejidad regulatoria; se abordará por separado. | Pendiente |
+| Seguimiento de envíos en tiempo real mediante integración con logística | Depende de integraciones con transportistas que no forman parte del sistema. | Pendiente |
+| Marketplace multidivisa | Requiere lógica de conversión y cumplimiento regulatorio por país. | Pendiente |
+| Marketplace multiidioma | Requiere internacionalización y localización del contenido. | Pendiente |
+| Aplicación móvil nativa | Constituye un proyecto separado con su propia especificación. | Pendiente |
+| Chat entre Comprador y Vendedor | No corresponde al modelo de interacción del Marketplace inicial. | Pendiente |
+| Suscripciones y planes de membresía | No contemplado en el modelo de negocio inicial. | Pendiente |
 
 ---
 

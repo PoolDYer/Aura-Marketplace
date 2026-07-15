@@ -41,6 +41,23 @@ const refreshAccessToken = async () => {
   if (!refreshRequest) {
     refreshRequest = (async () => {
       const authStore = useAuthStore.getState();
+
+      const currentToken = authStore.accessToken;
+      if (currentToken) {
+        try {
+          const payloadStr = currentToken.split('.')[1];
+          if (payloadStr) {
+            const payload = JSON.parse(window.atob(payloadStr.replace(/-/g, '+').replace(/_/g, '/')));
+            if (!payload.iss || !payload.iss.includes('neonauth')) {
+              // Local token, return as-is
+              return currentToken;
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
       const accessToken = authStore.user
         ? await getCurrentNeonToken()
         : (await syncNeonSession()).accessToken;

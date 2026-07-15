@@ -1,4 +1,4 @@
-# Registro de Decisiones Arquitectónicas — Marketplace Inteligente Asistido por IA
+# Registro de Decisiones Arquitectónicas — Aura Marketplace
 
 ## Introducción
 
@@ -310,7 +310,7 @@ Cada módulo documentado en `/design/03-ModulosSistema.md` especifica qué contr
 
 ### Contexto
 
-El sistema depende de cinco categorías de servicios externos (procesamiento de lenguaje natural, conversión de voz a texto, conversión de texto a voz, pasarela de pago, notificaciones). Los servicios externos son inherentemente poco fiables. Si alguno falla, la pregunta es si el sistema completo debe fallar o continuar operando en capacidad reducida.
+El sistema depende de servicios externos (procesamiento de lenguaje natural, conversión de voz a texto, pasarela de pago, notificaciones) y de capacidades nativas del cliente para la síntesis de voz. Los servicios externos son inherentemente poco fiables. Si alguno falla, la pregunta es si el sistema completo debe fallar o continuar operando en capacidad reducida.
 
 ### Alternativas evaluadas
 
@@ -320,7 +320,7 @@ El sistema depende de cinco categorías de servicios externos (procesamiento de 
 
 ### Decisión tomada
 
-Cada integración externa queda encapsulada en un adaptador dedicado en L-05. Cada adaptador tiene un modo de degradación explícitamente definido (derivado de RNF-06): servicio de lenguaje natural no disponible → modo de navegación manual; conversión de voz a texto no disponible → modo solo texto; conversión de texto a voz no disponible → solo respuesta de texto; pasarela de pago no disponible → carrito preservado, compra suspendida; servicio de notificaciones no disponible → cola de reintento. El dominio no depende de ningún proveedor externo específico.
+Cada integración externa queda encapsulada en un adaptador dedicado en L-05. Cada adaptador tiene un modo de degradación explícitamente definido (derivado de RNF-06): servicio de lenguaje natural no disponible → modo de navegación manual; conversión de voz a texto no disponible → modo solo texto; síntesis de voz en el navegador mediante API Web Speech no disponible → solo respuesta de texto; pasarela de pago no disponible → carrito preservado, compra suspendida; servicio de notificaciones no disponible → cola de reintento. El dominio no depende de ningún proveedor externo específico.
 
 ### Justificación
 
@@ -460,20 +460,20 @@ Los cinco adaptadores y sus modos de degradación están especificados en `/desi
 ## ADR-013: Interfaces de Abstracción para Proveedores de Inteligencia Artificial
 
 - **ID:** ADR-013
-- **Título:** Definición de interfaces abstractas para todos los proveedores de IA
+- **Título:** Definición de interfaces abstractas para proveedores de IA en el backend
 - **Estado:** Aceptada
 - **Fecha de registro:** Fase 2 — Actualización tecnológica
 
-**Contexto:** El Agente Inteligente depende de servicios externos de NLP, STT y TTS. Si la lógica de negocio se acopla a un proveedor específico, cualquier cambio de proveedor (costo, capacidades, disponibilidad) requeriría modificar L-03 o L-04, violando ADR-008.
+**Contexto:** El Agente Inteligente depende de servicios de NLP y STT en el backend. Si la lógica de negocio se acopla a un proveedor específico, cualquier cambio de proveedor (costo, capacidades, disponibilidad) requeriría modificar L-03 o L-04, violando ADR-008. La síntesis de voz (TTS) se delega directamente al cliente para reducir costos y latencia.
 
 **Alternativas evaluadas:**
 1. Llamadas directas al proveedor desde L-02/L-03 — acoplamiento directo, rompe ADR-008
 2. Abstracción solo a nivel de servicio — insuficiente para garantizar independencia del proveedor
-3. Interfaces explícitas en L-05: LanguageModelProvider, SpeechToTextProvider, TextToSpeechProvider
+3. Interfaces explícitas en L-05: LanguageModelProvider, SpeechToTextProvider. La síntesis de voz (TTS) se ejecuta de manera nativa en el navegador del cliente mediante la API Web Speech.
 
-**Decisión tomada:** Tres interfaces abstractas en L-05 con contratos de entrada/salida explícitos. Ningún nombre de proveedor puede aparecer en L-02, L-03 o L-04. Todo acceso a IA pasa exclusivamente por estas interfaces.
+**Decisión tomada:** Dos interfaces abstractas en L-05 para NLP y STT con contratos de entrada/salida explícitos. Ningún nombre de proveedor puede aparecer en L-02, L-03 o L-04. Todo acceso a IA pasa exclusivamente por estas interfaces en el backend, mientras que la síntesis de voz se implementa localmente en el frontend.
 
-**Justificación:** Extiende ADR-008 al dominio de IA. Permite adoptar o cambiar cualquier proveedor (LLM, STT, TTS) sin tocar la lógica de negocio. Satisface el principio de independencia del proveedor de `11-ArquitecturaTecnologica.md`.
+**Justificación:** Extiende ADR-008 al dominio de IA. Permite adoptar o cambiar cualquier proveedor (LLM, STT) sin tocar la lógica de negocio. Satisface el principio de independencia del proveedor de `11-ArquitecturaTecnologica.md`.
 
 **Consecuencias:**
 - Ventajas: libertad de elegir el mejor proveedor para cada necesidad; zero cambios en L-04 al cambiar de proveedor
@@ -532,10 +532,10 @@ Los cinco adaptadores y sus modos de degradación están especificados en `/desi
 
 ---
 
-## ADR-016: Cloudflare R2 para Almacenamiento de Imágenes de Publicaciones
+## ADR-016: Cloudinary para Almacenamiento de Imágenes de Publicaciones
 
 - **ID:** ADR-016
-- **Título:** Cloudflare R2 como almacenamiento de objetos para imágenes de Publicaciones
+- **Título:** Cloudinary como almacenamiento de objetos para imágenes de Publicaciones
 - **Estado:** Aceptada
 - **Fecha de registro:** Fase 2 — Actualización tecnológica
 
@@ -543,17 +543,17 @@ Los cinco adaptadores y sus modos de degradación están especificados en `/desi
 
 **Alternativas evaluadas:**
 1. AWS S3 — costo de egress alto; mayor complejidad de configuración
-2. Supabase Storage — acoplamiento al stack de Supabase
-3. Cloudflare R2 — compatible con API S3, sin costo de egress, colocado junto a Cloudflare Pages
+2. Cloudflare R2 — sin costos de egress, pero requiere desarrollo adicional de pipelines de optimización
+3. Cloudinary — servicio administrado para optimización y almacenamiento de imágenes con SDK integrado para NestJS.
 
-**Decisión tomada:** Cloudflare R2 para imágenes de Publicaciones. El backend genera URLs pre-firmadas para uploads directos desde el cliente. R2 es compatible con la API S3 — el adaptador de almacenamiento en L-05 usa el protocolo S3.
+**Decisión tomada:** Cloudinary para almacenar y servir las imágenes de las Publicaciones. El backend interactúa directamente con la API de Cloudinary a través de su SDK para gestionar la subida y generación de URLs de forma segura.
 
-**Justificación:** R2 elimina el costo de egress (crítico para un marketplace con imágenes). La colocación junto a Cloudflare Pages reduce la latencia de entrega de imágenes al usuario. La compatibilidad S3 permite reemplazar el proveedor de almacenamiento cambiando solo el adaptador L-05.
+**Justificación:** Cloudinary provee optimización automática de imágenes (compresión, redimensionamiento), entrega rápida vía CDN global y un SDK de Node.js maduro que simplifica el desarrollo de infraestructura en L-05. La abstracción a través de la interfaz `IStorageProvider` permite reemplazar el proveedor de almacenamiento cambiando solo el adaptador L-05.
 
 **Consecuencias:**
-- Ventajas: sin costo de egress; compatibilidad S3; uploads directos sin pasar por el backend
-- Desventajas/Compromisos: las URLs pre-firmadas tienen expiración — el flujo de upload debe gestionarlo el backend
-- Impactos: el módulo de Productos en L-03 genera URLs pre-firmadas; las imágenes se referencian como URLs públicas en el schema de Prisma
+- Ventajas: Optimización automática y entrega rápida; SDK maduro y fácil integración.
+- Desventajas/Compromisos: Dependencia de un servicio administrado (mitigado mediante la interfaz abstracta `IStorageProvider` / `StorageProvider`).
+- Impactos: El backend utiliza el SDK de Cloudinary para subir las imágenes directamente.
 
 ---
 
@@ -568,4 +568,4 @@ Los cinco adaptadores y sus modos de degradación están especificados en `/desi
 | ADR-013 | Interfaces de abstracción IA | Aceptada | RF-01, RF-02, ADR-008 |
 | ADR-014 | Jest + Supertest + Playwright | Aceptada | OBJ-01 a OBJ-06 |
 | ADR-015 | Cloudflare Pages + Render + Neon | Aceptada | RNF-05, RNF-08, RNF-11 |
-| ADR-016 | Cloudflare R2 para imágenes | Aceptada | RN-05, RF-09 |
+| ADR-016 | Cloudinary para imágenes | Aceptada | RN-05, RF-09 |

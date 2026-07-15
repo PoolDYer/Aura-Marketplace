@@ -1,8 +1,10 @@
-# Reglas de Negocio — Marketplace Inteligente Asistido por IA
+# Reglas de Negocio — Aura Marketplace
 
 ## 1. Introducción
 
-Este documento cataloga todas las reglas de negocio que rigen el comportamiento del Marketplace Inteligente. Cada regla tiene un identificador único, una descripción precisa, su justificación de negocio, el impacto en el sistema y su prioridad. Las reglas de negocio expresan restricciones y políticas del dominio que el sistema debe respetar independientemente del flujo técnico.
+Este documento cataloga todas las reglas de negocio que rigen el comportamiento de Aura Marketplace. Cada regla tiene un identificador único, una descripción precisa, su justificación de negocio, el impacto en el sistema y su prioridad. Las reglas de negocio expresan restricciones y políticas del dominio que el sistema debe respetar independientemente del flujo técnico.
+
+*Última revisión de alineación con producción: 14 de Julio de 2026*
 
 ---
 

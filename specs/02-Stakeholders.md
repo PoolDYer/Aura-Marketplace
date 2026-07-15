@@ -1,8 +1,8 @@
-# Partes Interesadas — Marketplace Inteligente Asistido por IA
+# Partes Interesadas — Aura Marketplace
 
 ## 1. Introducción
 
-Este documento identifica y describe a todas las partes interesadas (**stakeholders**) del Marketplace Inteligente: actores internos que interactúan directamente con el sistema y actores externos que proveen servicios o tienen interés en los resultados del sistema. Para cada parte interesada se definen sus objetivos, necesidades, expectativas y nivel de influencia.
+Este documento identifica y describe a todas las partes interesadas (**stakeholders**) de Aura Marketplace: actores internos que interactúan directamente con el sistema y actores externos que proveen servicios o tienen interés en los resultados del sistema. Para cada parte interesada se definen sus objetivos, necesidades, expectativas y nivel de influencia.
 
 ---
 
@@ -101,16 +101,16 @@ Este documento identifica y describe a todas las partes interesadas (**stakehold
 
 ---
 
-### STK-08 — Proveedor del Servicio TTS (Text-to-Speech)
+### STK-08 — API Web Speech (Text-to-Speech nativo)
 
 | Campo | Descripción |
 |---|---|
-| **Definición** | Servicio externo que convierte las respuestas del Agente Inteligente en audio de voz para ser reproducido al usuario. |
-| **Objetivos** | Generar audio claro, natural y con baja latencia. |
-| **Necesidades** | Recibir el texto a sintetizar en el idioma correcto y con las indicaciones de énfasis necesarias. |
-| **Expectativas** | Que el sistema solo solicite síntesis de voz cuando la modalidad de voz esté activa. |
-| **Nivel de influencia** | Bajo — Su fallo afecta la respuesta auditiva, pero no bloquea el flujo funcional en modo texto. |
-| **Preocupaciones** | Ninguna de impacto crítico en la especificación de requisitos. |
+| **Definición** | API nativa del navegador del cliente que convierte las respuestas del Agente Inteligente en audio de voz para ser reproducido al usuario. |
+| **Objetivos** | Generar audio claro y natural del lado del cliente sin latencia de red. |
+| **Necesidades** | Que el navegador soporte la síntesis de voz en español (`window.speechSynthesis`). |
+| **Expectativas** | Que el sistema active la reproducción solo cuando la modalidad de voz esté encendida. |
+| **Nivel de influencia** | Bajo — Su fallo o falta de soporte solo afecta la respuesta auditiva, pero no bloquea el flujo conversacional. |
+| **Preocupaciones** | Incompatibilidad de voces en navegadores móviles o antiguos. |
 
 ---
 

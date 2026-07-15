@@ -1,11 +1,11 @@
 # 05 — Diseño de Base de Datos: Modelo Conceptual de Datos
-# Intelligent Marketplace
+# Aura Marketplace
 
 ---
 
 ## 1. Objetivo del Modelo de Datos
 
-El modelo de datos del Intelligent Marketplace tiene como propósito representar, de forma estructurada y coherente, toda la información que el sistema necesita gestionar para operar correctamente. Este modelo define las entidades del dominio, sus atributos esenciales, las relaciones entre ellas y las restricciones que garantizan la integridad del negocio. Su diseño refleja los requisitos funcionales y no funcionales establecidos en la especificación del sistema, asegurando que la información sea almacenada de manera segura, trazable, escalable y consistente a lo largo del ciclo de vida de cada transacción, interacción con el agente de inteligencia artificial y operación de gestión de usuarios, publicaciones e inventario.
+El modelo de datos de Aura Marketplace tiene como propósito representar, de forma estructurada y coherente, toda la información que el sistema necesita gestionar para operar correctamente. Este modelo define las entidades del dominio, sus atributos esenciales, las relaciones entre ellas y las restricciones que garantizan la integridad del negocio. Su diseño refleja los requisitos funcionales y no funcionales establecidos en la especificación del sistema, asegurando que la información sea almacenada de manera segura, trazable, escalable y consistente a lo largo del ciclo de vida de cada transacción, interacción con el agente de inteligencia artificial y operación de gestión de usuarios, publicaciones e inventario.
 
 ---
 
@@ -37,7 +37,7 @@ El modelo de datos del Intelligent Marketplace tiene como propósito representar
 
 **Responsabilidad**: Centralizar la identidad digital del actor humano, sus credenciales de acceso, su estado dentro del sistema y sus asociaciones con las demás entidades del dominio.
 
-**Atributos esenciales**: identificador único, nombre completo, correo electrónico (único), contraseña en formato hash, estado, fecha de registro, fecha de última modificación.
+**Atributos esenciales**: identificador único, nombre completo, correo electrónico (único), contraseña en formato hash (Argon2), estado, fecha de registro, fecha de última modificación.
 
 **Relaciones**:
 - Se le asignan uno o más Roles (N:M con Rol).
@@ -59,7 +59,7 @@ El modelo de datos del Intelligent Marketplace tiene como propósito representar
 
 **Restricciones**:
 - El correo electrónico debe ser único en todo el sistema.
-- La contraseña nunca se almacena en texto plano (RNF-07).
+- La contraseña se almacena de forma segura utilizando hashes derivados con Argon2 (RNF-07).
 - El estado puede ser: `pendiente`, `activo`, `suspendido`.
 - Un usuario suspendido no puede operar, pero sus registros históricos se conservan.
 
@@ -648,9 +648,9 @@ Las siguientes reglas son restricciones de integridad derivadas directamente de 
 
 **RD-07** — Bajo ninguna circunstancia se almacenará número de tarjeta de crédito/débito, CVV, fecha de vencimiento de tarjeta ni ningún dato bancario completo en ninguna entidad del sistema. Solo se guarda el token o referencia de transacción proporcionado por el procesador de pagos externo (RNF-10).
 
-**RD-08** — Las contraseñas de Usuario nunca se almacenan en texto plano. Siempre se aplica un algoritmo de hash con sal antes del almacenamiento. La contraseña original nunca puede ser recuperada desde el sistema (RNF-07).
+**RD-08** — Las contraseñas de Usuario nunca se almacenan en texto plano. Siempre se utiliza el algoritmo Argon2 para cifrar y derivar hashes seguros antes del almacenamiento (RNF-07).
 
-**RD-09** — Los tokens de autenticación generados por el sistema tienen una vigencia máxima de 24 horas. Transcurrido ese tiempo, el token expira automáticamente y el usuario debe autenticarse nuevamente (RNF-09).
+**RD-09** — Los tokens de acceso (Access Tokens) locales expiran después de 15 minutos en producción, y los Refresh Tokens expiran después de 7 días (RNF-09).
 
 **RD-10** — Los registros de la entidad Auditoria son inmutables. No existe operación de modificación ni eliminación sobre esta entidad. Solo se permiten operaciones de inserción y consulta (RNF-17).
 
@@ -684,7 +684,7 @@ El modelo debe garantizar que las búsquedas de publicaciones en el catálogo re
 
 ### 6.3 Seguridad
 
-Los datos de alta sensibilidad están aislados y protegidos por diseño: las contraseñas se almacenan únicamente en formato hash con sal (RNF-07), los datos de pago se reducen a tokens externos sin información bancaria directa (RNF-10), y los tokens de sesión tienen expiración automática máxima de 24 horas (RNF-09). El acceso a la entidad Auditoria está restringido a roles administrativos con permisos específicos, garantizando que los logs no sean accesibles por actores no autorizados. Las entidades que contienen información personal (Usuario, Direccion, PreferenciasUsuario) deben estar sujetas a controles de acceso estrictos que prevengan la exposición no autorizada de datos.
+Los datos de alta sensibilidad están aislados y protegidos por diseño: las contraseñas se almacenan de forma segura utilizando hashes derivados con Argon2 (RNF-07), los datos de pago se reducen a tokens externos sin información bancaria directa (RNF-10), y los tokens de sesión tienen expiración automática de 15 minutos para tokens de acceso y 7 días para tokens de actualización (RNF-09). El acceso a la entidad Auditoria está restringido a roles administrativos con permisos específicos, garantizando que los logs no sean accesibles por actores no autorizados. Las entidades que contienen información personal (Usuario, Direccion, PreferenciasUsuario) deben estar sujetas a controles de acceso estrictos que prevengan la exposición no autorizada de datos.
 
 ### 6.4 Auditoría
 

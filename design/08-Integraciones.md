@@ -1,4 +1,4 @@
-# Diseño de Integraciones Externas — Marketplace Inteligente Asistido por IA
+# Diseño de Integraciones Externas — Aura Marketplace
 
 ## 1. Objetivo
 
@@ -24,11 +24,11 @@ Definir cómo el sistema se conecta con los servicios externos de los que depend
 
 | Integración | Dirección | Criticidad | Modo de Degradación |
 |---|---|---|---|
-| Proveedor de NLP (Procesamiento de Lenguaje Natural) | Saliente | Crítica | El Agente informa al usuario que la interpretación de lenguaje natural no está disponible. El Marketplace continúa operable mediante navegación manual. |
-| Servicio STT (Voz a Texto) | Saliente | Alta | La modalidad de voz queda suspendida. La entrada por texto continúa funcionando con normalidad. |
-| Servicio TTS (Texto a Voz) | Saliente | Media | Las respuestas del Agente se presentan únicamente en texto. No hay impacto funcional en ningún flujo transaccional. |
-| Pasarela de Pago | Saliente | Crítica | El flujo de compra queda suspendido. El carrito del Comprador se preserva intacto para reintento posterior. |
-| Servicio de Notificaciones | Saliente | Media | Las notificaciones se encolan para reintento con retardo. Los flujos transaccionales no son bloqueados por fallos en la entrega de notificaciones. |
+| Proveedor de NLP (Gemini AI) | Saliente | Crítica | El Agente informa al usuario que la interpretación de lenguaje natural no está disponible. El Marketplace continúa operable mediante navegación manual. |
+| Servicio STT (Gemini AI) | Saliente | Alta | La modalidad de voz queda suspendida. La entrada por texto continúa funcionando con normalidad. |
+| API Web Speech (Texto a Voz) | Cliente (navegador) | Media | Las respuestas del Agente se sintetizan en el cliente. Si la API no está disponible, se presentan en texto sin impacto funcional. |
+| Pasarela de Pago (Mercado Pago) | Saliente | Crítica | El flujo de compra queda suspendido. El carrito del Comprador se preserva intacto para reintento posterior. |
+| Servicio de Notificaciones (Resend) | Saliente | Media | Las notificaciones se encolan para reintento con retardo. Los flujos transaccionales no son bloqueados por fallos en la entrega de notificaciones. |
 
 ---
 
@@ -78,23 +78,21 @@ Definir cómo el sistema se conecta con los servicios externos de los que depend
 
 ---
 
-### 4.3 Servicio TTS (Text-to-Speech)
+### 4.3 API de Síntesis de Voz (Web Speech API)
 
-**Objetivo:** Sintetizar las respuestas del Agente Inteligente en audio para reproducción al Comprador en el modo de voz.
+**Objetivo:** Sintetizar las respuestas de texto del Agente Inteligente en audio para reproducción al Comprador en el navegador en el modo de voz.
 
-**Responsabilidad del adaptador:** Recibir el texto de la respuesta del Agente, enviarlo al servicio TTS con la configuración de voz e idioma, y retornar el audio sintetizado para reproducción.
+**Responsabilidad:** Recibir el texto de la respuesta del Agente en el cliente y utilizar la API nativa de síntesis de voz (window.speechSynthesis) con el idioma configurado (es-ES) para reproducir el audio.
 
-**Datos enviados al servicio:** Texto de la respuesta del Agente. Configuración de voz e idioma (español). El texto enviado no incluye datos sensibles del usuario ni información de pago.
+**Datos utilizados:** Texto de la respuesta en lenguaje natural. No hay envío de datos sensibles ni procesamiento en servidores externos para esta función.
 
-**Datos recibidos del servicio:** Archivo o flujo de audio con la respuesta sintetizada.
+**Dependencias:** Módulo frontend (agentStore.ts).
 
-**Dependencias:** Módulo Agente Inteligente (consumidor).
+**Errores posibles:** API no compatible con el navegador del usuario o silenciada por el sistema operativo.
 
-**Errores posibles:** Tiempo de espera superado. Texto de longitud excesiva para síntesis. Idioma o configuración de voz no soportada.
+**Restricciones de seguridad:** Al ser una API nativa del navegador del cliente, los datos no viajan a servidores de terceros para la síntesis de voz, protegiendo la privacidad del usuario.
 
-**Restricciones de seguridad:** Comunicación por canal cifrado (RNF-08). El texto enviado al servicio TTS no contiene datos personales del usuario ni referencias a pagos.
-
-**Degradación:** Si el servicio no está disponible, la respuesta del Agente se presenta únicamente en texto. El Agente informa brevemente al usuario que la respuesta de voz no está disponible. Ningún flujo funcional es interrumpido (RNF-06).
+**Degradación:** Si la API no está disponible o falla, la respuesta se presenta únicamente en texto. No hay impacto funcional en ningún flujo transaccional (RNF-06).
 
 ---
 
@@ -227,12 +225,12 @@ Cada integración externa se implementa mediante un adaptador en L-05 que cumple
 
 | Integración | Interfaz de adaptador | Tecnología del adaptador L-05 | Proveedor |
 |---|---|---|---|
-| Procesamiento de Lenguaje Natural | LanguageModelProvider | Módulo NestJS en L-05 que implementa la interfaz | Cualquiera compatible con el contrato definido en `11-ArquitecturaTecnologica.md` sec. 5.1 |
-| Transcripción de voz (STT) | SpeechToTextProvider | Módulo NestJS en L-05 que implementa la interfaz | Cualquiera compatible con el contrato definido en `11-ArquitecturaTecnologica.md` sec. 5.2 |
-| Síntesis de voz (TTS) | TextToSpeechProvider | Módulo NestJS en L-05 que implementa la interfaz | Cualquiera compatible con el contrato definido en `11-ArquitecturaTecnologica.md` sec. 5.3 |
-| Pasarela de Pago | PaymentGatewayProvider | Módulo NestJS en L-05 | Pasarela externa a elegir en la implementación |
-| Notificaciones | NotificationProvider | Módulo NestJS en L-05 | Servicio externo a elegir en la implementación |
-| Almacenamiento de imágenes | StorageProvider | Cloudflare R2 (API compatible S3) | Cloudflare R2 |
+| Procesamiento de Lenguaje Natural | LanguageModelProvider | Módulo NestJS en L-05 que implementa la interfaz | Gemini AI |
+| Transcripción de voz (STT) | SpeechToTextProvider | Módulo NestJS en L-05 que implementa la interfaz | Gemini AI |
+| Síntesis de voz (TTS) | N/A (Frontend Nativo) | API nativa Web Speech (speechSynthesis) en el cliente | Nativo del navegador del cliente |
+| Pasarela de Pago | MercadoPagoService | Módulo NestJS en L-05 | Mercado Pago |
+| Notificaciones | ResendMailService | Módulo NestJS en L-05 | Resend |
+| Almacenamiento de imágenes | CloudinaryService | Módulo NestJS en L-05 | Cloudinary |
 
 ### 8.2 Regla de Sustitución de Proveedores
 

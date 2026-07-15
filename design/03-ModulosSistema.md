@@ -1,4 +1,4 @@
-# Módulos del Sistema — Marketplace Inteligente Asistido por IA
+# Módulos del Sistema — Aura Marketplace
 
 ## Introducción
 
@@ -26,7 +26,7 @@ Este documento describe los veinte módulos funcionales del sistema. Cada módul
 
 **Eventos que produce:** UsuarioRegistrado, SesionIniciada, SesionCerrada.
 
-**Restricciones:** Las contraseñas nunca se almacenan ni transmiten en texto plano. Los tokens expiran en máximo 24 horas (RNF-09).
+**Restricciones:** Las contraseñas nunca se almacenan ni transmiten en texto plano. Los Access Tokens expiran en 15 minutos y los Refresh Tokens en 7 días (RNF-09).
 
 **Interfaces conceptuales que expone:** Registrar usuario, autenticar usuario, cerrar sesión, verificar validez de token, obtener rol del usuario autenticado.
 
@@ -471,21 +471,21 @@ Este documento describe los veinte módulos funcionales del sistema. Cada módul
 - Resolver referencias contextuales de instrucciones de seguimiento.
 - Solicitar confirmación explícita antes de acciones irreversibles como la compra (RN-01).
 - Coordinar con los módulos de Búsquedas, Carrito y Pedidos para ejecutar las acciones identificadas.
-- Coordinar con TTS para sintetizar las respuestas en audio cuando el modo de voz está activo.
+- Coordinar con la API nativa Web Speech (window.speechSynthesis) en el frontend para sintetizar las respuestas en audio cuando el modo de voz está activo.
 - Informar al Comprador el resultado de cada acción ejecutada (RNF-13).
-- Operar en modo degradado cuando servicios externos (NLP, STT, TTS) no están disponibles (RNF-06).
+- Operar en modo degradado cuando servicios externos (NLP, STT) no están disponibles (RNF-06).
 - Solicitar aclaración al Comprador cuando la intención no puede determinarse (RF-01, E1).
 
 **Entradas:** Texto escrito del Comprador, transcripción de audio con nivel de confianza, respuestas de los módulos funcionales.
 
 **Salidas:** Resultado de la acción ejecutada en texto y opcionalmente en audio, solicitud de aclaración, resumen de Orden para confirmación, mensajes de error en lenguaje natural.
 
-**Dependencias:** Módulo de Búsquedas, Módulo de Carrito, Módulo de Pedidos, Módulo de Conversaciones, Módulo de Autenticación, adaptadores externos de NLP, STT y TTS.
+**Dependencias:** Módulo de Búsquedas, Módulo de Carrito, Módulo de Pedidos, Módulo de Conversaciones, Módulo de Autenticación, adaptador externo de NLP (Gemini), STT (Gemini) y API de síntesis de voz en el navegador.
 
 **Eventos que produce:** InstruccionRecibida, IntencionIdentificada, AccionEjecutada.
 
 **Restricciones:**
-- No ejecuta acciones irreversibles sin confirmación explícita (RN-01).
+- No ejecuta acciones irreversibles sin confirmación explícitamente (RN-01).
 - No procesa transcripciones STT por debajo del umbral de confianza (RN-11).
 - El Contexto de Sesión expira a los 30 minutos de inactividad (RN-14).
 - La comparación de productos se limita a entre 2 y 5 productos (RN-13).
@@ -500,4 +500,4 @@ Este documento describe los veinte módulos funcionales del sistema. Cada módul
 - Con el Módulo de Pedidos para iniciar el proceso de compra y presentar el resumen de Orden.
 - Con el Módulo de Conversaciones para registrar el historial y resolver referencias contextuales.
 - Con los adaptadores de NLP para la interpretación de lenguaje natural.
-- Con los adaptadores de STT y TTS para la modalidad de voz.
+- Con el adaptador de STT en el backend y la síntesis en el frontend para la modalidad de voz.

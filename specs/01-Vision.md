@@ -1,8 +1,8 @@
-# Visión del Producto — Marketplace Inteligente Asistido por IA
+# Visión del Producto — Aura Marketplace
 
 ## 1. Descripción General
 
-El **Marketplace Inteligente** es una plataforma de comercio electrónico de nueva generación que integra un **Agente Inteligente** capaz de comprender instrucciones en lenguaje natural —mediante texto y voz— y de ejecutar acciones funcionales directamente dentro del sistema. El Agente no opera como un asistente conversacional pasivo: es un actor funcional que interpreta la intención del usuario, extrae entidades y restricciones, y lleva a cabo operaciones reales como búsqueda, filtrado, ordenamiento, comparación, gestión de carrito y compra.
+El **Aura Marketplace** es una plataforma de comercio electrónico de nueva generación (monorepo con frontend en React 19 + Zustand y backend en NestJS 10 con Arquitectura Hexagonal) que integra un **Agente Inteligente** conversacional impulsado por Google Gemini. Dicho Agente comprende instrucciones en lenguaje natural (texto y voz) y ejecuta acciones funcionales en tiempo real dentro del sistema en nombre del usuario (ej. buscar productos, comparar, administrar el carrito de compras y automatizar flujos transaccionales).
 
 ---
 
@@ -36,7 +36,7 @@ El avance en el procesamiento de lenguaje natural y los sistemas de reconocimien
 
 ## 4. Propuesta de Valor
 
-| Para | El Marketplace Inteligente ofrece |
+| Para | El Aura Marketplace ofrece |
 |---|---|
 | **Compradores** | Una experiencia de compra fluida mediante instrucciones en lenguaje natural, sin necesidad de aprender la interfaz del sistema. |
 | **Vendedores** | Una plataforma con mayor alcance y conversión gracias a un descubrimiento de productos más eficiente. |
@@ -50,28 +50,28 @@ El avance en el procesamiento de lenguaje natural y los sistemas de reconocimien
 1. **Reducir la fricción** en el proceso de búsqueda y compra eliminando la necesidad de que el usuario navegue manualmente la interfaz.
 2. **Aumentar la accesibilidad** del Marketplace para usuarios con diferentes capacidades y niveles de experiencia digital.
 3. **Incrementar la tasa de conversión** reduciendo los pasos entre la intención de compra y la orden completada.
-4. **Construir una base escalable** de interacción inteligente que pueda evolucionar hacia recomendaciones proactivas y automatización de compras recurrentes.
+4. **Construir una base de persistencia y lógica altamente desacoplada** (Arquitectura Hexagonal) que soporte la escalabilidad y cambios ágiles en integraciones (pagos, IA, etc.).
 
 ---
 
 ## 6. Alcance de la Visión
 
-### 6.1 Dentro del alcance (versión inicial)
+### 6.1 Dentro del alcance (implementado)
 
 - Agente Inteligente con capacidad de interpretar texto y voz para ejecutar acciones funcionales.
 - Módulos de búsqueda, filtrado, ordenamiento, comparación, gestión de carrito y compra.
-- Registro y autenticación de usuarios (Comprador, Vendedor, Administrador).
-- Publicación y gestión de productos por parte del Vendedor.
-- Procesamiento de pagos mediante integración con servicio externo de pasarela de pago.
-- Notificaciones de eventos relevantes a Compradores y Vendedores.
-- Panel de administración para gestión de usuarios, publicaciones y órdenes.
+- Registro y autenticación de usuarios local mediante JWT (Access Token de 15 minutos, Refresh Token de 7 días) y Argon2 para contraseñas.
+- Publicación y gestión de productos por parte del Vendedor (incluyendo stock e inventario reservado).
+- Procesamiento de pagos mediante integración real con la pasarela de Mercado Pago.
+- Notificaciones de correo electrónico a través del servicio de Resend (verificación de cuenta, restablecimiento de contraseña).
+- Panel de administración para gestión de categorías, productos, usuarios y visualización de reportes de auditoría en tiempo real.
 
 ### 6.2 Fuera del alcance (versión inicial)
 
 - Recomendaciones proactivas sin instrucción explícita del usuario.
 - Aprendizaje continuo del agente basado en el historial de compras del usuario.
 - Gestión de devoluciones y disputas post-venta.
-- Funciones de logística y seguimiento de envíos en tiempo real con integraciones externas.
+- Funciones de logística y seguimiento de envíos en tiempo real con integraciones externas de courier.
 - Marketplace multidivisa o multiidioma.
 - Aplicación móvil nativa.
 
@@ -83,7 +83,7 @@ El avance en el procesamiento de lenguaje natural y los sistemas de reconocimien
 |---|---|---|---|---|
 | R-01 | El Agente Inteligente interpreta incorrectamente instrucciones ambiguas, generando acciones no deseadas por el usuario. | Alta | Alto | Diseñar un mecanismo de confirmación para acciones irreversibles (ej. compra). Solicitar aclaración cuando la intención sea ambigua. |
 | R-02 | La latencia del servicio STT impacta negativamente la experiencia de interacción por voz. | Media | Alto | Establecer umbrales máximos de tiempo de respuesta y proveer retroalimentación visual mientras se procesa el audio. |
-| R-03 | Usuarios con acentos o variantes lingüísticas regionales tienen menor precisión en reconocimiento de voz. | Alta | Medio | Documentar como limitación conocida y ofrecer siempre la alternativa de texto. |
+| R-03 | Usuarios con acentos o variantes lingüísticas regionales tienen menor precisión en reconocimiento de voz. | Alta | Medio | Ofrecer siempre la alternativa de entrada de texto e intenciones estructuradas. |
 | R-04 | La Pasarela de Pago externa presenta indisponibilidad, bloqueando el flujo de compra. | Baja | Alto | Definir mensajes de error claros y mantener el Carrito para reintentar la compra posteriormente. |
 | R-05 | Vendedores publican productos con información incompleta o engañosa, degradando la confianza del Comprador. | Media | Medio | Implementar validaciones obligatorias en el proceso de publicación y mecanismos de reporte para el Administrador. |
-| R-06 | El sistema no escala adecuadamente ante picos de demanda simultánea. | Media | Alto | Establecer requisitos no funcionales de rendimiento y escalabilidad desde la fase de especificación. |
+| R-06 | El sistema no escala adecuadamente ante picos de demanda simultánea. | Media | Alto | Arquitectura Serverless sobre Neon DB y caching en frontend mediante TanStack Query para mitigar carga. |

@@ -1,4 +1,4 @@
-# Diseño de Contratos de Comunicación (API) — Marketplace Inteligente Asistido por IA
+# Diseño de Contratos de Comunicación (API) — Aura Marketplace
 
 ## 1. Objetivo
 
@@ -80,7 +80,7 @@ Definir los contratos de comunicación del sistema de forma explícita e indepen
 
 **Datos de salida:** Token de acceso con expiración, rol del usuario autenticado, identificador de sesión.
 
-**Reglas de negocio aplicables:** RN-08 (bloqueo temporal de 15 minutos tras 3 intentos fallidos consecutivos), RNF-09 (token expira en máximo 24 horas o al cerrar sesión).
+**Reglas de negocio aplicables:** RN-08 (bloqueo temporal de 15 minutos tras 3 intentos fallidos consecutivos), RNF-09 (Access Token expira en 15 minutos en producción, y Refresh Token expira en 7 días o al cerrar sesión).
 
 **Validaciones:** Credenciales presentes y con formato válido. Cuenta no bloqueada ni suspendida.
 
@@ -257,7 +257,7 @@ Definir los contratos de comunicación del sistema de forma explícita e indepen
 
 **Datos de entrada:** Texto libre de la instrucción, o audio capturado. Identificador de sesión activa.
 
-**Datos de salida:** Acción ejecutada, resultado en lenguaje natural, estado actualizado del Agente, contexto de sesión actualizado. Para instrucciones de voz: respuesta también en audio si el servicio TTS está disponible.
+**Datos de salida:** Acción ejecutada, resultado en lenguaje natural, estado actualizado del Agente, contexto de sesión actualizado. Para instrucciones de voz: la respuesta de texto es reproducida en audio de forma nativa por el navegador mediante la API Web Speech en el frontend.
 
 **Reglas de negocio aplicables:** RN-01 (confirmación antes de acción irreversible), RN-11 (umbral de confianza STT), RN-14 (expiración de sesión a los 30 minutos de inactividad), RNF-01 (respuesta en máximo 2 segundos).
 
@@ -310,7 +310,7 @@ Definir los contratos de comunicación del sistema de forma explícita e indepen
 **Actor:** Comprador con sesión activa y modo de voz activado.
 **Entrada:** Audio capturado del micrófono del Comprador.
 **Procesamiento:** El audio es enviado al servicio STT, que retorna la transcripción con su nivel de confianza. El Agente verifica que el nivel de confianza supera el umbral configurado (RN-11). Si supera el umbral, la transcripción es procesada exactamente como una instrucción de texto.
-**Salida:** Resultado de la acción en texto. Cuando el servicio TTS está disponible, también se retorna la respuesta sintetizada en audio.
+**Salida:** Resultado de la acción en texto. En el cliente, la respuesta se sintetiza de forma nativa utilizando la API Web Speech (window.speechSynthesis) en el navegador.
 
 ### Interpretación
 
@@ -347,11 +347,11 @@ Definir los contratos de comunicación del sistema de forma explícita e indepen
 | PAYMENT_TIMEOUT | La pasarela no respondió en el tiempo establecido | Fallo de comunicación con la pasarela | Pagos | Reintentar el proceso de pago |
 | ACCOUNT_LOCKED | La cuenta está bloqueada temporalmente (RN-08) | Tres intentos de autenticación fallidos consecutivos | Autenticación | Esperar 15 minutos antes de reintentar |
 | ACCOUNT_SUSPENDED | La cuenta fue suspendida por un Administrador | Incumplimiento de las políticas del Marketplace | Autenticación | Contactar al soporte del Marketplace |
-| TOKEN_EXPIRED | El token de acceso ha expirado (RNF-09) | Han transcurrido más de 24 horas desde la emisión | Autenticación | Iniciar sesión nuevamente |
+| TOKEN_EXPIRED | El token de acceso ha expirado (RNF-09) | Ha expirado el tiempo de validez del token (15 minutos para Access Token) | Autenticación | Iniciar sesión nuevamente o refrescar token |
 | SESSION_EXPIRED | La sesión del Agente expiró por inactividad (RN-14) | Han transcurrido 30 minutos sin actividad del Comprador | Agente Inteligente | Iniciar una nueva conversación |
 | AGENT_UNAVAILABLE | El servicio de interpretación de lenguaje no está disponible | El proveedor de NLP no responde | Agente Inteligente | Navegar el Marketplace de forma manual |
 | STT_UNAVAILABLE | El servicio de reconocimiento de voz no está disponible | El servicio STT no responde | Agente Inteligente | Cambiar al modo de entrada por texto |
-| TTS_UNAVAILABLE | El servicio de síntesis de voz no está disponible | El servicio TTS no responde | Agente Inteligente | La respuesta se presenta solo en texto |
+| TTS_UNAVAILABLE | La síntesis de voz del navegador no está disponible | La API Web Speech no es compatible o falló | Agente Inteligente | La respuesta se presenta solo en texto |
 | PUBLICATION_VALIDATION_ERROR | La publicación no cumple los campos obligatorios o el precio es inválido | Incumplimiento de RN-05 o RN-06 | Productos | Completar todos los campos obligatorios con valores válidos |
 | COMPARISON_LIMIT_EXCEEDED | Se intentó comparar más de 5 productos (RN-13) | La cantidad de productos seleccionados supera el límite | Agente Inteligente | Seleccionar entre 2 y 5 productos para comparar |
 | INVALID_PAYMENT_METHOD | El método de pago no es válido o no está registrado | Referencia de pago expirada o no reconocida | Pagos | Registrar un método de pago válido |

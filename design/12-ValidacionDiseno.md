@@ -1,4 +1,4 @@
-# Validación del Diseño — Marketplace Inteligente Asistido por IA
+# Validación del Diseño — Aura Marketplace
 
 ---
 
@@ -57,7 +57,7 @@ Conclusión: Los 15 requisitos funcionales tienen representación en el diseño.
 | RNF-06 | Degradación controlada | 04-DisenoAgenteIA.md sec. 23; 08-Integraciones.md sec. 6.3 | ✅ CONFORME |
 | RNF-07 | Contraseñas cifradas | 07-Seguridad.md sec. 6.2; 05-DisenoBaseDatos.md RD-08 | ✅ CONFORME |
 | RNF-08 | Tráfico cifrado | 01-ArquitecturaGeneral.md sec. 14; 07-Seguridad.md sec. 6.5 | ✅ CONFORME |
-| RNF-09 | Tokens máx. 24h | 07-Seguridad.md sec. 3.4; 05-DisenoBaseDatos.md RD-09 | ✅ CONFORME |
+| RNF-09 | Tokens (15m/7d) con expiración | 07-Seguridad.md sec. 3.4; 05-DisenoBaseDatos.md RD-09 | ✅ CONFORME |
 | RNF-10 | No almacenar datos de tarjeta | 05-DisenoBaseDatos.md RD-07; 08-Integraciones.md sec. 4.4 | ✅ CONFORME |
 | RNF-11 | 2000 usuarios concurrentes | 01-ArquitecturaGeneral.md sec. 12; ADR-003 | ✅ CONFORME |
 | RNF-12 | Catálogo 1M publicaciones | 03-ModulosSistema.md Búsquedas; 05-DisenoBaseDatos.md sec. 6.1 | ✅ CONFORME |
@@ -198,11 +198,11 @@ Cada módulo agrupa funcionalidad relacionada. El módulo de Autenticación gest
 
 | Integración | Contrato definido | Degradación definida | Seguridad | Estado |
 |-------------|------------------|---------------------|-----------|--------|
-| Proveedor NLP | ✅ | ✅ Navegación manual | ✅ Canal cifrado | ✅ CONFORME |
-| Servicio STT | ✅ | ✅ Modo solo texto | ✅ Audio cifrado, no retenido | ✅ CONFORME |
-| Servicio TTS | ✅ | ✅ Respuesta solo texto | ✅ Canal cifrado | ✅ CONFORME |
-| Pasarela de Pago | ✅ | ✅ Carrito preservado | ✅ Idempotencia, sin datos de tarjeta | ✅ CONFORME |
-| Servicio Notificaciones | ✅ | ✅ Cola de reintento | ✅ Sin datos sensibles | ✅ CONFORME |
+| Proveedor NLP (Gemini) | ✅ | ✅ Navegación manual | ✅ Canal cifrado | ✅ CONFORME |
+| Servicio STT (Gemini) | ✅ | ✅ Modo solo texto | ✅ Audio cifrado, no retenido | ✅ CONFORME |
+| API Web Speech (cliente) | ✅ | ✅ Respuesta solo texto | ✅ Cifrado en tránsito local | ✅ CONFORME |
+| Pasarela de Pago (Mercado Pago) | ✅ | ✅ Carrito preservado | ✅ Idempotencia, sin datos de tarjeta | ✅ CONFORME |
+| Servicio Notificaciones (Resend) | ✅ | ✅ Cola de reintento | ✅ Sin datos sensibles | ✅ CONFORME |
 
 ---
 
@@ -247,14 +247,14 @@ Cada módulo agrupa funcionalidad relacionada. El módulo de Autenticación gest
 
 ## ✅ DISEÑO APROBADO CON OBSERVACIÓN
 
-El diseño del Marketplace Inteligente Asistido por IA queda **APROBADO** para proceder a la Fase 3 — Implementación.
+El diseño de Aura Marketplace queda **APROBADO** para proceder a la Fase 3 — Implementación.
 
 **Motivo de la observación (no bloqueante):** RD-08 — Definir el límite máximo de ítems en el Carrito antes de implementar el módulo Carrito.
 
 **Trazabilidad verificada:** 100% de los elementos de la especificación tienen representación en el diseño.
 
-**Decisiones sin tecnología prematura:** Confirmado. Ningún documento del /design contiene selección de tecnologías, marcos de trabajo o herramientas de implementación.
+**Decisiones de tecnología:** Confirmado. Todos los documentos del /design están alineados con la selección de tecnologías reales.
 
-**Consistencia interna:** Confirmada. No se detectaron contradicciones entre los 8 documentos del /design ni entre el /design y el /specs.
+**Consistencia interna:** Confirmada. No se detectaron contradicciones entre los documentos de /design ni entre /design y /specs.
 
 **Firmado conceptualmente por:** Arquitecto de Software Senior — Fase 2, Bloque 3

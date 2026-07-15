@@ -1,4 +1,4 @@
-# Especificación de Diagramas del Sistema — Marketplace Inteligente Asistido por IA
+# Especificación de Diagramas del Sistema — Aura Marketplace
 
 > Este documento especifica qué debe representar cada diagrama del sistema.
 > No renderiza diagramas ejecutables. Incluye representaciones textuales esquemáticas
@@ -12,28 +12,28 @@
 
 **Qué debe representar:**
 
-- El sistema central: "Marketplace Inteligente" como bloque principal
+- El sistema central: "Aura Marketplace" como bloque principal
 - Actores humanos externos que interactúan con el sistema:
   - Comprador (entrada: instrucciones texto/voz, búsquedas, compras; salida: resultados, confirmaciones, respuestas del agente)
   - Vendedor (entrada: publicaciones, gestión de órdenes; salida: panel de gestión, notificaciones)
   - Administrador (entrada: acciones de moderación, gestión; salida: reportes, panel de administración)
   - Visitante (entrada: consultas de catálogo; salida: resultados de búsqueda)
 - Sistemas externos que se integran:
-  - Proveedor de NLP (interpretación de lenguaje natural)
-  - Servicio STT — convertidor de voz a texto (transcripción de voz)
-  - Servicio TTS — convertidor de texto a voz (síntesis de voz)
-  - Pasarela de Pago (procesamiento de transacciones)
-  - Servicio de Notificaciones (entrega de avisos)
+  - Proveedor de NLP (interpretación de lenguaje natural mediante Gemini AI)
+  - Servicio STT — convertidor de voz a texto (transcripción mediante Gemini AI)
+  - API Web Speech — convertidor de texto a voz nativo en el cliente (síntesis de voz)
+  - Pasarela de Pago de Mercado Pago (procesamiento de transacciones)
+  - Servicio de Notificaciones de Resend (entrega de avisos por correo)
 - Límites del sistema: qué es interno (dominio, aplicación, infraestructura) y qué es externo (integraciones, actores)
 
 **Representación textual esquemática:**
 
 ```
-[Comprador]      ──texto/voz────► [MARKETPLACE INTELIGENTE] ──consulta NLP──► [Proveedor NLP]
-[Vendedor]       ──publicaciones► [MARKETPLACE INTELIGENTE] ──audio──────────► [Servicio STT]
-[Administrador]  ───────────────► [MARKETPLACE INTELIGENTE] ──respuesta voz──► [Servicio TTS]
-[Visitante]      ──búsqueda─────► [MARKETPLACE INTELIGENTE] ──cobro──────────► [Pasarela Pago]
-                                                             ──avisos─────────► [Notificaciones]
+[Comprador]      ──texto/voz────► [AURA MARKETPLACE] ──consulta NLP──► [Proveedor NLP (Gemini)]
+[Vendedor]       ──publicaciones► [AURA MARKETPLACE] ──audio──────────► [Servicio STT (Gemini)]
+[Administrador]  ───────────────► [AURA MARKETPLACE] (cliente) ──síntesis de voz──► [API Web Speech]
+[Visitante]      ──búsqueda─────► [AURA MARKETPLACE] ──cobro──────────► [Pasarela Mercado Pago]
+                                                     ──avisos─────────► [Notificaciones Resend]
 ```
 
 **Trazabilidad:** /specs/02-Stakeholders.md, /specs/04-Alcance.md, /design/08-Integraciones.md
@@ -219,12 +219,12 @@ Los 40 casos de uso agrupados por módulo funcional (derivados de /specs/10-Caso
    - Si confianza por debajo del umbral: Agente informa al Comprador y solicita repetir o escribir. Fin.
    - Si confianza igual o superior al umbral: continúa en el paso 6
 6. Agente procesa la transcripción exactamente como una instrucción de texto (flujo 5.1, pasos 3 a 9)
-7. Agente envía la respuesta formulada al adaptador del Servicio de Síntesis de Voz
-8. El Servicio de Síntesis retorna el audio sintetizado
-   - Si el servicio no está disponible: la respuesta se entrega solo en texto (RNF-06)
-9. Interfaz reproduce el audio de respuesta al Comprador
+7. Interfaz en el frontend recibe la respuesta de texto del Agente
+8. La interfaz utiliza la API nativa Web Speech (window.speechSynthesis) para sintetizar el texto de la respuesta en audio en español (es-ES)
+   - Si la API no es compatible o falla: la respuesta se presenta solo en texto (RNF-06)
+9. El navegador reproduce el audio de respuesta al Comprador
 
-**Respuesta:** Resultado presentado en texto más audio sintetizado (si el servicio está disponible)
+**Respuesta:** Resultado presentado en texto más audio sintetizado en el cliente (si la API Web Speech está disponible)
 
 ---
 
@@ -393,7 +393,7 @@ Expirado     ──[nueva instrucción recibida]──────────�
 **Zonas conceptuales:**
 
 **Zona de Usuarios (externos al sistema):**
-- Dispositivo del Comprador: accede mediante la interfaz de texto y voz
+- Dispositivo del Comprador: accede mediante la interfaz de texto y voz (ejecuta localmente la API nativa Web Speech del navegador para la síntesis de voz)
 - Dispositivo del Vendedor: accede mediante el panel de gestión de publicaciones y órdenes
 - Dispositivo del Administrador: accede mediante el panel de administración y moderación
 - Dispositivo del Visitante: accede de forma anónima al catálogo público
@@ -416,11 +416,10 @@ Expirado     ──[nueva instrucción recibida]──────────�
 - Adaptadores de integraciones con servicios externos
 
 **Zona de Servicios Externos (fuera del límite del sistema):**
-- Proveedor de interpretación de lenguaje natural
-- Servicio de transcripción de voz a texto
-- Servicio de síntesis de texto a voz
-- Pasarela de Pago
-- Servicio de Notificaciones
+- Proveedor de interpretación de lenguaje natural (Gemini AI)
+- Servicio de transcripción de voz a texto (Gemini AI)
+- Pasarela de Pago (Mercado Pago)
+- Servicio de Notificaciones (Resend)
 
 **Canales de comunicación entre zonas:**
 - Usuario ↔ Zona de Frontera: canal cifrado (RNF-08)

@@ -1,8 +1,8 @@
-# Modelo de Dominio — Marketplace Inteligente Asistido por IA
+# Modelo de Dominio — Aura Marketplace
 
 ## 1. Descripción del Dominio
 
-El dominio del Marketplace Inteligente representa una plataforma de comercio electrónico que conecta Compradores y Vendedores para realizar transacciones de productos. Su característica distintiva es la presencia de un Agente Inteligente que interpreta instrucciones en lenguaje natural y ejecuta acciones funcionales en nombre del usuario: búsqueda, filtrado, ordenamiento, comparación de productos, gestión del carrito y ejecución de compras.
+El dominio de Aura Marketplace representa una plataforma de comercio electrónico que conecta Compradores y Vendedores para realizar transacciones de productos. Su característica distintiva es la presencia de un Agente Inteligente que interpreta instrucciones en lenguaje natural y ejecuta acciones funcionales en nombre del usuario: búsqueda, filtrado, ordenamiento, comparación de productos, gestión del carrito y ejecución de compras.
 
 El dominio abarca la publicación y gestión de productos, la exploración y descubrimiento del catálogo, el proceso transaccional completo (desde la expresión de intención hasta la confirmación de la orden), la gestión de usuarios y roles, y la administración operativa de la plataforma.
 
@@ -115,8 +115,8 @@ Mensaje generado por el sistema y enviado a un usuario para informar sobre un ev
 | Objeto de Valor | Descripción |
 |---|---|
 | Precio | Valor monetario positivo (mayor que cero, RN-06) expresado en la moneda del Marketplace. |
-| Credenciales | Par de correo electrónico y contraseña que identifican a un usuario. La contraseña cumple la política RN-09 y se almacena cifrada (RNF-07). |
-| TokenAcceso | Identificador de sesión emitido al autenticarse con vida útil máxima de 24 horas (RNF-09). |
+| Credenciales | Par de correo electrónico y contraseña que identifican a un usuario. La contraseña cumple la política RN-09 y se almacena utilizando Argon2 (RNF-07). |
+| TokenAcceso | Identificador JWT de sesión local con vida útil de 15 minutos en producción, y Refresh Token de 7 días (RNF-09). |
 | NivelConfianzaSTT | Valor numérico retornado por el servicio STT que indica la certeza de la transcripción. Debe superar el umbral configurado (RN-11) para ser procesado. |
 | Intencion | Propósito identificado en la instrucción del usuario por el Agente (buscar, filtrar, ordenar, comparar, agregar al carrito, comprar, ver carrito). |
 | EntidadExtraida | Elemento de información extraído de la instrucción: nombre de producto, marca, categoría, rango de precio, condición de envío. |
@@ -283,7 +283,7 @@ Pendiente → Activo → Suspendido → Activo (reactivación)
 **No pertenece al dominio:**
 - Procesamiento de lenguaje natural (delegado al Proveedor de IA externo).
 - Transcripción de voz a texto (delegado al servicio STT externo).
-- Síntesis de texto a voz (delegado al servicio TTS externo).
+- Síntesis de texto a voz (delegado a la API nativa de síntesis de voz del navegador del cliente).
 - Procesamiento financiero de la transacción (delegado a la Pasarela de Pago).
 - Entrega física de productos y seguimiento logístico.
 - Gestión de devoluciones y disputas post-venta.

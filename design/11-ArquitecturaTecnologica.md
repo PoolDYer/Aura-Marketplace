@@ -1,10 +1,10 @@
-# Arquitectura Tecnológica — Marketplace Inteligente Asistido por IA
+# Arquitectura Tecnológica — Aura Marketplace
 
 ---
 
 ## 1. Objetivo y Alcance
 
-Este documento formaliza las decisiones tecnológicas para la implementación de la Fase 3 del Marketplace Inteligente Asistido por IA. Complementa el diseño conceptual contenido en la carpeta `/design` sin modificar ni reemplazar ningún documento de `/specs`.
+Este documento formaliza las decisiones tecnológicas para la implementación de la Fase 3 de Aura Marketplace. Complementa el diseño conceptual contenido en la carpeta `/design` sin modificar ni reemplazar ningún documento de `/specs`.
 
 Todas las tecnologías seleccionadas deben mapearse a las capas arquitectónicas existentes L-01 a L-05 definidas en `01-ArquitecturaGeneral.md`. Ninguna decisión tecnológica puede forzar cambios estructurales en esa arquitectura.
 
@@ -15,7 +15,7 @@ Todas las tecnologías seleccionadas deben mapearse a las capas arquitectónicas
 1. **Alineación con la arquitectura:** la tecnología debe encajar en la arquitectura de 5 capas existente sin forzar cambios estructurales.
 2. **Madurez y comunidad:** preferencia por tecnologías con mantenimiento activo, amplia adopción y ecosistema robusto.
 3. **Tipado estático:** TypeScript en todas las capas garantiza seguridad en tiempo de compilación y reduce errores en tiempo de ejecución.
-4. **Independencia del proveedor de IA:** las integraciones de IA se definen mediante interfaces abstractas (`SpeechToTextProvider`, `LanguageModelProvider`, `TextToSpeechProvider`) — nunca acopladas a un proveedor específico.
+4. **Independencia del proveedor de IA:** las integraciones de IA se definen mediante interfaces abstractas en el backend (`SpeechToTextProvider`, `LanguageModelProvider`) y capacidades nativas del cliente (`API Web Speech`) — nunca acopladas a un proveedor específico.
 5. **Separación frontend/backend:** React (L-01) se comunica con NestJS (L-03) exclusivamente a través de contratos de API definidos en `06-DisenoAPI.md`.
 6. **Consistencia del modelo de datos:** Prisma provee una fuente única de verdad para el schema, alineada con el modelo de datos conceptual en `05-DisenoBaseDatos.md`.
 7. **Seguridad implementada, no agregada:** Argon2 para contraseñas (RNF-07), JWT+RefreshToken para sesiones (RNF-09), class-validator para validación de entrada (L-01 validation).
@@ -60,7 +60,7 @@ Todas las tecnologías seleccionadas deben mapearse a las capas arquitectónicas
 | Nube Frontend | CDN/Hosting | Cloudflare Pages | — | Hosting del frontend (L-01) — despliegue global en el edge |
 | Nube Backend | PaaS | Render | — | Hosting del backend (L-03/L-04) — despliegue de la API |
 | Nube Base de Datos | DBaaS | Neon PostgreSQL | — | Base de datos serverless gestionada en la nube |
-| Nube Almacenamiento | Object Storage | Cloudflare R2 | — | Almacenamiento de imágenes de publicaciones y archivos de usuario |
+| Nube Almacenamiento | Cloud Storage | Cloudinary | — | Almacenamiento de imágenes de publicaciones y archivos de usuario |
 
 ---
 
@@ -126,11 +126,11 @@ Todas las tecnologías seleccionadas deben mapearse a las capas arquitectónicas
 **Relación con la arquitectura:** transversal — cubre L-01, L-03, L-04.
 **Alternativas descartadas:** Vitest+Cypress (ecosistema Vitest aún no al nivel de Jest para backend NestJS), Mocha+Chai (más configuración manual para NestJS).
 
-### Cloudflare Pages + Render + Cloudflare R2
-**Justificación:** Cloudflare Pages sirve L-01 desde el edge global (CDN) sin servidor; Render provee un PaaS confiable para L-03/L-04 con HTTPS automático; Cloudflare R2 almacena imágenes de Publicacion sin impactar la carga del backend ni de la base de datos, con compatibilidad S3.
+### Cloudflare Pages + Render + Cloudinary
+**Justificación:** Cloudflare Pages sirve L-01 desde el edge global (CDN) sin servidor; Render provee un PaaS confiable para L-03/L-04 con HTTPS automático; Cloudinary almacena imágenes de Publicación sin impactar la carga del backend ni de la base de datos, ofreciendo optimización automática de imágenes.
 **Requisitos que satisface:** RNF-05 (disponibilidad 99.5%), RNF-11 (escalabilidad), RF-09 (imágenes de publicaciones).
 **Relación con la arquitectura:** infraestructura de despliegue para L-01, L-03/L-04/L-05.
-**Alternativas descartadas:** Vercel (costo mayor a escala para backend full), AWS (complejidad operacional excesiva para fase inicial), Railway (menor madurez que Render para NestJS).
+**Alternativas descartadas:** Vercel (costo mayor a escala para backend full), AWS (complejidad operacional excesiva para fase inicial), Railway (menor madurez que Render para NestJS), Cloudflare R2 (descartado para evitar codificar pipelines de compresión personalizados).
 
 ---
 
@@ -181,26 +181,20 @@ El sistema **no debe depender de ningún proveedor de IA específico**. Toda int
 
 **Retención de audio:** el adaptador no debe almacenar el audio una vez entregada la transcripción.
 
-### 5.3 TextToSpeechProvider (adaptador L-05)
+### 5.3 API de Síntesis de Voz (Web Speech API)
 
 **Propósito:** sintetizar las respuestas de texto del Agente en audio para reproducción en modo de voz.
 
-**Contrato de entrada:**
-- Texto de respuesta del Agente
-- Configuración de voz
-- Idioma (español)
+**Funcionamiento:** la síntesis de voz se realiza del lado del cliente utilizando la API nativa del navegador (`window.speechSynthesis`), configurando la voz en español (`es-ES`).
 
-**Contrato de salida:**
-- Archivo de audio o stream de audio
+**Estados de error:** API del navegador no compatible o silenciada por el sistema operativo.
 
-**Estados de error:** timeout, texto demasiado largo, configuración de voz no soportada.
-
-**Degradación:** si el adaptador no está disponible → la respuesta se entrega únicamente en texto; no hay impacto funcional en el flujo del Agente (RNF-06).
+**Degradación:** si la API no está disponible o falla → la respuesta se entrega únicamente en texto; no hay impacto funcional en el flujo del Agente (RNF-06).
 
 ### Reglas de sustitución de interfaces (deben respetarse todas)
 
 - Ningún nombre de proveedor de IA puede aparecer en las capas L-03 o L-04.
-- Todas las llamadas a proveedores se enrutan exclusivamente a través de los adaptadores en L-05.
+- Todas las llamadas a proveedores de IA (NLP, STT) se enrutan exclusivamente a través de los adaptadores en L-05.
 - La lógica interna del Agente (L-02) llama a la interfaz del adaptador, nunca al proveedor directamente.
 - Reemplazar un proveedor requiere únicamente implementar un nuevo adaptador en L-05 — cero cambios en dominio ni en lógica de aplicación.
 
@@ -210,19 +204,19 @@ El sistema **no debe depender de ningún proveedor de IA específico**. Toda int
 
 | Capa | Descripción | Tecnologías asignadas |
 |---|---|---|
-| L-01 | Presentación e Interacción | React 19, TypeScript, Vite, Tailwind CSS, Shadcn/ui, React Router DOM, Axios |
+| L-01 | Presentación e Interacción | React 19, TypeScript, Vite, Tailwind CSS, Shadcn/ui, React Router DOM, Axios, API Web Speech (client-side synthesis) |
 | L-01 (estado) | Gestión de estado cliente | Zustand, TanStack Query, React Hook Form, Zod (cliente) |
 | L-02 | Agente Inteligente | NestJS (módulo AgentModule), Zustand (estado del Agente en frontend) |
 | L-03 | Lógica de Aplicación | NestJS (services, controllers, guards), class-validator, class-transformer, JWT guards |
 | L-04 | Dominio | NestJS (domain entities, domain services, value objects — sin dependencias externas) |
-| L-05 | Infraestructura e Integraciones | Prisma ORM, Neon PostgreSQL, Argon2, JWT (emisión), adaptadores LanguageModelProvider / SpeechToTextProvider / TextToSpeechProvider, adaptador Pasarela de Pago, adaptador Notificaciones |
+| L-05 | Infraestructura e Integraciones | Prisma ORM, Neon PostgreSQL, Argon2, JWT (emisión), adaptadores LanguageModelProvider / SpeechToTextProvider, adaptador Pasarela de Pago, adaptador Notificaciones |
 | Transversal | Seguridad | JWT, Argon2, RBAC (NestJS Guards + Decorators), Zod |
 | Transversal | Pruebas | Jest, Supertest, Playwright |
 | Transversal | Calidad | ESLint, Prettier |
 | Nube L-01 | Despliegue Frontend | Cloudflare Pages |
 | Nube L-03/L-04/L-05 | Despliegue Backend | Render |
 | Nube L-05 | Base de datos | Neon PostgreSQL (cloud) |
-| Nube L-05 | Almacenamiento | Cloudflare R2 |
+| Nube L-05 | Almacenamiento | Cloudinary |
 
 ---
 
@@ -250,15 +244,14 @@ ZONA BACKEND (Render)
           ├── [Prisma ORM] → [Neon PostgreSQL] (datos operacionales)
           ├── [Argon2] → hash de contraseñas
           ├── [JWT] → emisión/validación de tokens
-          ├── [Adaptador LanguageModelProvider] → [Proveedor NLP externo]
-          ├── [Adaptador SpeechToTextProvider] → [Proveedor STT externo]
-          ├── [Adaptador TextToSpeechProvider] → [Proveedor TTS externo]
-          ├── [Adaptador Pasarela de Pago] → [Pasarela externa]
-          └── [Adaptador Notificaciones] → [Servicio externo]
+          ├── [Adaptador LanguageModelProvider] → [Proveedor NLP externo (Gemini AI)]
+          ├── [Adaptador SpeechToTextProvider] → [Proveedor STT externo (Gemini AI)]
+          ├── [Adaptador Pasarela de Pago] → [Pasarela externa (Mercado Pago)]
+          └── [Adaptador Notificaciones] → [Servicio externo (Resend)]
 
-ALMACENAMIENTO OBJETOS (Cloudflare R2)
+ALMACENAMIENTO DE IMÁGENES (Cloudinary)
   └── Imágenes de Publicaciones (subidas por Vendedores)
-      └── Accedidas desde L-03 a través de adaptador de almacenamiento
+      └── Accedidas desde L-03 a través de CloudinaryService
 ```
 
 ---
@@ -288,11 +281,11 @@ ALMACENAMIENTO OBJETOS (Cloudflare R2)
 - Prisma Migrate gestiona el estado del esquema — no se realizan cambios manuales al esquema en producción.
 - Neon soporta branching de base de datos para entornos de staging y test independientes del entorno de producción.
 
-### 8.4 Almacenamiento (Cloudflare R2)
+### 8.4 Almacenamiento (Cloudinary)
 
-- Las imágenes de Publicaciones se almacenan en R2 como objetos con URL pública.
-- El backend genera URLs pre-firmadas para uploads directos desde el cliente, sin que el archivo pase por el servidor.
-- R2 es compatible con la API S3 — el adaptador de almacenamiento en L-05 usa el protocolo S3 sin modificación.
+- Las imágenes de Publicaciones se almacenan y sirven a través del servicio administrado de Cloudinary.
+- El backend utiliza el SDK oficial de Cloudinary en NestJS para subir las imágenes directamente.
+- Cloudinary realiza la optimización de las imágenes de forma transparente (formato dinámico, compresión automática).
 
 ---
 
@@ -305,7 +298,7 @@ Relacionadas con RNF-11 (2000 usuarios concurrentes) y RNF-12 (1M publicaciones)
 - **Neon PostgreSQL serverless:** escala las conexiones automáticamente; soporta connection pooling para reducir latencia de conexión en frío.
 - **TanStack Query:** la caché en el cliente reduce significativamente las peticiones al backend para datos de catálogo repetidos.
 - **Prisma:** los índices definidos en el schema son críticos para que la búsqueda de publicaciones cumpla RNF-02 (≤3s con 1M de registros).
-- **Cloudflare R2:** el almacenamiento de imágenes no impacta la carga del backend ni de la base de datos al usar uploads directos pre-firmados.
+- **Cloudinary:** el almacenamiento y optimización de imágenes es delegado por completo al servicio Cloudinary, reduciendo el tráfico y almacenamiento en servidores de base de datos o backend.
 - **JWT stateless:** no requiere sesiones en servidor — el backend puede escalar horizontalmente sin infraestructura de sesiones compartidas.
 
 ---
@@ -333,7 +326,7 @@ Relacionadas con RNF-11 (2000 usuarios concurrentes) y RNF-12 (1M publicaciones)
 - **Swagger/OpenAPI generado automáticamente:** los contratos de `06-DisenoAPI.md` son verificables contra la implementación real en cualquier momento.
 - **ESLint + Prettier:** código consistente entre todos los colaboradores; reduce la carga cognitiva al revisar cambios.
 - **Jest + Supertest + Playwright:** la suite de tests documenta el comportamiento esperado y actúa como red de seguridad contra regresiones.
-- **Interfaces de abstracción AI:** cambiar de proveedor de NLP, STT o TTS no requiere modificar L-03 ni L-04 — solo el adaptador L-05 correspondiente.
+- **Interfaces de abstracción AI:** cambiar de proveedor de NLP o STT no requiere modificar L-03 ni L-04 — solo el adaptador L-05 correspondiente.
 
 ---
 
@@ -343,9 +336,9 @@ Relacionadas con RNF-11 (2000 usuarios concurrentes) y RNF-12 (1M publicaciones)
 |---|---|---|---|---|
 | RT-01 | Render puede tener cold starts en instancias inactivas (primer request lento) | Bajo-Medio | Media | Configurar health check pings para mantener la instancia activa; documentar comportamiento esperado para usuarios |
 | RT-02 | Neon PostgreSQL serverless puede introducir latencia en conexiones en frío | Medio | Baja-Media | Usar connection pooling de Prisma; medir impacto en RNF-02 durante testing de carga |
-| RT-03 | Cambio de proveedor de NLP/STT/TTS requiere implementar nuevo adaptador L-05 | Bajo | Alta (es un feature, no un riesgo real) | Las interfaces SpeechToTextProvider, LanguageModelProvider y TextToSpeechProvider están definidas — el adaptador es el único artefacto a crear |
+| RT-03 | Cambio de proveedor de NLP o STT requiere implementar nuevo adaptador L-05 | Bajo | Alta (es un feature, no un riesgo real) | Las interfaces SpeechToTextProvider y LanguageModelProvider están definidas — el adaptador es el único artefacto a crear |
 | RT-04 | JWT Access Token comprometido tiene ventana de 15 minutos de validez | Medio | Baja | La ventana corta minimiza el daño; implementar lista negra de tokens en casos de logout o compromiso detectado |
-| RT-05 | Cloudflare R2 upload de imágenes podría eludir validaciones del backend | Medio | Baja | Las URLs pre-firmadas incluyen restricciones de tipo MIME y tamaño máximo; validación adicional en L-03 tras la carga |
+| RT-05 | Upload de imágenes podría eludir validaciones del backend | Medio | Baja | Restricciones de tipo MIME y tamaño máximo en el validador del backend y configuración del SDK de Cloudinary |
 | RT-06 | Versiones de dependencias npm sin pinning exacto pueden introducir regresiones | Medio | Media | Usar `package-lock.json` con versiones exactas; revisar actualizaciones de forma controlada (dependabot o equivalente) |
 | RT-07 | Playwright E2E tests pueden ser frágiles ante cambios de UI | Bajo-Medio | Media | Usar selectores semánticos (`data-testid`, roles ARIA) en lugar de selectores CSS frágiles |
 
@@ -364,7 +357,7 @@ Relacionadas con RNF-11 (2000 usuarios concurrentes) y RNF-12 (1M publicaciones)
 - **Zod + React Hook Form:** integración oficial mediante `@hookform/resolvers/zod` — validación de schemas directamente en formularios.
 - **Playwright + NestJS:** Playwright ejecuta tests contra la aplicación desplegada de forma independiente — sin acoplamiento.
 - **Cloudflare Pages + Vite:** adaptador oficial de Cloudflare Pages para builds de Vite.
-- **Cloudflare R2 + S3 API:** R2 es compatible con S3 — cualquier SDK S3 funciona sin modificación.
+- **Cloudinary + NestJS SDK:** integración robusta utilizando el SDK de Cloudinary para NestJS para la subida de imágenes y generación de URLs dinámicas.
 
 ---
 
@@ -387,7 +380,7 @@ Relacionadas con RNF-11 (2000 usuarios concurrentes) y RNF-12 (1M publicaciones)
 | Playwright | RF-01 a RF-08 (flujos E2E del Agente y del Marketplace) |
 | Cloudflare Pages | RNF-05 (disponibilidad 99.5%), RNF-11 (escalabilidad — CDN global) |
 | Render | RNF-05 (disponibilidad), RNF-11 (escalabilidad horizontal backend) |
-| Cloudflare R2 | RF-09 (imágenes de Publicaciones — RN-05 requiere al menos una imagen) |
+| Cloudinary | RF-09 (imágenes de Publicaciones — RN-05 requiere al menos una imagen) |
 | LanguageModelProvider | RF-01/02 (NLP), ADR-008 (independencia del proveedor) |
 | SpeechToTextProvider | RF-02 (voz a texto), RN-11 (umbral de confianza STT) |
-| TextToSpeechProvider | RF-02 (texto a voz), RNF-06 (degradación controlada) |
+| API Web Speech | RF-02 (texto a voz), RNF-06 (degradación controlada) |
