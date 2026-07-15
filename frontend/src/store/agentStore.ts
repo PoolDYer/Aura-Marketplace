@@ -223,8 +223,8 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
         }));
         set({ messages: historyMsgs });
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
+      // Background history loading should never block the app shell.
     }
   },
 }));

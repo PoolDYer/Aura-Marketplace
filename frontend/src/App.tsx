@@ -35,7 +35,7 @@ import { useCartStore } from './store/cartStore';
 import { Sparkles } from 'lucide-react';
 import { useAuthStore } from './store/authStore';
 import { useEffect, useRef } from 'react';
-import { getNeonRegistrationStatus } from './lib/neonAuth';
+import { clearNeonSession, getNeonRegistrationStatus, isUnauthorizedError } from './lib/neonAuth';
 
 type JwtPayload = {
   iss?: string;
@@ -91,9 +91,11 @@ function App() {
   const user = useAuthStore((state) => state.user);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const setAuth = useAuthStore((state) => state.setAuth);
+  const logout = useAuthStore((state) => state.logout);
   const location = useLocation();
   const navigate = useNavigate();
   const initialPathnameRef = useRef(location.pathname);
+  const fetchedHistoryUserRef = useRef<string | null>(null);
   const userId = user?.id;
   const hideGlobalBot =
     location.pathname === '/' ||
@@ -104,10 +106,22 @@ function App() {
     location.pathname.startsWith('/products/');
 
   useEffect(() => {
-    if (userId) {
+    const shouldLoadAgentHistory =
+      userId &&
+      fetchedHistoryUserRef.current !== userId &&
+      !location.pathname.startsWith('/admin') &&
+      !isAuthRoute(location.pathname);
+
+    if (shouldLoadAgentHistory) {
+      fetchedHistoryUserRef.current = userId;
       fetchHistory();
+      return;
     }
-  }, [fetchHistory, userId]);
+
+    if (!userId) {
+      fetchedHistoryUserRef.current = null;
+    }
+  }, [fetchHistory, location.pathname, userId]);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -152,7 +166,18 @@ function App() {
           });
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        if (ignore) return;
+
+        if (isUnauthorizedError(error)) {
+          clearNeonSession();
+          logout();
+          navigate('/login', {
+            replace: true,
+            state: { from: initialPathname },
+          });
+        }
+
         // Keep the persisted session on transient Neon/network failures.
         // Protected API calls still handle real 401s through the axios interceptor.
       });
@@ -160,7 +185,7 @@ function App() {
     return () => {
       ignore = true;
     };
-  }, [hasHydrated, navigate, setAuth]);
+  }, [hasHydrated, logout, navigate, setAuth]);
 
   // Register navigation callback for the copilot
   useEffect(() => {

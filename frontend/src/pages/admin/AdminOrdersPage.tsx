@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../api/admin';
 import { AdminMetricStrip, AdminTableActions } from './AdminMetricStrip';
 
@@ -24,18 +24,40 @@ const statusTone: Record<string, string> = {
   ESCALADA: 'bg-[#ffdad6] text-[#93000a]',
 };
 
+function getOrdersErrorMessage(error: unknown) {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const status = (error as any).response?.status;
+    if (status === 401) {
+      return 'Tu sesion expiro. Vuelve a iniciar sesion para ver los pedidos.';
+    }
+
+    const message = (error as any).response?.data?.message;
+    if (message) return message;
+  }
+
+  return 'No pudimos cargar los pedidos. Intenta nuevamente.';
+}
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [filter, setFilter] = useState('TODOS');
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
-    adminApi.getOrders().then(({ data }) => setOrders(data)).finally(() => setLoading(false));
-  };
+    setError('');
+    adminApi
+      .getOrders()
+      .then(({ data }) => setOrders(Array.isArray(data) ? data : []))
+      .catch((error) => setError(getOrdersErrorMessage(error)))
+      .finally(() => setLoading(false));
+  }, []);
 
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const visible = useMemo(() => orders.filter((order) => {
     const matchesStatus = filter === 'TODOS' || order.estado === filter;
@@ -76,7 +98,7 @@ export default function AdminOrdersPage() {
               className="h-12 w-full rounded-xl border border-[#d6c3b0]/70 bg-white pl-12 pr-4 text-sm outline-none transition focus:border-[#845400] focus:ring-2 focus:ring-[#ffb347]/25"
             />
           </label>
-          <button type="button" onClick={load} className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#ffb347] px-6 text-sm font-bold text-[#704700] shadow-sm transition hover:brightness-105">
+          <button type="button" onClick={load} disabled={loading} className="flex h-12 items-center justify-center gap-2 rounded-full bg-[#ffb347] px-6 text-sm font-bold text-[#704700] shadow-sm transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70">
             <span className="material-symbols-outlined text-lg">add</span>
             Nuevo Pedido
           </button>
@@ -118,6 +140,15 @@ export default function AdminOrdersPage() {
             <tbody className="divide-y divide-[#e5e1e3]">
               {loading ? (
                 <tr><td colSpan={7} className="px-6 py-16 text-center text-[#524535]">Cargando pedidos...</td></tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-16 text-center text-[#524535]">
+                    <p className="font-semibold text-[#93000a]">{error}</p>
+                    <button type="button" onClick={load} className="mt-4 rounded-full bg-[#845400] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#704700]">
+                      Reintentar
+                    </button>
+                  </td>
+                </tr>
               ) : visible.length ? visible.map((order) => (
                 <tr key={order.id} className="transition hover:bg-[#fcf8fa]">
                   <td className="px-6 py-4">

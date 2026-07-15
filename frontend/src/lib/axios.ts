@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
-import { getCurrentNeonToken, syncNeonSession } from './neonAuth';
+import { clearNeonSession, getCurrentNeonToken, syncNeonSession } from './neonAuth';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -16,6 +16,7 @@ type JwtPayload = {
 };
 
 let refreshRequest: Promise<string> | null = null;
+let isClearingSession = false;
 
 const decodeJwtPayload = (token: string): JwtPayload | null => {
   try {
@@ -67,6 +68,18 @@ const refreshAccessToken = async () => {
   return refreshRequest;
 };
 
+const clearInvalidAuthSession = async () => {
+  if (isClearingSession) return;
+
+  isClearingSession = true;
+  try {
+    useAuthStore.getState().logout();
+    await clearNeonSession();
+  } finally {
+    isClearingSession = false;
+  }
+};
+
 api.interceptors.request.use(
   async (config) => {
     let { accessToken } = useAuthStore.getState();
@@ -98,15 +111,21 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const accessToken = await refreshAccessToken();
+        originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        await clearInvalidAuthSession();
         return Promise.reject(refreshError);
       }
+    }
+
+    if (error.response?.status === 401) {
+      await clearInvalidAuthSession();
     }
 
     return Promise.reject(error);

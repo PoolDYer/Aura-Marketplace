@@ -58,6 +58,14 @@ export async function getCurrentNeonToken() {
   return token;
 }
 
+export function isUnauthorizedError(error: unknown) {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+export async function clearNeonSession() {
+  await authClient.signOut().catch(() => undefined);
+}
+
 export async function syncNeonSession(options: { nombre?: string; rol?: UserRole } = {}) {
   const { data, error } = await authClient.getSession();
   if (error) throw new Error(error.message || 'No se pudo leer la sesion de Neon');
