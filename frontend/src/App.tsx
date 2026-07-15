@@ -34,8 +34,37 @@ import { useAgentStore, setNavigationCallback, setAddToCartCallback } from './st
 import { useCartStore } from './store/cartStore';
 import { Sparkles } from 'lucide-react';
 import { useAuthStore } from './store/authStore';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { getNeonRegistrationStatus } from './lib/neonAuth';
+
+type JwtPayload = {
+  iss?: string;
+};
+
+const isAuthRoute = (pathname: string) =>
+  pathname === '/login' ||
+  pathname === '/forgot-password' ||
+  pathname === '/reset-password' ||
+  pathname === '/auth/callback' ||
+  pathname.startsWith('/register');
+
+const decodeJwtPayload = (token: string): JwtPayload | null => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    return JSON.parse(window.atob(padded)) as JwtPayload;
+  } catch {
+    return null;
+  }
+};
+
+const isLocalAccessToken = (token: string) => {
+  const payload = decodeJwtPayload(token);
+  return Boolean(payload && (!payload.iss || !payload.iss.includes('neonauth')));
+};
 
 function StorefrontRoute() {
   const { user, hasHydrated } = useAuthStore();
@@ -58,9 +87,11 @@ function StorefrontRoute() {
 function App() {
   const { toggleChat, fetchHistory } = useAgentStore();
   const { addItem } = useCartStore();
-  const { user, hasHydrated, setAuth, logout } = useAuthStore();
+  const { user, hasHydrated, setAuth } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
+  const initialPathnameRef = useRef(location.pathname);
+  const userId = user?.id;
   const hideGlobalBot =
     location.pathname === '/' ||
     location.pathname === '/catalog' ||
@@ -70,29 +101,45 @@ function App() {
     location.pathname.startsWith('/products/');
 
   useEffect(() => {
-    if (user) {
+    if (userId) {
       fetchHistory();
     }
-  }, [user]);
+  }, [fetchHistory, userId]);
 
   useEffect(() => {
     if (!hasHydrated) return;
 
+    const initialPathname = initialPathnameRef.current;
+    if (isAuthRoute(initialPathname)) return;
+
+    const { accessToken } = useAuthStore.getState();
+    if (accessToken && isLocalAccessToken(accessToken)) {
+      return;
+    }
+
+    let ignore = false;
+
     getNeonRegistrationStatus()
       .then((status) => {
+        if (ignore) return;
+
         if (status.registered && status.user) {
-          setAuth(status.user, status.accessToken);
+          const currentAuth = useAuthStore.getState();
+          const currentUser = currentAuth.user;
+          const isSameSession =
+            currentAuth.accessToken === status.accessToken &&
+            currentUser?.id === status.user.id &&
+            currentUser?.nombre === status.user.nombre &&
+            currentUser?.email === status.user.email &&
+            currentUser?.rol === status.user.rol;
+
+          if (!isSameSession) {
+            setAuth(status.user, status.accessToken);
+          }
           return;
         }
 
-        const isAuthRoute =
-          location.pathname === '/login' ||
-          location.pathname === '/forgot-password' ||
-          location.pathname === '/reset-password' ||
-          location.pathname === '/auth/callback' ||
-          location.pathname.startsWith('/register');
-
-        if (!isAuthRoute) {
+        if (!isAuthRoute(initialPathname)) {
           navigate('/register?provider=google', {
             replace: true,
             state: {
@@ -103,11 +150,14 @@ function App() {
         }
       })
       .catch(() => {
-        if (user) {
-          logout();
-        }
+        // Keep the persisted session on transient Neon/network failures.
+        // Protected API calls still handle real 401s through the axios interceptor.
       });
-  }, [hasHydrated, location.pathname, logout, navigate, setAuth, user]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [hasHydrated, navigate, setAuth]);
 
   // Register navigation callback for the copilot
   useEffect(() => {
