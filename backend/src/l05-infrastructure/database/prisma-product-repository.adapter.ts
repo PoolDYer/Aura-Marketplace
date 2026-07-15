@@ -2,6 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { IProductRepository } from '../../l04-domain/ports/product-repository.interface';
 import { EstadoPublicacion } from '../../l04-domain/products/product.enums';
+import { BLOCKED_PRODUCT_IMAGE_URLS } from '../../l04-domain/products/image-url-policy';
+
+const activeProductImages = {
+  where: {
+    activa: true,
+    url: { notIn: BLOCKED_PRODUCT_IMAGE_URLS },
+  },
+  orderBy: { orden: 'asc' as const },
+};
 
 @Injectable()
 export class PrismaProductRepository implements IProductRepository {
@@ -35,10 +44,7 @@ export class PrismaProductRepository implements IProductRepository {
       include: {
         categoria: true,
         inventario: true,
-        imagenes: {
-          where: { activa: true },
-          orderBy: { orden: 'asc' },
-        },
+        imagenes: activeProductImages,
       },
     });
   }
@@ -53,10 +59,7 @@ export class PrismaProductRepository implements IProductRepository {
       include: {
         categoria: true,
         inventario: true,
-        imagenes: {
-          where: { activa: true },
-          orderBy: { orden: 'asc' },
-        },
+        imagenes: activeProductImages,
       },
     });
   }
@@ -67,10 +70,7 @@ export class PrismaProductRepository implements IProductRepository {
       include: {
         categoria: true,
         inventario: true,
-        imagenes: {
-          where: { activa: true },
-          orderBy: { orden: 'asc' },
-        },
+        imagenes: activeProductImages,
       },
     });
   }
@@ -114,10 +114,7 @@ export class PrismaProductRepository implements IProductRepository {
       include: {
         categoria: true,
         inventario: true,
-        imagenes: {
-          where: { activa: true },
-          orderBy: { orden: 'asc' },
-        },
+        imagenes: activeProductImages,
         promociones: {
           where: { activa: true },
         },
@@ -134,10 +131,7 @@ export class PrismaProductRepository implements IProductRepository {
         },
         categoria: true,
         inventario: true,
-        imagenes: {
-          where: { activa: true },
-          orderBy: { orden: 'asc' },
-        },
+        imagenes: activeProductImages,
         promociones: {
           where: { activa: true },
         },

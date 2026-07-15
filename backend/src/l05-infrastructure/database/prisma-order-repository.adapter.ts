@@ -1,6 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { IOrderRepository } from '../../l04-domain/ports/order-repository.interface';
+import { BLOCKED_PRODUCT_IMAGE_URLS } from '../../l04-domain/products/image-url-policy';
+
+const orderProductImages = {
+  where: {
+    activa: true,
+    url: { notIn: BLOCKED_PRODUCT_IMAGE_URLS },
+  },
+  orderBy: { orden: 'asc' as const },
+  take: 1,
+};
 
 @Injectable()
 export class PrismaOrderRepository implements IOrderRepository {
@@ -84,7 +94,7 @@ export class PrismaOrderRepository implements IOrderRepository {
       orderBy: { createdAt: 'desc' },
       include: {
         lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } },
+          include: { publicacion: { include: { imagenes: orderProductImages } } },
         },
         pago: true,
       },
@@ -96,7 +106,7 @@ export class PrismaOrderRepository implements IOrderRepository {
       where: { id: orderId, compradorId: userId },
       include: {
         lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } },
+          include: { publicacion: { include: { imagenes: orderProductImages } } },
         },
         pago: true,
         direccion: true,
@@ -118,7 +128,7 @@ export class PrismaOrderRepository implements IOrderRepository {
       orderBy: { createdAt: 'desc' },
       include: {
         lineas: {
-          include: { publicacion: { include: { imagenes: { take: 1 } } } },
+          include: { publicacion: { include: { imagenes: orderProductImages } } },
         },
         comprador: {
           select: { nombre: true, email: true, telefono: true },

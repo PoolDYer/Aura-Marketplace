@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { ICartRepository } from '../../l04-domain/ports/cart-repository.interface';
+import { BLOCKED_PRODUCT_IMAGE_URLS } from '../../l04-domain/products/image-url-policy';
 
 @Injectable()
 export class PrismaCartRepository implements ICartRepository {
@@ -10,7 +11,11 @@ export class PrismaCartRepository implements ICartRepository {
         publicacion: {
           include: {
             inventario: true,
-            imagenes: { take: 1 },
+            imagenes: {
+              where: { activa: true, url: { notIn: BLOCKED_PRODUCT_IMAGE_URLS } },
+              orderBy: { orden: 'asc' },
+              take: 1,
+            },
           },
         },
       },

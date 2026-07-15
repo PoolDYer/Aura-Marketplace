@@ -130,15 +130,6 @@ async function main() {
           cantidad: 50
         }
       });
-      // Create image for Seller 1
-      await prisma.imagenPublicacion.create({
-        data: {
-          publicacionId: p1.id,
-          url: 'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626782/Aura/assets/frontend/src/assets/placeholder.png',
-          orden: 0
-        }
-      });
-
       // Create product for Seller 2
       const p2 = await prisma.publicacion.create({
         data: {
@@ -157,15 +148,6 @@ async function main() {
           cantidad: 40
         }
       });
-      // Create image for Seller 2
-      await prisma.imagenPublicacion.create({
-        data: {
-          publicacionId: p2.id,
-          url: 'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626782/Aura/assets/frontend/src/assets/placeholder.png',
-          orden: 0
-        }
-      });
-
       totalProducts += 2;
     }
   }

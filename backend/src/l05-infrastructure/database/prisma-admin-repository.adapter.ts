@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { IAdminRepository } from '../../l04-domain/ports/admin-repository.interface';
+import { BLOCKED_PRODUCT_IMAGE_URLS } from '../../l04-domain/products/image-url-policy';
 
 @Injectable()
 export class PrismaAdminRepository implements IAdminRepository {
@@ -107,7 +108,11 @@ export class PrismaAdminRepository implements IAdminRepository {
         categoria: { select: { nombre: true } },
         vendedor: { select: { nombre: true, email: true } },
         inventario: true,
-        imagenes: { where: { activa: true }, orderBy: { orden: 'asc' }, take: 1 },
+        imagenes: {
+          where: { activa: true, url: { notIn: BLOCKED_PRODUCT_IMAGE_URLS } },
+          orderBy: { orden: 'asc' },
+          take: 1,
+        },
       },
     });
   }

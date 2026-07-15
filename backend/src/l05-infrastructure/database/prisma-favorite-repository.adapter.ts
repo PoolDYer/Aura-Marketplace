@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { IFavoriteRepository } from '../../l04-domain/ports/favorite-repository.interface';
+import { BLOCKED_PRODUCT_IMAGE_URLS } from '../../l04-domain/products/image-url-policy';
 
 @Injectable()
 export class PrismaFavoriteRepository implements IFavoriteRepository {
@@ -12,7 +13,10 @@ export class PrismaFavoriteRepository implements IFavoriteRepository {
       include: {
         publicacion: {
           include: {
-            imagenes: true,
+            imagenes: {
+              where: { activa: true, url: { notIn: BLOCKED_PRODUCT_IMAGE_URLS } },
+              orderBy: { orden: 'asc' },
+            },
             inventario: true,
           },
         },

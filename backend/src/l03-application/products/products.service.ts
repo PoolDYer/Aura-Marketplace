@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, Inject } from '@nestjs/common';
 import { EstadoPublicacion } from '../../l04-domain/products/product.enums';
+import { isPersistableProductImageUrl } from '../../l04-domain/products/image-url-policy';
 import { IProductRepository } from '../../l04-domain/ports/product-repository.interface';
 import { ICategoriaRepository } from '../../l04-domain/ports/categoria-repository.interface';
 import { ICacheProvider } from '../../l04-domain/ports/cache-provider.interface';
@@ -194,7 +195,7 @@ export class ProductsService {
         ]
           .filter((url): url is string => typeof url === 'string')
           .map((url) => url.trim())
-          .filter(Boolean),
+          .filter(isPersistableProductImageUrl),
       ),
     );
   }

@@ -148,6 +148,15 @@ describe('ProductsService', () => {
     (service as any).clearProductCaches();
     expect(cache.deleteByPrefix).toHaveBeenCalledWith('products:vendor:');
     expect((service as any).normalizeImageUrls({ imageUrls: 'not-array', imagenUrl: ' solo.png ' })).toEqual(['solo.png']);
+    expect(
+      (service as any).normalizeImageUrls({
+        imageUrls: [
+          'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626782/Aura/assets/frontend/src/assets/placeholder.png',
+          ' https://img.test/real.png ',
+        ],
+        imagenUrl: 'https://res.cloudinary.com/dg4hes0tm/image/upload/v1783626782/Aura/assets/frontend/src/assets/placeholder.png',
+      }),
+    ).toEqual(['https://img.test/real.png']);
   });
 
   it('updates stock when the product has no inventory record', async () => {
