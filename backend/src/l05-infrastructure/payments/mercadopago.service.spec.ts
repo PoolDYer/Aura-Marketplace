@@ -60,7 +60,7 @@ describe('MercadoPagoService', () => {
 
   it('returns the public Mercado Pago key without exposing private credentials', async () => {
     const { service } = createService({
-      MERCADOPAGO_PUBLIC_KEY: 'pk_test_public',
+      MERCADOPAGO_PUBLIC_KEY: ' "pk_test_public" ',
       MERCADOPAGO_ACCESS_TOKEN: 'APP_USR_private',
     });
 
@@ -113,6 +113,15 @@ describe('MercadoPagoService', () => {
       'Mercado Pago rechazo la preferencia de pago',
     );
     await expect(service.createCheckoutPreference('user-1', 'order-1')).rejects.toThrow('Mercado Pago no devolvio una URL');
+  });
+
+  it('returns a clear setup message when Mercado Pago rejects the access token', async () => {
+    const { service } = createService();
+    preferenceCreate.mockRejectedValueOnce(new Error('invalid access token'));
+
+    await expect(service.createCheckoutPreference('user-1', 'order-1')).rejects.toThrow(
+      'Mercado Pago no esta configurado correctamente. Revisa MERCADOPAGO_ACCESS_TOKEN en Render.',
+    );
   });
 
   it('creates Brick initialization preferences', async () => {

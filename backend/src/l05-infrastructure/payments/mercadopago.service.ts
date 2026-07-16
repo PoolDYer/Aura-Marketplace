@@ -23,7 +23,7 @@ export class MercadoPagoService implements IPaymentGateway {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    const accessToken = this.configService.get<string>('MERCADOPAGO_ACCESS_TOKEN');
+    const accessToken = this.getConfigValue('MERCADOPAGO_ACCESS_TOKEN');
 
     if (!accessToken) {
       throw new Error('MERCADOPAGO_ACCESS_TOKEN no configurado');
@@ -40,7 +40,7 @@ export class MercadoPagoService implements IPaymentGateway {
 
   async getPublicConfig() {
     return {
-      mercadoPagoPublicKey: this.configService.get<string>('MERCADOPAGO_PUBLIC_KEY') || '',
+      mercadoPagoPublicKey: this.getConfigValue('MERCADOPAGO_PUBLIC_KEY') || '',
     };
   }
 
@@ -87,7 +87,7 @@ export class MercadoPagoService implements IPaymentGateway {
         },
       });
     } catch (err) {
-      throw new BadRequestException(err?.message || 'Mercado Pago rechazo la preferencia de pago');
+      throw new BadRequestException(this.getMercadoPagoErrorMessage(err, 'Mercado Pago rechazo la preferencia de pago'));
     }
 
     await this.prisma.pago.upsert({
@@ -191,7 +191,7 @@ export class MercadoPagoService implements IPaymentGateway {
         },
       });
     } catch (err) {
-      throw new BadRequestException(err?.message || 'Mercado Pago rechazo el pago');
+      throw new BadRequestException(this.getMercadoPagoErrorMessage(err, 'Mercado Pago rechazo el pago'));
     }
 
     return this.applyPaymentStatus(paymentResponse, order.id);
@@ -336,7 +336,7 @@ export class MercadoPagoService implements IPaymentGateway {
         },
       });
     } catch (err) {
-      throw new BadRequestException(err?.message || 'Mercado Pago rechazo la preferencia de pago');
+      throw new BadRequestException(this.getMercadoPagoErrorMessage(err, 'Mercado Pago rechazo la preferencia de pago'));
     }
   }
 
@@ -385,6 +385,22 @@ export class MercadoPagoService implements IPaymentGateway {
   }
 
   private getCurrency() {
-    return this.configService.get<string>('MERCADOPAGO_CURRENCY') || 'PEN';
+    return this.getConfigValue('MERCADOPAGO_CURRENCY') || 'PEN';
+  }
+
+  private getConfigValue(key: string) {
+    const value = this.configService.get<string>(key);
+
+    return typeof value === 'string' ? value.trim().replace(/^["']|["']$/g, '').trim() : value;
+  }
+
+  private getMercadoPagoErrorMessage(err: any, fallback: string) {
+    const message = typeof err?.message === 'string' ? err.message : '';
+
+    if (message.toLowerCase().includes('invalid access token')) {
+      return 'Mercado Pago no esta configurado correctamente. Revisa MERCADOPAGO_ACCESS_TOKEN en Render.';
+    }
+
+    return message || fallback;
   }
 }
