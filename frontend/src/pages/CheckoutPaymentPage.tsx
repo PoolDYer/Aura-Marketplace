@@ -139,6 +139,7 @@ export default function CheckoutPaymentPage() {
       payer: {
         email: brick.payer.email,
         firstName: brick.payer.firstName,
+        entityType: 'individual' as const,
       },
       items: order
         ? {
@@ -161,7 +162,6 @@ export default function CheckoutPaymentPage() {
           customVariables: {
             baseColor: '#845400',
             secondaryColor: '#005144',
-            borderRadius: '8px',
             fontSizeMedium: '15px',
           },
         },

@@ -198,6 +198,15 @@ describe('MercadoPagoService', () => {
     await expect(service.processBrickPayment('user-1', 'order-1', {})).rejects.toThrow('Mercado Pago rechazo el pago');
   });
 
+  it('explains live credentials rejections during tests', async () => {
+    const { service } = createService();
+    paymentCreate.mockRejectedValueOnce(new Error('Unauthorized use of live credentials'));
+
+    await expect(service.processBrickPayment('user-1', 'order-1', {})).rejects.toThrow(
+      'Mercado Pago rechazo la prueba porque estas usando credenciales de produccion.',
+    );
+  });
+
   it('validates webhooks, extracts payment ids and verifies payments', async () => {
     const { service } = createService({ MERCADOPAGO_WEBHOOK_SECRET: 'secret' });
     paymentGet.mockResolvedValueOnce({ id: 99, status: 'rejected', external_reference: 'order-1', payment_method_id: 'visa' });

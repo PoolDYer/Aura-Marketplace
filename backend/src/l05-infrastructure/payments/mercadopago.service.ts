@@ -401,6 +401,10 @@ export class MercadoPagoService implements IPaymentGateway {
       return 'Mercado Pago no esta configurado correctamente. Revisa MERCADOPAGO_ACCESS_TOKEN en Render.';
     }
 
+    if (message.toLowerCase().includes('unauthorized use of live credentials')) {
+      return 'Mercado Pago rechazo la prueba porque estas usando credenciales de produccion. Usa una cuenta Yape real o cambia a credenciales de prueba de Mercado Pago.';
+    }
+
     return message || fallback;
   }
 }
