@@ -1,32 +1,154 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ordersApi, Order } from '../../api/orders';
+import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  CreditCard,
+  Home,
+  Info,
+  Loader2,
+  MapPin,
+  Package,
+  PackageCheck,
+  ShoppingBag,
+  Truck,
+  XCircle,
+} from 'lucide-react';
 
-const C = {
-  primary: '#845400', primaryContainer: '#ffb347', secondary: '#006b5b',
-  secondaryContainer: '#96f0db', bgCatalog: '#FAF6F8', surfaceCatalog: '#FFFFFF',
-  surfaceContainerLowest: '#ffffff', surfaceContainerLow: '#f6f2f4',
-  surfaceContainer: '#f1edef', surfaceContainerHigh: '#ebe7e9',
-  surfaceContainerHighest: '#e5e1e3',
-  onSurface: '#1c1b1d', onSurfaceVariant: '#524535',
-  outlineVariant: '#d6c3b0', outline: '#847463',
-  onPrimary: '#ffffff', onPrimaryContainer: '#704700',
-  onSecondary: '#ffffff', onSecondaryContainer: '#00705f',
+import { ordersApi, type Order } from '../../api/orders';
+
+const STATUS_STEPS = [
+  { key: 'PENDIENTE', label: 'PENDIENTE', icon: Clock3 },
+  { key: 'CONFIRMADA', label: 'CONFIRMADA', icon: CheckCircle2 },
+  { key: 'EN_PREPARACION', label: 'EN PREPARACION', icon: Package },
+  { key: 'DESPACHADA', label: 'DESPACHADA', icon: Truck },
+  { key: 'ENTREGADA', label: 'ENTREGADA', icon: Home },
+];
+
+const formatMoney = (value?: string | number | null) => `S/ ${Number(value || 0).toFixed(2)}`;
+
+const formatDate = (value?: string | null) => {
+  if (!value) return 'No disponible';
+
+  return new Date(value).toLocaleDateString('es-PE', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
+  });
 };
 
-const STATUS_STEPS = ['PENDIENTE', 'CONFIRMADA', 'EN_PREPARACION', 'DESPACHADA', 'ENTREGADA'];
+const addBusinessEstimate = (value?: string | null) => {
+  const date = value ? new Date(value) : new Date();
+  date.setDate(date.getDate() + 5);
 
-const getStatusStyle = (estado: string) => {
-  switch (estado) {
-    case 'ENTREGADA': return { bg: `${C.secondaryContainer}60`, color: C.onSecondaryContainer, icon: 'check_circle', label: 'Entregado' };
-    case 'DESPACHADA': return { bg: `${C.primaryContainer}40`, color: C.onPrimaryContainer, icon: 'local_shipping', label: 'En Camino' };
-    case 'EN_PREPARACION': return { bg: '#f5d9fd80', color: '#5d4865', icon: 'manufacturing', label: 'En Preparación' };
-    case 'CONFIRMADA': return { bg: `${C.secondaryContainer}40`, color: C.onSecondaryContainer, icon: 'verified', label: 'Confirmada' };
-    case 'PENDIENTE': return { bg: `${C.primaryContainer}20`, color: C.onPrimaryContainer, icon: 'schedule', label: 'Pendiente' };
-    case 'CANCELADA': return { bg: '#ffdad640', color: '#93000a', icon: 'cancel', label: 'Cancelada' };
-    default: return { bg: C.surfaceContainerHighest, color: C.onSurfaceVariant, icon: 'package_2', label: estado };
+  return date.toLocaleDateString('es-PE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
+const getOrderCode = (order: Order) => order.numeroConfirmacion || order.id.slice(0, 8).toUpperCase();
+
+const getShortOrderId = (order: Order) => {
+  const parts = order.numeroConfirmacion?.split('-').filter(Boolean) ?? [];
+  return parts[parts.length - 1] || order.id.slice(0, 6).toUpperCase();
+};
+
+const getAddressLines = (order: Order) => {
+  const address = order.direccion;
+  if (!address) return ['No disponible'];
+
+  const recipient = order.comprador?.nombre;
+  const street = [address.calle, address.numero].filter(Boolean).join(' ');
+  const city = [address.ciudad, address.estado, address.codigoPostal].filter(Boolean).join(', ');
+
+  return [recipient, street, city].filter(Boolean);
+};
+
+const getPaymentLabel = (method?: string | null) => {
+  if (!method) return 'No disponible';
+
+  return method
+    .replace(/^mercadopago_?/i, 'Mercado Pago ')
+    .replace(/_/g, ' ')
+    .trim();
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'PENDIENTE':
+      return 'Pendiente';
+    case 'CONFIRMADA':
+      return 'Confirmada';
+    case 'EN_PREPARACION':
+      return 'En preparacion';
+    case 'DESPACHADA':
+      return 'Despachada';
+    case 'ENTREGADA':
+      return 'Entregada';
+    case 'CANCELADA':
+      return 'Cancelada';
+    default:
+      return status;
   }
 };
+
+function SectionCard({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`rounded-xl border border-[#f1edef] bg-white shadow-[0_14px_40px_rgba(33,21,39,0.06)] ${className}`}>
+      {children}
+    </section>
+  );
+}
+
+function CardTitle({
+  icon: Icon,
+  children,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  children: ReactNode;
+}) {
+  return (
+    <h2 className="mb-4 flex items-center gap-2 font-auth-display text-xl font-bold text-[#211527]">
+      <Icon className="h-5 w-5 text-[#845400]" />
+      {children}
+    </h2>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="flex min-h-[calc(100vh-96px)] items-center justify-center bg-[#FAF6F8]">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-[#eadfd2] bg-white px-10 py-8 text-[#524535] shadow-sm">
+        <Loader2 className="h-9 w-9 animate-spin text-[#845400]" />
+        <p>Estamos cargando tu pedido...</p>
+      </div>
+    </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="flex min-h-[calc(100vh-96px)] items-center justify-center bg-[#FAF6F8] px-4 text-center">
+      <section className="w-full max-w-md rounded-[28px] border border-[#eadfd2] bg-white px-8 py-10 shadow-sm">
+        <XCircle className="mx-auto mb-4 h-12 w-12 text-[#ba1a1a]" />
+        <h1 className="font-auth-display text-2xl font-bold text-[#211527]">Orden no encontrada</h1>
+        <p className="mt-2 text-sm leading-6 text-[#524535]">No pudimos cargar los detalles de este pedido.</p>
+        <Link className="mt-6 inline-flex rounded-full bg-[#845400] px-6 py-3 text-sm font-bold text-white" to="/profile/orders">
+          Volver a mis pedidos
+        </Link>
+      </section>
+    </div>
+  );
+}
 
 export default function OrderDetailPage() {
   const { id } = useParams();
@@ -35,185 +157,212 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    ordersApi.getOrderById(id).then(res => setOrder(res.data)).catch(console.error).finally(() => setIsLoading(false));
+
+    ordersApi
+      .getOrderById(id)
+      .then((res) => setOrder(res.data))
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
   }, [id]);
 
-  if (isLoading) {
-    return (
-      <div style={{ background: C.bgCatalog }} className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 animate-spin" style={{ borderColor: `${C.primaryContainer} transparent` }} />
-      </div>
-    );
-  }
+  const currentStep = useMemo(() => {
+    if (!order) return -1;
+    return STATUS_STEPS.findIndex((step) => step.key === order.estado);
+  }, [order]);
 
-  if (!order) {
-    return (
-      <div style={{ background: C.bgCatalog, minHeight: '100vh', padding: '40px 24px', textAlign: 'center' }}>
-        <span className="material-symbols-outlined" style={{ fontSize: '56px', color: C.onSurfaceVariant, display: 'block', marginBottom: '12px' }}>search_off</span>
-        <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '24px', fontWeight: 600, color: C.onSurface, marginBottom: '8px' }}>Orden no encontrada</h2>
-        <Link to="/profile/orders" style={{ color: C.primary, fontSize: '14px' }}>← Volver a mis órdenes</Link>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingState />;
+  if (!order) return <EmptyState />;
 
-  const st = getStatusStyle(order.estado);
-  const currentStep = STATUS_STEPS.indexOf(order.estado);
+  const addressLines = getAddressLines(order);
+  const isCancelled = order.estado === 'CANCELADA';
+  const paymentStatus = order.pago?.estado || 'No disponible';
 
   return (
-    <div style={{ background: C.bgCatalog, fontFamily: "'General Sans', sans-serif", minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ padding: '20px 24px', borderBottom: `1px solid ${C.outlineVariant}33`, background: C.surfaceContainerLowest, display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <Link to="/profile/orders"
-          style={{ padding: '8px', borderRadius: '9999px', color: C.onSurfaceVariant, display: 'flex', textDecoration: 'none', transition: 'all 0.15s' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.surfaceContainerHigh}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-        </Link>
-        <div>
-          <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '24px', fontWeight: 600, color: C.onSurface, marginBottom: '2px' }}>
-            Detalle de Orden
-          </h2>
-          <p style={{ color: C.onSurfaceVariant, fontFamily: "'IBM Plex Mono', monospace", fontSize: '13px' }}>#{order.numeroConfirmacion}</p>
-        </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <span style={{ background: st.bg, color: st.color, padding: '6px 14px', borderRadius: '9999px', fontSize: '13px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'IBM Plex Mono', monospace" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{st.icon}</span>
-            {st.label}
-          </span>
-        </div>
-      </div>
+    <div className="min-h-[calc(100vh-96px)] bg-[#FAF6F8] font-sans text-[#211527]">
+      <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-8 md:py-16">
+        <section className="mb-10 flex flex-col gap-5 text-center md:text-left">
+          <Link
+            to="/profile/orders"
+            className="inline-flex w-fit items-center gap-2 self-center rounded-full border border-[#d6c3b0] bg-white px-4 py-2 text-sm font-semibold text-[#524535] transition-colors hover:border-[#845400] hover:text-[#845400] md:self-start"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Mis pedidos
+          </Link>
 
-      <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {/* Status Timeline (only for non-cancelled) */}
-        {order.estado !== 'CANCELADA' && (
-          <div style={{ background: C.surfaceCatalog, borderRadius: '16px', padding: '20px 24px', border: `1px solid ${C.outlineVariant}1A`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '16px', fontWeight: 600, color: C.onSurface, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="material-symbols-outlined" style={{ color: C.primary }}>timeline</span>
-              Seguimiento
-            </h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
-              {STATUS_STEPS.map((step, idx) => {
-                const done = idx <= currentStep;
-                const isCurrent = idx === currentStep;
+          <div>
+            <h1 className="font-auth-display text-4xl font-bold text-[#211527] md:text-5xl">Seguimiento de Pedido</h1>
+            <div className="mt-3 flex flex-col items-center gap-2 text-[#524535] md:flex-row md:items-start">
+              <span className="rounded-lg bg-[#f1edef] px-3 py-1 font-mono text-sm font-semibold text-[#845400]">
+                #{getOrderCode(order)}
+              </span>
+              <span className="hidden md:inline">-</span>
+              <span className="text-sm md:text-base">
+                Entrega estimada: <strong className="text-[#845400]">{addBusinessEstimate(order.createdAt)}</strong>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {isCancelled ? (
+          <SectionCard className="mb-10 p-6 md:p-8">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#ffdad6] text-[#93000a]">
+                <XCircle className="h-7 w-7" />
+              </div>
+              <h2 className="font-auth-display text-2xl font-bold text-[#211527]">Pedido cancelado</h2>
+              <p className="max-w-xl text-sm leading-6 text-[#524535]">
+                Este pedido fue cancelado. Puedes revisar tus otros pedidos o volver al catalogo.
+              </p>
+            </div>
+          </SectionCard>
+        ) : (
+          <SectionCard className="mb-10 overflow-hidden p-6 md:p-8">
+            <div className="relative flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+              <div className="absolute left-0 right-0 top-5 z-0 hidden h-0.5 bg-[#e5e1e3] md:block" />
+              <div
+                className="absolute left-0 top-5 z-0 hidden h-0.5 bg-[#7dd7c2] md:block"
+                style={{ width: `${Math.max(currentStep, 0) * 25}%` }}
+              />
+
+              {STATUS_STEPS.map((step, index) => {
+                const Icon = step.icon;
+                const done = index <= currentStep;
+                const active = index === currentStep;
+
                 return (
-                  <div key={step} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
-                      <div style={{
-                        width: isCurrent ? '32px' : '24px', height: isCurrent ? '32px' : '24px',
-                        borderRadius: '9999px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: done ? C.secondary : C.surfaceContainerHigh,
-                        border: isCurrent ? `3px solid ${C.secondaryContainer}` : 'none',
-                        transition: 'all 0.3s',
-                      }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '14px', color: done ? C.onSecondary : C.onSurfaceVariant, fontVariationSettings: done ? "'FILL' 1" : "'FILL' 0" }}>
-                          {done ? 'check' : 'radio_button_unchecked'}
-                        </span>
-                      </div>
-                      <span style={{ fontSize: '10px', color: done ? C.secondary : C.onSurfaceVariant, fontWeight: isCurrent ? 700 : 400, marginTop: '4px', textAlign: 'center', fontFamily: "'IBM Plex Mono', monospace", whiteSpace: 'nowrap' }}>
-                        {step.replace('_', ' ')}
-                      </span>
+                  <div key={step.key} className="relative z-10 flex items-center gap-3 md:flex-1 md:flex-col md:gap-2">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border shadow-sm ${
+                        active
+                          ? 'border-white bg-[#ffb347] text-[#704700] shadow-[0_10px_28px_rgba(132,84,0,0.18)] ring-4 ring-white'
+                          : done
+                            ? 'border-[#7dd7c2] bg-[#7dd7c2] text-[#005144]'
+                            : 'border-[#e5e1e3] bg-[#e5e1e3] text-[#847463]'
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
                     </div>
-                    {idx < STATUS_STEPS.length - 1 && (
-                      <div style={{ height: '2px', flex: 1, background: idx < currentStep ? C.secondary : C.surfaceContainerHigh, marginBottom: '14px' }} />
-                    )}
+                    <span
+                      className={`font-mono text-xs font-bold ${
+                        active ? 'text-[#845400]' : done ? 'text-[#006b5b]' : 'text-[#847463]'
+                      }`}
+                    >
+                      {step.label}
+                    </span>
                   </div>
                 );
               })}
             </div>
-          </div>
+          </SectionCard>
         )}
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Products */}
-          <div className="md:col-span-2" style={{ background: C.surfaceCatalog, borderRadius: '16px', padding: '20px', border: `1px solid ${C.outlineVariant}1A`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '16px', fontWeight: 600, color: C.onSurface, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span className="material-symbols-outlined" style={{ color: C.primary }}>shopping_bag</span>
-              Productos ({order.lineas.length})
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {order.lineas.map(linea => (
-                <div key={linea.id} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', borderRadius: '10px', background: C.surfaceContainerLowest, border: `1px solid ${C.outlineVariant}1A` }}>
-                  <div style={{ width: '56px', height: '56px', borderRadius: '8px', background: C.surfaceContainerHigh, overflow: 'hidden', flexShrink: 0 }}>
-                    {linea.publicacion?.imagenes?.[0]?.url && (
-                      <img src={linea.publicacion.imagenes[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    )}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ color: C.onSurface, fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>{linea.nombreProducto}</p>
-                    <p style={{ color: C.onSurfaceVariant, fontSize: '12px' }}>Cant: {linea.cantidad}</p>
-                  </div>
-                  <p style={{ color: C.onSurface, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", fontSize: '14px' }}>
-                    ${Number(linea.subtotal).toFixed(2)}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${C.outlineVariant}33`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: C.onSurfaceVariant, fontSize: '14px' }}>Total del Pedido</span>
-              <span style={{ color: C.onSurface, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", fontSize: '20px' }}>
-                ${Number(order.total).toFixed(2)}
-              </span>
-            </div>
-          </div>
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          <SectionCard className="p-5 md:p-7 lg:col-span-2">
+            <CardTitle icon={ShoppingBag}>Resumen de Pedido</CardTitle>
 
-          {/* Sidebar Info */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {/* Shipping */}
-            <div style={{ background: C.surfaceCatalog, borderRadius: '16px', padding: '16px', border: `1px solid ${C.outlineVariant}1A`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '15px', fontWeight: 600, color: C.onSurface, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: C.primary }}>location_on</span>
-                Dirección de Envío
-              </h3>
-              {order.direccion ? (
-                <div style={{ color: C.onSurfaceVariant, fontSize: '13px', lineHeight: 1.6 }}>
-                  <p style={{ color: C.onSurface, fontWeight: 500 }}>{order.direccion.calle}</p>
-                  <p>{order.direccion.ciudad}, {order.direccion.estado} {order.direccion.codigoPostal}</p>
-                </div>
-              ) : <p style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>No disponible</p>}
+            <div className="space-y-4">
+              {order.lineas.map((line) => {
+                const imageUrl = line.publicacion?.imagenes?.[0]?.url;
+
+                return (
+                  <article
+                    key={line.id}
+                    className="group flex flex-col gap-4 rounded-xl border border-[#f1edef] bg-white p-3 sm:flex-row sm:items-center"
+                  >
+                    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#f6f2f4]">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={line.nombreProducto}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <PackageCheck className="h-9 w-9 text-[#847463]" />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="line-clamp-2 font-semibold text-[#211527]">{line.nombreProducto}</h3>
+                      <p className="mt-1 text-sm text-[#524535]">Cantidad: {line.cantidad}</p>
+                      {line.publicacion?.descripcion ? (
+                        <p className="mt-1 line-clamp-2 text-sm leading-6 text-[#524535]">{line.publicacion.descripcion}</p>
+                      ) : null}
+                    </div>
+                    <span className="font-mono text-sm font-bold text-[#211527] sm:text-right">
+                      {formatMoney(line.subtotal)}
+                    </span>
+                  </article>
+                );
+              })}
             </div>
 
-            {/* Payment */}
-            <div style={{ background: C.surfaceCatalog, borderRadius: '16px', padding: '16px', border: `1px solid ${C.outlineVariant}1A`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '15px', fontWeight: 600, color: C.onSurface, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: C.primary }}>credit_card</span>
-                Pago
-              </h3>
-              {order.pago ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>Estado</span>
-                    <span style={{ color: C.onSurface, fontSize: '13px', fontWeight: 500 }}>{order.pago.estado}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>Método</span>
-                    <span style={{ color: C.onSurface, fontSize: '13px', fontWeight: 500 }}>{order.pago.metodoPago || 'N/A'}</span>
-                  </div>
-                </div>
-              ) : <p style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>No disponible</p>}
-            </div>
-
-            {/* Order Info */}
-            <div style={{ background: C.surfaceCatalog, borderRadius: '16px', padding: '16px', border: `1px solid ${C.outlineVariant}1A`, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-              <h3 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '15px', fontWeight: 600, color: C.onSurface, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px', color: C.primary }}>info</span>
-                Detalles
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>Fecha</span>
-                  <span style={{ color: C.onSurface, fontSize: '13px', fontWeight: 500 }}>{new Date(order.createdAt).toLocaleDateString('es')}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: C.onSurfaceVariant, fontSize: '13px' }}>ID Orden</span>
-                  <span style={{ color: C.onSurface, fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px' }}>#{order.numeroConfirmacion?.split('-')[2]}</span>
-                </div>
+            <div className="mt-6 space-y-3 border-t border-[#f1edef] pt-5">
+              <div className="flex justify-between text-sm text-[#524535]">
+                <span>Subtotal</span>
+                <span>{formatMoney(order.total)}</span>
+              </div>
+              <div className="flex justify-between text-sm text-[#524535]">
+                <span>Envio</span>
+                <span className="font-semibold text-[#006b5b]">Gratis</span>
+              </div>
+              <div className="flex justify-between pt-2 font-auth-display text-2xl font-bold text-[#211527]">
+                <span>Total</span>
+                <span>{formatMoney(order.total)}</span>
               </div>
             </div>
+          </SectionCard>
+
+          <div className="space-y-6 lg:col-span-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <SectionCard className="p-5 md:p-7">
+                <CardTitle icon={MapPin}>Direccion de Envio</CardTitle>
+                <div className="space-y-1 text-sm leading-6 text-[#524535]">
+                  {addressLines.map((line) => (
+                    <p key={line} className={line === addressLines[0] ? 'font-semibold text-[#211527]' : ''}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </SectionCard>
+
+              <SectionCard className="p-5 md:p-7">
+                <CardTitle icon={CreditCard}>Pago</CardTitle>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#524535]">Estado</span>
+                    <span className="rounded-lg bg-[#96f0db]/60 px-3 py-1 font-mono text-xs font-bold text-[#00705f]">
+                      {paymentStatus}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#524535]">Metodo</span>
+                    <span className="text-right font-mono text-xs font-semibold text-[#211527]">
+                      {getPaymentLabel(order.pago?.metodoPago)}
+                    </span>
+                  </div>
+                </div>
+              </SectionCard>
+
+              <SectionCard className="p-5 md:p-7">
+                <CardTitle icon={Info}>Detalles</CardTitle>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#524535]">Fecha</span>
+                    <span className="font-mono text-xs font-semibold text-[#211527]">{formatDate(order.createdAt)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#524535]">ID Pedido</span>
+                    <span className="font-mono text-xs font-semibold text-[#211527]">#{getShortOrderId(order)}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm text-[#524535]">Estado actual</span>
+                    <span className="text-right font-mono text-xs font-semibold text-[#845400]">{getStatusLabel(order.estado)}</span>
+                  </div>
+                </div>
+              </SectionCard>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
