@@ -269,7 +269,7 @@ export default function ProductFormPage() {
               {uploadingSlot === 0 ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80 text-[#845400] backdrop-blur-sm">
                   <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="text-[14px] font-semibold">Subiendo a Cloudinary...</span>
+                  <span className="text-[14px] font-semibold">Subiendo imagen...</span>
                 </div>
               ) : null}
             </button>
