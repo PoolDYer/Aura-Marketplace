@@ -9,13 +9,21 @@ import {
   type CheckoutSummaryItem,
 } from '../components/checkout/CheckoutOrderSummary';
 
-const mercadoPagoPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+const embeddedMercadoPagoPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as string | undefined;
+let initializedMercadoPagoPublicKey: string | null = null;
 
-if (mercadoPagoPublicKey) {
-  initMercadoPago(mercadoPagoPublicKey, {
+const setupMercadoPago = (publicKey: string) => {
+  if (initializedMercadoPagoPublicKey === publicKey) return;
+
+  initMercadoPago(publicKey, {
     locale: 'es-PE',
     advancedFraudPrevention: true,
   });
+  initializedMercadoPagoPublicKey = publicKey;
+};
+
+if (embeddedMercadoPagoPublicKey) {
+  setupMercadoPago(embeddedMercadoPagoPublicKey);
 }
 
 type BrickInitialization = {
@@ -74,6 +82,7 @@ export default function CheckoutPaymentPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [brick, setBrick] = useState<BrickInitialization | null>(null);
+  const [mercadoPagoPublicKey, setMercadoPagoPublicKey] = useState(embeddedMercadoPagoPublicKey || '');
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('mercadopago');
   const [loading, setLoading] = useState(true);
   const [brickReady, setBrickReady] = useState(false);
@@ -87,13 +96,23 @@ export default function CheckoutPaymentPage() {
     const loadPayment = async () => {
       if (!orderId) return;
 
-      if (!mercadoPagoPublicKey) {
-        setError('La llave publica de Mercado Pago no esta configurada.');
-        setLoading(false);
-        return;
-      }
-
       try {
+        let publicKey = embeddedMercadoPagoPublicKey;
+
+        if (!publicKey) {
+          const configRes = await ordersApi.getPaymentConfig();
+          publicKey = configRes.data.mercadoPagoPublicKey;
+        }
+
+        if (!publicKey) {
+          setError('La llave publica de Mercado Pago no esta configurada.');
+          setLoading(false);
+          return;
+        }
+
+        setupMercadoPago(publicKey);
+        setMercadoPagoPublicKey(publicKey);
+
         const [orderRes, brickRes] = await Promise.all([
           ordersApi.getOrderById(orderId),
           ordersApi.createBrickInitialization(orderId),

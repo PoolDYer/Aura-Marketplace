@@ -1,4 +1,5 @@
 export interface IPaymentGateway {
+  getPublicConfig(): Promise<any>;
   createCheckoutPreference(userId: string, orderId: string): Promise<any>;
   createBrickInitialization(userId: string, orderId: string): Promise<any>;
   processBrickPayment(userId: string, orderId: string, body: any): Promise<any>;

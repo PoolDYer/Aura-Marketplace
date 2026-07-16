@@ -41,6 +41,7 @@ export const ordersApi = {
   updateOrderStatus: (orderId: string, estado: string) => api.patch(`/vendors/me/orders/${orderId}/status`, { estado }),
 
   // Payments
+  getPaymentConfig: () => api.get<{ mercadoPagoPublicKey: string }>('/payments/config'),
   createCheckoutPreference: (orderId: string) => api.post<{preferenceId: string, url: string}>(`/payments/checkout/${orderId}`),
   createBrickInitialization: (orderId: string) => api.post<{
     preferenceId: string;

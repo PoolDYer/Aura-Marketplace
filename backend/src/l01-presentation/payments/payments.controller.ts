@@ -9,6 +9,13 @@ import { PaymentsService } from '../../l03-application/payments/payments.service
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
+  @Public()
+  @Get('config')
+  @ApiOperation({ summary: 'Obtener configuracion publica de pagos' })
+  getPublicConfig() {
+    return this.paymentsService.getPublicConfig();
+  }
+
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('checkout/:orderId')

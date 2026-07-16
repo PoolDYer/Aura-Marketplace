@@ -3,6 +3,7 @@ import { PaymentsController } from './payments.controller';
 describe('PaymentsController', () => {
   const createController = () => {
     const mercadoPagoService = {
+      getPublicConfig: jest.fn(),
       createCheckoutPreference: jest.fn(),
       createBrickInitialization: jest.fn(),
       processBrickPayment: jest.fn(),
@@ -13,6 +14,14 @@ describe('PaymentsController', () => {
     const controller = new PaymentsController(mercadoPagoService as any);
     return { controller, mercadoPagoService };
   };
+
+  it('getPublicConfig should return public payment configuration', () => {
+    const { controller, mercadoPagoService } = createController();
+    mercadoPagoService.getPublicConfig.mockReturnValue({ mercadoPagoPublicKey: 'pk_test_123' });
+
+    expect(controller.getPublicConfig()).toEqual({ mercadoPagoPublicKey: 'pk_test_123' });
+    expect(mercadoPagoService.getPublicConfig).toHaveBeenCalled();
+  });
 
   it('createCheckoutPreference should call mercadoPagoService.createCheckoutPreference', () => {
     const { controller, mercadoPagoService } = createController();

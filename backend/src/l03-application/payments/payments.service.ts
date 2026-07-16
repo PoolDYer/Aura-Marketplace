@@ -7,6 +7,10 @@ export class PaymentsService {
     @Inject('IPaymentGateway') private readonly gateway: IPaymentGateway,
   ) {}
 
+  getPublicConfig() {
+    return this.gateway.getPublicConfig();
+  }
+
   createCheckoutPreference(userId: string, orderId: string) {
     return this.gateway.createCheckoutPreference(userId, orderId);
   }

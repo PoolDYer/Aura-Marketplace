@@ -58,6 +58,17 @@ describe('MercadoPagoService', () => {
     expect(() => new MercadoPagoService(config as any, createPrisma() as any)).toThrow('MERCADOPAGO_ACCESS_TOKEN no configurado');
   });
 
+  it('returns the public Mercado Pago key without exposing private credentials', async () => {
+    const { service } = createService({
+      MERCADOPAGO_PUBLIC_KEY: 'pk_test_public',
+      MERCADOPAGO_ACCESS_TOKEN: 'APP_USR_private',
+    });
+
+    await expect(service.getPublicConfig()).resolves.toEqual({
+      mercadoPagoPublicKey: 'pk_test_public',
+    });
+  });
+
   it('creates checkout preferences and persists pending payments', async () => {
     const { service, prisma } = createService({
       FRONTEND_URL: 'https://front.test',

@@ -38,6 +38,12 @@ export class MercadoPagoService implements IPaymentGateway {
     this.payment = new Payment(client);
   }
 
+  async getPublicConfig() {
+    return {
+      mercadoPagoPublicKey: this.configService.get<string>('MERCADOPAGO_PUBLIC_KEY') || '',
+    };
+  }
+
   async createCheckoutPreference(userId: string, orderId: string) {
     const order = await this.getPendingOrder(userId, orderId);
 
