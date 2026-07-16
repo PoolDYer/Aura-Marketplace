@@ -4,7 +4,7 @@ services:
     runtime: node
     rootDir: backend
     buildCommand: npm ci && npx prisma generate && npm run build
-    preDeployCommand: npx prisma migrate deploy
+    preDeployCommand: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=1 npx prisma migrate deploy
     startCommand: node dist/src/main.js
     healthCheckPath: /health
     autoDeployTrigger: off
@@ -21,6 +21,8 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+        value: "1"
       - key: UPSTASH_REDIS_REST_URL
         sync: false
       - key: UPSTASH_REDIS_REST_TOKEN

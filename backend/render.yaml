@@ -3,7 +3,7 @@ services:
     name: ecommerce-api
     runtime: node
     buildCommand: npm ci && npx prisma generate && npm run build
-    preDeployCommand: npx prisma migrate deploy
+    preDeployCommand: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=1 npx prisma migrate deploy
     startCommand: node dist/src/main.js
     healthCheckPath: /health
     envVars:
@@ -11,6 +11,8 @@ services:
         value: production
       - key: DATABASE_URL
         sync: false # Set securely in Render Dashboard
+      - key: PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK
+        value: "1"
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
