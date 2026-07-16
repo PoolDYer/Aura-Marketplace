@@ -209,7 +209,7 @@ export default function CheckoutShippingPage() {
                   <p className="font-semibold text-[#211527]">Envio Estandar Ajustado</p>
                   <p className="text-sm text-[#524535]">3 a 5 dias habiles</p>
                 </div>
-                <span className="font-semibold text-[#845400]">$15.00</span>
+                <span className="font-semibold text-[#845400]">S/ 15.00</span>
               </div>
             </div>
           </div>

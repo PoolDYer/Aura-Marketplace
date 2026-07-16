@@ -124,7 +124,7 @@ export default function AdminReportsPage() {
             </div>
             <div>
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '32px', fontWeight: 500, color: C.onSurface, marginBottom: '4px' }}>
-                ${reports ? Number(reports.totalSales).toLocaleString() : '—'}
+                S/ {reports ? Number(reports.totalSales).toLocaleString() : '—'}
               </div>
               <div className="flex items-center gap-1" style={{ color: C.secondary, fontFamily: "'IBM Plex Mono', monospace", fontSize: '12px' }}>
                 <span className="material-symbols-outlined text-sm">trending_up</span>
@@ -208,7 +208,7 @@ export default function AdminReportsPage() {
                           {order.comprador?.nombre || '—'}
                         </td>
                         <td style={{ padding: '12px 16px', fontFamily: "'IBM Plex Mono', monospace", fontSize: '14px', color: C.onSurface }}>
-                          ${Number(order.total).toFixed(2)}
+                          S/ {Number(order.total).toFixed(2)}
                         </td>
                         <td style={{ padding: '12px 16px' }}>
                           <span style={{ background: st.bg, color: st.color, padding: '4px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>

@@ -52,7 +52,7 @@ function formatPrice(value: string | number) {
 }
 
 function formatCurrency(value: string | number) {
-  return `$${formatPrice(value).toFixed(2)}`;
+  return `S/ ${formatPrice(value).toFixed(2)}`;
 }
 
 function getAvailableStock(product: CatalogProduct) {

@@ -24,7 +24,7 @@ type AppliedCoupon = {
 };
 
 function formatCurrency(value: number) {
-  return `$${value.toFixed(2)}`;
+  return `S/ ${value.toFixed(2)}`;
 }
 
 export default function CartPage() {

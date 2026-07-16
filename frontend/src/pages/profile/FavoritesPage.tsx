@@ -28,7 +28,7 @@ const getAvailableStock = (favorite: FavoriteRecord) => {
 
 const formatPrice = (value: string | number | undefined) => {
   const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? `$${amount.toFixed(2)}` : '$0.00';
+  return Number.isFinite(amount) ? `S/ ${amount.toFixed(2)}` : 'S/ 0.00';
 };
 
 export default function FavoritesPage() {

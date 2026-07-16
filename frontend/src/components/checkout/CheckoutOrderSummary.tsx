@@ -32,7 +32,7 @@ type CheckoutOrderSummaryProps = {
   className?: string;
 };
 
-function formatCurrency(value: number, currency = '$') {
+function formatCurrency(value: number, currency = 'S/ ') {
   return `${currency}${value.toFixed(2)}`;
 }
 
@@ -50,7 +50,7 @@ export function CheckoutOrderSummary({
   shipping = 0,
   discount = 0,
   total,
-  currency = '$',
+  currency = 'S/ ',
   couponSlot,
   action,
   className,

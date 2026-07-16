@@ -40,7 +40,7 @@ type FeaturedCard = {
 
 function formatPrice(value: string | number) {
   const amount = Number(value);
-  return Number.isFinite(amount) ? `$${amount.toFixed(2)}` : '$0.00';
+  return Number.isFinite(amount) ? `S/ ${amount.toFixed(2)}` : 'S/ 0.00';
 }
 
 function getAvailableStock(product: HomeProduct) {

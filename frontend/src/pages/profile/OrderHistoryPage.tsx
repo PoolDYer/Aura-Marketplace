@@ -156,7 +156,7 @@ export default function OrderHistoryPage() {
                           {formatDate(order.createdAt)}
                         </h2>
                         <p className="mt-1 text-[14px] text-[#524535]">
-                          {totalItems} {totalItems === 1 ? 'articulo' : 'articulos'} - ${Number(order.total).toFixed(2)}
+                          {totalItems} {totalItems === 1 ? 'articulo' : 'articulos'} - S/ {Number(order.total).toFixed(2)}
                         </p>
                       </div>
                     </div>

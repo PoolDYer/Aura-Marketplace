@@ -55,7 +55,7 @@ function ProductCard({
         </p>
         <div className="mt-auto flex items-center justify-between pt-1">
           <span className="text-[14px] font-bold text-[#845400]">
-            ${Number(product.precio).toFixed(2)}
+            S/ {Number(product.precio).toFixed(2)}
           </span>
           <div className="flex gap-1">
             <button
@@ -270,7 +270,7 @@ export function ChatAgente() {
             </p>
             <div className="flex flex-wrap gap-2 mt-2">
               {[
-                'Busca artículos entre $500 y $900',
+                'Busca articulos entre S/ 500 y S/ 900',
                 'Llévame al carrito',
                 '¿Qué productos hay?',
               ].map((suggestion) => (

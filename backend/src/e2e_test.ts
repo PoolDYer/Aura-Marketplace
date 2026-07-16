@@ -43,7 +43,7 @@ export async function runTest(
   if (!prod) {
     throw new Error('No se encontro ningun producto activo en el catalogo');
   }
-  console.log(`2. Producto encontrado: ${prod.nombre} - Precio: $${prod.precio} - ID: ${prod.id}`);
+  console.log(`2. Producto encontrado: ${prod.nombre} - Precio: S/ ${prod.precio} - ID: ${prod.id}`);
 
   const clearCartRes = await fetchImpl(`${apiUrl}/cart`, {
     method: 'DELETE',
@@ -94,7 +94,7 @@ export async function runTest(
   }
 
   const order = await orderRes.json() as any;
-  console.log(`7. Orden creada. ID: ${order.id} - Total: $${order.total} - Estado: ${order.estado}`);
+  console.log(`7. Orden creada. ID: ${order.id} - Total: S/ ${order.total} - Estado: ${order.estado}`);
 
   const dbOrder = await prisma.orden.findUnique({
     where: { id: order.id },
@@ -113,9 +113,9 @@ export async function runTest(
   console.log(`Confirmacion #: ${dbOrder.numeroConfirmacion}`);
   console.log(`Comprador: ${dbOrder.comprador.nombre} (${dbOrder.comprador.email})`);
   dbOrder.lineas.forEach((linea) => {
-    console.log(`- ${linea.nombreProducto} x${linea.cantidad} (Precio unitario: $${linea.precioUnitario})`);
+    console.log(`- ${linea.nombreProducto} x${linea.cantidad} (Precio unitario: S/ ${linea.precioUnitario})`);
   });
-  console.log(`Total registrado en DB: $${dbOrder.total}`);
+  console.log(`Total registrado en DB: S/ ${dbOrder.total}`);
 }
 
 /* istanbul ignore next */
