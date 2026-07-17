@@ -20,9 +20,9 @@ El **Aura Marketplace** es una plataforma de comercio electrónico multidireccio
 | `07-RequisitosFuncionales.md` | Requisitos Funcionales | Descripción detallada de todo lo que el sistema hace, por actor y módulo. |
 | `08-RequisitosNoFuncionales.md` | Requisitos No Funcionales | Restricciones de calidad implementadas: rendimiento, seguridad, disponibilidad y más. |
 | `09-Actores.md` | Actores del Sistema | Roles, permisos y responsabilidades de los actores (Comprador, Vendedor, Administrador). |
-| `10-CasosUsoResumen.md` | Catálogo de Casos de Uso | Inventario de todos los casos de uso implementados con sus prioridades. |
+| `10-HistoriasUsuarioResumen.md` | Catálogo de Historias de Usuario | Inventario de todas las historias de usuario con sus prioridades. |
 | `11-CriteriosAceptacion.md` | Criterios de Aceptación | Criterios en formato Given/When/Then basados en el comportamiento real del sistema. |
-| `12-MatrizTrazabilidad.md` | Matriz de Trazabilidad | Relación entre Objetivos → Requisitos → Reglas de Negocio → Casos de Uso. |
+| `12-MatrizTrazabilidad.md` | Matriz de Trazabilidad | Relación entre Objetivos → Requisitos → Reglas de Negocio → Historias de Usuario. |
 
 ---
 
@@ -35,7 +35,7 @@ El **Aura Marketplace** es una plataforma de comercio electrónico multidireccio
                                                └── rigen → 06-ReglasNegocio
                                                └── ejecutan → 09-Actores
                                                └── se prueban → 11-CriteriosAceptacion
-                                               └── se consolidan → 10-CasosUsoResumen
+                                               └── se consolidan → 10-HistoriasUsuarioResumen
 02-Stakeholders
     └── definen → 09-Actores
 03-Glosario
@@ -58,7 +58,7 @@ El **Aura Marketplace** es una plataforma de comercio electrónico multidireccio
 | `RF-` | Requisito Funcional | `RF-01` |
 | `RNF-` | Requisito No Funcional | `RNF-01` |
 | `RN-` | Regla de Negocio | `RN-01` |
-| `CU-` | Caso de Uso | `CU-01` |
+| `HU-` | Historia de Usuario | `HU-01` |
 | `CA-` | Criterio de Aceptación | `CA-RF01-01` |
 | `ACT-` | Actor | `ACT-01` |
 

@@ -2,7 +2,7 @@
 
 ## Propósito
 
-Este documento define formalmente todos los términos del dominio utilizados en la especificación de Aura Marketplace. Cualquier término que aparezca en los documentos de requisitos, reglas de negocio o casos de uso debe estar definido aquí. Los términos se presentan en orden alfabético.
+Este documento define formalmente todos los términos del dominio utilizados en la especificación de Aura Marketplace. Cualquier término que aparezca en los documentos de requisitos, reglas de negocio o historias de usuario debe estar definido aquí. Los términos se presentan en orden alfabético.
 
 ---
 
@@ -153,7 +153,7 @@ Registro de tokens (Access Token o Refresh Token) que han sido explícitamente i
 Servicio en el cliente que convierte el texto de las respuestas del Agente Inteligente en audio de voz para ser reproducido al usuario. En la implementación actual se utiliza la API nativa Web Speech (window.speechSynthesis) en el navegador del frontend.
 
 **Trazabilidad**
-Capacidad de vincular cada requisito con los objetivos que lo motivan, las reglas de negocio que lo rigen, y los casos de uso que lo implementan.
+Capacidad de vincular cada requisito con los objetivos que lo motivan, las reglas de negocio que lo rigen, y las historias de usuario que lo implementan.
 
 ### U
 

@@ -177,7 +177,7 @@
 | Estado | Ítem | Referencia |
 |--------|------|------------|
 | ☑ | El Diagrama de Contexto del Sistema está especificado | 09-Diagramas.md sec. 1 |
-| ☑ | El Diagrama de Casos de Uso está especificado (40 CU) | 09-Diagramas.md sec. 2 |
+| ☑ | El Diagrama de Historias de Usuario / Casos de Uso está especificado (25 HU) | 09-Diagramas.md sec. 2 |
 | ☑ | El Diagrama de Dominio está especificado | 09-Diagramas.md sec. 3 |
 | ☑ | El Diagrama de Componentes está especificado (20 módulos) | 09-Diagramas.md sec. 4 |
 | ☑ | Los 7 Diagramas de Secuencia están especificados | 09-Diagramas.md sec. 5.1–5.7 |

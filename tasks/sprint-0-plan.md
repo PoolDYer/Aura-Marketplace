@@ -425,7 +425,7 @@ Flujo transaccional completo funcionando: agregar al carrito → checkout → co
 
 ### Pruebas
 
-- Tests unitarios (Jest): expiración de sesión (RN-14), umbral STT (RN-11), límite comparación 2-5 (RN-13), confirmación antes de pago (RN-01), 9 casos límite de `04-DisenoAgenteIA.md` sec.26
+- Tests unitarios (Jest): expiración de sesión (RN-14), umbral STT (RN-11), límite comparación 2-5 (RN-13), confirmación antes de pago (RN-01), 9 escenarios límite de `04-DisenoAgenteIA.md` sec.26
 - Tests Supertest: instrucción texto → intención identificada → acción ejecutada; instrucción sin auth para carrito → 401; flujo compra vía Agente → confirmación → Orden registrada; STT bajo umbral → LOW_CONFIDENCE
 - Tests de adaptadores con mocks: `LanguageModelProvider` mock, `SpeechToTextProvider` mock (alta y baja confianza), `TextToSpeechProvider` mock
 

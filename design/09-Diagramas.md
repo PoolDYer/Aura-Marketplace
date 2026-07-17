@@ -41,60 +41,71 @@
 
 ---
 
-## 2. Diagrama de Casos de Uso
+## 2. Diagrama de Historias de Usuario / Casos de Uso
 
-**Propósito:** Representar todas las funciones que el sistema ofrece a cada actor, con sus relaciones.
+**Propósito:** Representar todas las historias de usuario que el sistema implementa para cada actor, mapeándolas al modelo funcional.
 
 **Qué debe representar:**
 
 Los 4 actores internos del sistema: Visitante, Comprador, Vendedor, Administrador.
-Los 40 casos de uso agrupados por módulo funcional (derivados de /specs/10-CasosUsoResumen.md):
+Las 25 historias de usuario agrupadas por módulo funcional (derivadas de /specs/10-HistoriasUsuarioResumen.md):
 
-**Módulo: Agente Inteligente (CU-01 a CU-04)**
-- CU-01: Ingresar instrucción en texto — Actor: Comprador
-- CU-02: Ingresar instrucción por voz — Actor: Comprador
-- CU-03: Solicitar aclaración de instrucción ambigua — Actor: Agente (sistema)
-- CU-04: Mantener contexto de sesión — Actor: Agente (sistema)
+**Módulo: Agente Inteligente (HU-01 al HU-02)**
+- HU-01: Interactuar con el Agente Inteligente mediante texto o voz — Actor: Comprador
+- HU-02: Interpretar instrucciones, pedir aclaraciones y mantener contexto — Actor: Agente IA (sistema)
 
-**Módulo: Catálogo y Búsqueda (CU-05 a CU-11)**
-- CU-05: Buscar productos — Actor: Comprador, Visitante
-- CU-06: Explorar catálogo sin agente — Actor: Comprador, Visitante
-- CU-07: Filtrar resultados — Actor: Comprador
-- CU-08: Eliminar filtro activo — Actor: Comprador
-- CU-09: Ordenar resultados — Actor: Comprador
-- CU-10: Comparar productos — Actor: Comprador
-- CU-11: Ver detalle de un producto — Actor: Comprador, Visitante
+**Módulo: Catálogo y Búsqueda (HU-03 al HU-05)**
+- HU-03: Explorar y buscar productos mediante catálogo, filtros y ordenamientos — Actor: Visitante / Comprador
+- HU-04: Comparar productos — Actor: Comprador
+- HU-05: Ver el detalle de una publicación, imágenes, descripción y reputación — Actor: Visitante / Comprador
 
-**Módulo: Carrito (CU-12 a CU-16)**
-- CU-12 a CU-16: Gestión completa del carrito — Actor: Comprador
+**Módulo: Carrito (HU-06)**
+- HU-06: Agregar, modificar, eliminar o vaciar productos del carrito — Actor: Comprador
 
-**Módulo: Compra (CU-17 a CU-21)**
-- CU-17 a CU-21: Flujo de compra completo — Actor: Comprador
+**Módulo: Checkout y Pagos (HU-07 al HU-09)**
+- HU-07: Iniciar el checkout, elegir dirección y confirmar orden — Actor: Comprador
+- HU-08: Seleccionar método de pago, aplicar cupones y completar transacción — Actor: Comprador
+- HU-09: Procesar pagos, webhooks y estados de orden en tiempo real — Actor: Sistema
 
-**Módulo: Publicaciones del Vendedor (CU-22 a CU-25)**
-- CU-22 a CU-25: Alta, edición, pausa y baja de publicaciones — Actor: Vendedor
+**Módulo: Órdenes (HU-10)**
+- HU-10: Recibir y consultar número de orden, historial y detalle de compras — Actor: Comprador
 
-**Módulo: Gestión de Órdenes del Vendedor (CU-26 a CU-28)**
-- CU-26 a CU-28: Consulta y actualización de estado de órdenes — Actor: Vendedor
+**Módulo: Publicaciones del Vendedor (HU-11, HU-12)**
+- HU-11: Publicar productos con datos e imágenes — Actor: Vendedor
+- HU-12: Editar, pausar, reactivar o eliminar publicaciones — Actor: Vendedor
 
-**Módulo: Administración (CU-29 a CU-33)**
-- CU-29 a CU-33: Moderación de contenido y reportes — Actor: Administrador
+**Módulo: Gestión de Órdenes y Ventas del Vendedor (HU-13, HU-14)**
+- HU-13: Consultar órdenes y actualizar sus estados — Actor: Vendedor
+- HU-14: Consultar clientes vinculados a ventas — Actor: Vendedor
 
-**Módulo: Autenticación y Perfil (CU-34 a CU-40)**
-- CU-34 a CU-40: Registro, inicio de sesión, cierre de sesión y gestión de perfil — Actor: Comprador, Vendedor, Administrador
+**Módulo: Autenticación, Perfil y Preferencias (HU-15 al HU-17)**
+- HU-15: Registrarse como comprador o vendedor y verificar correo — Actor: Visitante
+- HU-16: Iniciar sesión, cerrar sesión y recuperar contraseña — Actor: Usuario
+- HU-17: Gestionar datos personales, direcciones y preferencias — Actor: Usuario
 
+**Módulo: Favoritos y Reseñas (HU-18, HU-19)**
+- HU-18: Guardar, consultar y eliminar favoritos — Actor: Comprador
+- HU-19: Consultar y registrar reseñas — Actor: Comprador
 
-**Relaciones entre casos de uso:**
+**Módulo: Notificaciones (HU-20)**
+- HU-20: Recibir, consultar y marcar notificaciones — Actor: Usuario
 
-- CU-01 «include» CU-03: cuando la intención es ambigua, el agente solicita aclaración
-- CU-01 «include» CU-04: toda instrucción siempre mantiene el contexto activo
-- CU-02 «include» CU-01: la voz se transcribe y se procesa como texto tras el servicio de transcripción
-- CU-05 «extend» CU-07, CU-08, CU-09: la búsqueda puede extenderse con filtros y ordenamiento
-- CU-05 «extend» CU-10: la búsqueda puede extenderse con la comparación de productos
-- CU-12 «include» CU-34: agregar al carrito requiere autenticación previa
-- CU-17 «include» CU-34: iniciar proceso de compra requiere autenticación previa
+**Módulo: Administración y Moderación (HU-21 al HU-25)**
+- HU-21: Gestionar usuarios para suspender, reactivar y supervisar cuentas — Actor: Administrador
+- HU-22: Moderar publicaciones retirando contenido no permitido — Actor: Administrador
+- HU-23: Gestionar órdenes escaladas para resolver incidencias — Actor: Administrador
+- HU-24: Consultar reportes y estadísticas globales — Actor: Administrador
+- HU-25: Gestionar categorías para organizar publicaciones del catálogo — Actor: Administrador
 
-**Trazabilidad:** /specs/10-CasosUsoResumen.md, /specs/07-RequisitosFuncionales.md
+**Relaciones entre historias de usuario:**
+
+- HU-01 «include» HU-02: el Agente interpreta, aclara y mantiene el contexto de cada interacción del usuario
+- HU-03 «extend» HU-04: la exploración del catálogo se extiende al comparar múltiples productos
+- HU-03 «extend» HU-05: la búsqueda se extiende a la visualización en detalle de un producto específico
+- HU-06 «include» HU-16: agregar o modificar el carrito requiere que el usuario haya iniciado sesión
+- HU-07 «include» HU-16: iniciar el checkout y confirmar el pedido requiere autenticación activa
+
+**Trazabilidad:** /specs/10-HistoriasUsuarioResumen.md, /specs/07-RequisitosFuncionales.md
 
 ---
 
@@ -437,7 +448,7 @@ Expirado     ──[nueva instrucción recibida]──────────�
 | Diagrama | Documenta | Trazabilidad principal |
 |---|---|---|
 | Contexto del Sistema | Límites del sistema y actores externos | /specs/02-Stakeholders.md, /specs/04-Alcance.md |
-| Casos de Uso | Funciones del sistema agrupadas por actor | /specs/10-CasosUsoResumen.md, /specs/07-RequisitosFuncionales.md |
+| Historias de Usuario | Historias y funciones agrupadas por actor | /specs/10-HistoriasUsuarioResumen.md, /specs/07-RequisitosFuncionales.md |
 | Dominio | Entidades, agregados, relaciones e invariantes | /design/02-ModeloDominio.md |
 | Componentes | Módulos funcionales y sus dependencias | /design/03-ModulosSistema.md |
 | Secuencia 5.1: Búsqueda por texto | Flujo completo RF-01, RF-03 | /specs/07-RequisitosFuncionales.md |

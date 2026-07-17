@@ -31,7 +31,7 @@ La arquitectura de Aura Marketplace busca satisfacer los siguientes objetivos es
 
 ## 3. Estilo Arquitectónico Seleccionado
 
-El sistema adopta una **Arquitectura Hexagonal (Puertos y Adaptadores)**. Las integraciones con servicios externos se gestionan a través de puertos definidos en el dominio y adaptadores en la capa de infraestructura, de modo que el núcleo de la aplicación (dominio y casos de uso) no depende de ninguna implementación concreta de los servicios de terceros ni de detalles como la base de datos o frameworks.
+El sistema adopta una **Arquitectura Hexagonal (Puertos y Adaptadores)**. Las integraciones con servicios externos se gestionan a través de puertos definidos en el dominio y adaptadores en la capa de infraestructura, de modo que el núcleo de la aplicación (dominio e historias de usuario) no depende de ninguna implementación concreta de los servicios de terceros ni de detalles como la base de datos o frameworks.
 
 Este estilo organiza el sistema en capas concéntricas con dirección de dependencia hacia el centro: las capas exteriores conocen a las interiores, pero el dominio y la aplicación son puros y no conocen detalles de la infraestructura.
 
@@ -55,7 +55,7 @@ Este estilo organiza el sistema en capas concéntricas con dirección de depende
 |---|---|---|
 | L-01 | Presentación e Interacción | Recibe las solicitudes de los usuarios (texto, voz, formularios) y presenta las respuestas. No contiene lógica de negocio. |
 | L-02 | Agente Inteligente | Interpreta instrucciones en lenguaje natural, identifica intenciones y entidades, mantiene el Contexto de Sesión y coordina la ejecución de acciones. |
-| L-03 | Lógica de Aplicación | Orquesta los flujos de negocio, ejecuta los casos de uso inyectando los puertos del dominio. |
+| L-03 | Lógica de Aplicación | Orquesta los flujos de negocio, ejecuta las historias de usuario inyectando los puertos del dominio. |
 | L-04 | Dominio | Contiene las entidades, los objetos de valor y las interfaces de los puertos. Es el núcleo del sistema y no depende de ninguna capa exterior. |
 | L-05 | Infraestructura e Integraciones | Implementa los adaptadores concretos para persistencia (Prisma/Neon DB) y servicios externos (Resend, Cloudinary, Mercado Pago, Gemini). |
 
@@ -96,7 +96,7 @@ Responsable de la interfaz gráfica y la interactividad en el cliente. Captura l
 Orquestador conversacional en el backend (NestJS AgentModule) apoyado por Gemini. Recibe las consultas, identifica intenciones y entidades estructuradas, gestiona el historial conversacional persistente y delega las operaciones del sistema a los servicios de aplicación.
 
 **Capa de Lógica de Aplicación (L-03)**
-Contiene los servicios de casos de uso (ej. `OrdersService`, `ProductsService`). Orquesta la ejecución del negocio invocando a las entidades de dominio y guardando los cambios a través de los puertos de persistencia (interfaces).
+Contiene los servicios de aplicación (ej. `OrdersService`, `ProductsService`). Orquesta la ejecución del negocio invocando a las entidades de dominio y guardando los cambios a través de los puertos de persistencia (interfaces).
 
 **Capa de Dominio (L-04)**
 Núcleo puro del negocio. Contiene las entidades puras de TypeScript (ej. `UsuarioEntity`, `ProductoEntity`), las constantes del negocio y las interfaces de los puertos (ej. `IUserRepository`). No tiene dependencias de infraestructura ni frameworks.

@@ -2,7 +2,7 @@
 
 ## 1. Introducción
 
-La matriz de trazabilidad establece las relaciones entre los elementos de la especificación de Aura Marketplace: **Objetivos → Requisitos Funcionales → Reglas de Negocio → Casos de Uso**. Esta trazabilidad garantiza que cada requisito tiene un objetivo que lo justifica, que cada regla de negocio está vinculada a los requisitos que rige, y que cada caso de uso está cubierto por al menos un requisito funcional.
+La matriz de trazabilidad establece las relaciones entre los elementos de la especificación de Aura Marketplace: **Objetivos → Requisitos Funcionales → Reglas de Negocio → Historias de Usuario**. Esta trazabilidad garantiza que cada requisito tiene un objetivo que lo justifica, que cada regla de negocio está vinculada a los requisitos que rige, y que cada historia de usuario está cubierta por al menos un requisito funcional.
 
 ---
 
@@ -41,25 +41,25 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 
 ---
 
-## 4. Trazabilidad: Requisitos Funcionales → Casos de Uso
+## 4. Trazabilidad: Requisitos Funcionales → Historias de Usuario
 
-| Requisito | Nombre del Requisito | Casos de Uso |
+| Requisito | Nombre del Requisito | Historias de Usuario |
 |---|---|---|
-| RF-01 | Interpretación de instrucciones en texto | CU-01, CU-03, CU-04 |
-| RF-02 | Interpretación de instrucciones por voz | CU-02, CU-03, CU-04 |
-| RF-03 | Búsqueda de productos | CU-05, CU-06, CU-11 |
-| RF-04 | Filtrado de resultados | CU-07, CU-08 |
-| RF-05 | Ordenamiento de resultados | CU-09 |
-| RF-06 | Comparación de productos | CU-10 |
-| RF-07 | Gestión del Carrito | CU-12, CU-13, CU-14, CU-15, CU-16 |
-| RF-08 | Ejecución de compra | CU-17, CU-18, CU-19, CU-20, CU-21 |
-| RF-09 | Creación de Publicación | CU-22, CU-23, CU-24, CU-25 |
-| RF-10 | Gestión de Órdenes por el Vendedor | CU-26, CU-27, CU-28 |
-| RF-11 | Administración de usuarios y publicaciones | CU-29, CU-30, CU-31, CU-32, CU-33 |
-| RF-12 | Registro y autenticación de usuarios | CU-34, CU-35, CU-36, CU-37, CU-38, CU-39, CU-40 |
-| RF-13 | Gestión de Sesión del Agente | CU-04 |
-| RF-14 | Accesibilidad e Inclusión | CU-06, CU-07 |
-| RF-15 | Notificaciones al Usuario | CU-28, CU-39 |
+| RF-01 | Interpretación de instrucciones en texto | HU-01, HU-02 |
+| RF-02 | Interpretación de instrucciones por voz | HU-01, HU-02 |
+| RF-03 | Búsqueda de productos | HU-03, HU-05 |
+| RF-04 | Filtrado de resultados | HU-03 |
+| RF-05 | Ordenamiento de resultados | HU-03 |
+| RF-06 | Comparación de productos | HU-04 |
+| RF-07 | Gestión del Carrito | HU-06 |
+| RF-08 | Ejecución de compra | HU-07, HU-08, HU-09, HU-10 |
+| RF-09 | Creación de Publicación | HU-11, HU-12 |
+| RF-10 | Gestión de Órdenes por el Vendedor | HU-13, HU-14 |
+| RF-11 | Administración de usuarios y publicaciones | HU-21, HU-22, HU-23, HU-24, HU-25 |
+| RF-12 | Registro y autenticación de usuarios | HU-15, HU-16, HU-17, HU-18, HU-19 |
+| RF-13 | Gestión de Sesión del Agente | HU-02 |
+| RF-14 | Accesibilidad e Inclusión | HU-03 |
+| RF-15 | Notificaciones al Usuario | HU-10, HU-20 |
 
 ---
 
@@ -84,50 +84,35 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 
 ---
 
-## 6. Trazabilidad: Casos de Uso → Requisitos Funcionales
+## 6. Trazabilidad: Historias de Usuario → Requisitos Funcionales
 
-| Caso de Uso | Nombre del Caso de Uso | Requisito Funcional |
+| Historia de Usuario | Nombre de la Historia de Usuario | Requisito Funcional |
 |---|---|---|
-| CU-01 | Ingresar instrucción en texto | RF-01 |
-| CU-02 | Ingresar instrucción por voz | RF-02 |
-| CU-03 | Solicitar aclaración de instrucción ambigua | RF-01, RF-02 |
-| CU-04 | Mantener contexto de Sesión | RF-01, RF-02, RF-03, RF-04, RF-05, RF-13 |
-| CU-05 | Buscar productos | RF-03 |
-| CU-06 | Explorar Catálogo sin Agente | RF-03, RF-14 |
-| CU-07 | Filtrar resultados de búsqueda | RF-04, RF-14 |
-| CU-08 | Eliminar un filtro activo | RF-04 |
-| CU-09 | Ordenar resultados de búsqueda | RF-05 |
-| CU-10 | Comparar productos | RF-06 |
-| CU-11 | Ver detalle de un producto | RF-03 |
-| CU-12 | Agregar producto al Carrito mediante Agente | RF-07 |
-| CU-13 | Ver contenido del Carrito | RF-07 |
-| CU-14 | Modificar cantidad de producto en el Carrito | RF-07 |
-| CU-15 | Eliminar producto del Carrito | RF-07 |
-| CU-16 | Vaciar el Carrito | RF-07 |
-| CU-17 | Iniciar proceso de compra | RF-08 |
-| CU-18 | Confirmar compra | RF-08 |
-| CU-19 | Seleccionar método de pago | RF-08 |
-| CU-20 | Procesar pago | RF-08 |
-| CU-21 | Recibir confirmación de Orden | RF-08 |
-| CU-22 | Crear Publicación de producto | RF-09 |
-| CU-23 | Modificar Publicación existente | RF-09 |
-| CU-24 | Desactivar Publicación | RF-09 |
-| CU-25 | Reactivar Publicación | RF-09 |
-| CU-26 | Ver Órdenes recibidas | RF-10 |
-| CU-27 | Actualizar estado de Orden | RF-10 |
-| CU-28 | Recibir notificación de nueva Orden | RF-10, RF-15 |
-| CU-29 | Suspender cuenta de usuario | RF-11 |
-| CU-30 | Reactivar cuenta de usuario | RF-11 |
-| CU-31 | Eliminar Publicación por incumplimiento | RF-11 |
-| CU-32 | Gestionar Orden escalada | RF-11 |
-| CU-33 | Consultar reportes del Marketplace | RF-11 |
-| CU-34 | Registrarse como Comprador | RF-12 |
-| CU-35 | Registrarse como Vendedor | RF-12 |
-| CU-36 | Verificar correo electrónico | RF-12 |
-| CU-37 | Iniciar sesión | RF-12 |
-| CU-38 | Cerrar sesión | RF-12 |
-| CU-39 | Configurar preferencias de notificación | RF-12, RF-15 |
-| CU-40 | Gestionar perfil de usuario | RF-12 |
+| HU-01 | Interactuar con el Agente Inteligente mediante texto o voz | RF-01, RF-02 |
+| HU-02 | Interpretar instrucciones, pedir aclaraciones y mantener contexto | RF-01, RF-02, RF-13 |
+| HU-03 | Explorar y buscar productos mediante catálogo, filtros y ordenamientos | RF-03, RF-04, RF-05, RF-14 |
+| HU-04 | Comparar productos para evaluar diferencias | RF-06 |
+| HU-05 | Ver el detalle de una publicación, imágenes, descripción y reputación | RF-03 |
+| HU-06 | Agregar, modificar, eliminar o vaciar productos del carrito | RF-07 |
+| HU-07 | Iniciar el checkout, elegir dirección y confirmar orden | RF-08 |
+| HU-08 | Seleccionar método de pago, aplicar cupones y completar transacción | RF-08 |
+| HU-09 | Procesar pagos, webhooks y estados de orden en tiempo real | RF-08 |
+| HU-10 | Recibir y consultar número de orden, historial y detalle de compras | RF-08, RF-15 |
+| HU-11 | Publicar productos con datos e imágenes | RF-09 |
+| HU-12 | Editar, pausar, reactivar o eliminar publicaciones | RF-09 |
+| HU-13 | Consultar órdenes y actualizar sus estados (Vendedor) | RF-10 |
+| HU-14 | Consultar clientes vinculados a ventas | RF-10 |
+| HU-15 | Registrarse como comprador o vendedor y verificar correo | RF-12 |
+| HU-16 | Iniciar sesión, cerrar sesión y recuperar contraseña | RF-12 |
+| HU-17 | Gestionar datos personales, direcciones y preferencias | RF-12 |
+| HU-18 | Guardar, consultar y eliminar favoritos | RF-12 |
+| HU-19 | Consultar y registrar reseñas | RF-12 |
+| HU-20 | Recibir, consultar y marcar notificaciones | RF-15 |
+| HU-21 | Suspender, reactivar y supervisar cuentas (Administrador) | RF-11 |
+| HU-22 | Moderar publicaciones retirando contenido no permitido | RF-11 |
+| HU-23 | Gestionar órdenes escaladas para resolver incidencias | RF-11 |
+| HU-24 | Consultar reportes y estadísticas globales | RF-11 |
+| HU-25 | Gestionar categorías para organizar publicaciones | RF-11 |
 
 ---
 
@@ -138,7 +123,7 @@ La matriz de trazabilidad establece las relaciones entre los elementos de la esp
 | Objetivos con al menos un requisito funcional | 6 | 6 | 100% |
 | Requisitos funcionales con al menos un objetivo | 15 | 15 | 100% |
 | Requisitos funcionales con al menos una regla de negocio | 15 | 15 | 100% |
-| Requisitos funcionales con al menos un caso de uso | 15 | 15 | 100% |
+| Requisitos funcionales con al menos una historia de usuario | 15 | 15 | 100% |
 | Reglas de negocio con al menos un requisito que rigen | 14 | 14 | 100% |
-| Casos de uso con al menos un requisito funcional | 40 | 40 | 100% |
+| Historias de usuario con al menos un requisito funcional | 25 | 25 | 100% |
 | Requisitos funcionales con criterios de aceptación | 15 | 15 | 100% |
