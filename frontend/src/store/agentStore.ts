@@ -89,6 +89,22 @@ function speakText(text: string) {
   }
 }
 
+const getApiErrorMessage = (error: unknown, fallback: string) => {
+  const responseMessage = (error as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
+
+  if (Array.isArray(responseMessage)) {
+    return responseMessage.join(' ');
+  }
+
+  return responseMessage || fallback;
+};
+
+const getAudioFilename = (audioBlob: Blob) => {
+  if (audioBlob.type.includes('mp4')) return 'audio.mp4';
+  if (audioBlob.type.includes('ogg')) return 'audio.ogg';
+  return 'audio.webm';
+};
+
 export const useAgentStore = create<AgentStore>((set, get) => ({
   isOpen: false,
   state: 'INACTIVO',
@@ -159,7 +175,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       setState('ERROR');
       addMessage({
         role: 'SYSTEM',
-        content: 'Hubo un error de conexión. Intenta de nuevo.',
+        content: getApiErrorMessage(error, 'Hubo un error de conexion. Intenta de nuevo.'),
       });
       setTimeout(() => setState('INACTIVO'), 3000);
     }
@@ -171,7 +187,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
     try {
       const formData = new FormData();
-      formData.append('audio', audioBlob, 'audio.webm');
+      formData.append('audio', audioBlob, getAudioFilename(audioBlob));
 
       const res = await api.post('/agent/voice', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -205,7 +221,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
       setState('ERROR');
       addMessage({
         role: 'SYSTEM',
-        content: 'Hubo un error de conexión. Intenta de nuevo.',
+        content: getApiErrorMessage(error, 'No pude procesar el audio. Intenta de nuevo.'),
       });
       setTimeout(() => setState('INACTIVO'), 3000);
     }

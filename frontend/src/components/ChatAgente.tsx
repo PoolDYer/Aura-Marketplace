@@ -124,6 +124,7 @@ export function ChatAgente() {
 
   const [text, setText] = useState('');
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const speechRecognitionRef = useRef<any>(null);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -151,14 +152,62 @@ export function ChatAgente() {
   };
 
   const startRecording = async () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      let handledResult = false;
+      recognition.lang = 'es-PE';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      speechRecognitionRef.current = recognition;
+
+      recognition.onresult = (event: any) => {
+        const transcript = String(event.results?.[0]?.[0]?.transcript || '').trim();
+        handledResult = true;
+        speechRecognitionRef.current = null;
+        if (transcript) {
+          sendTextMessage(transcript);
+        } else {
+          setState('INACTIVO');
+        }
+      };
+
+      recognition.onerror = () => {
+        speechRecognitionRef.current = null;
+        setState('INACTIVO');
+      };
+
+      recognition.onend = () => {
+        speechRecognitionRef.current = null;
+        if (!handledResult) {
+          setState('INACTIVO');
+        }
+      };
+
+      recognition.start();
+      setState('ESCUCHANDO');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+      ].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       const chunks: BlobPart[] = [];
 
-      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'audio/webm' });
         sendVoiceMessage(blob);
         stream.getTracks().forEach((track) => track.stop());
       };
@@ -172,6 +221,13 @@ export function ChatAgente() {
   };
 
   const stopRecording = () => {
+    if (speechRecognitionRef.current) {
+      speechRecognitionRef.current.stop();
+      speechRecognitionRef.current = null;
+      setState('INACTIVO');
+      return;
+    }
+
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       mediaRecorder.stop();
       setMediaRecorder(null);

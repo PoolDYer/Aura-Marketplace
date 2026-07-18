@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, Get, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { BadRequestException, Controller, Post, Body, UseGuards, Request, Get, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../l03-application/auth/guards/jwt-auth.guard';
 import { AgentService } from '../../l02-agent/agent.service';
@@ -32,7 +32,11 @@ export class AgentController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('audio'))
   async sendVoice(@Request() req, @UploadedFile() file: any) {
-    const result = await this.agentService.processVoiceMessage(req.user.sub, file.buffer);
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('No se recibió ningún audio.');
+    }
+
+    const result = await this.agentService.processVoiceMessage(req.user.sub, file.buffer, file.mimetype);
     return {
       transcribedText: result.transcribedText,
       message: result.message,
