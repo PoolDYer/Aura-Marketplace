@@ -124,7 +124,6 @@ export function ChatAgente() {
 
   const [text, setText] = useState('');
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const speechRecognitionRef = useRef<any>(null);
   const [ttsEnabled, setTtsEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -152,44 +151,6 @@ export function ChatAgente() {
   };
 
   const startRecording = async () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      let handledResult = false;
-      recognition.lang = 'es-PE';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-      speechRecognitionRef.current = recognition;
-
-      recognition.onresult = (event: any) => {
-        const transcript = String(event.results?.[0]?.[0]?.transcript || '').trim();
-        handledResult = true;
-        speechRecognitionRef.current = null;
-        if (transcript) {
-          sendTextMessage(transcript);
-        } else {
-          setState('INACTIVO');
-        }
-      };
-
-      recognition.onerror = () => {
-        speechRecognitionRef.current = null;
-        setState('INACTIVO');
-      };
-
-      recognition.onend = () => {
-        speechRecognitionRef.current = null;
-        if (!handledResult) {
-          setState('INACTIVO');
-        }
-      };
-
-      recognition.start();
-      setState('ESCUCHANDO');
-      return;
-    }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = [
@@ -211,6 +172,11 @@ export function ChatAgente() {
         sendVoiceMessage(blob);
         stream.getTracks().forEach((track) => track.stop());
       };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setMediaRecorder(null);
+        setState('INACTIVO');
+      };
 
       recorder.start();
       setMediaRecorder(recorder);
@@ -221,13 +187,6 @@ export function ChatAgente() {
   };
 
   const stopRecording = () => {
-    if (speechRecognitionRef.current) {
-      speechRecognitionRef.current.stop();
-      speechRecognitionRef.current = null;
-      setState('INACTIVO');
-      return;
-    }
-
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       mediaRecorder.stop();
       setMediaRecorder(null);

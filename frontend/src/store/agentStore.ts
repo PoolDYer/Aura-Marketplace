@@ -183,6 +183,16 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
 
   sendVoiceMessage: async (audioBlob: Blob) => {
     const { addMessage, setState, executeAction } = get();
+
+    if (audioBlob.size === 0) {
+      addMessage({
+        role: 'SYSTEM',
+        content: 'No se detectó audio. Graba unos segundos y presiona Detener para enviarlo.',
+      });
+      setState('INACTIVO');
+      return;
+    }
+
     setState('PROCESANDO');
 
     try {
