@@ -50,6 +50,9 @@ const statusOptions = [
 ];
 
 const currency = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' });
+const allowedImageTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/avif'];
+const imageAccept = allowedImageTypes.join(',');
+const imageFormatHelp = 'PNG, JPG, WEBP, AVIF, max 5MB';
 
 const getApiErrorMessage = (error: unknown, fallback: string) => {
   const responseMessage = (error as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
@@ -149,6 +152,11 @@ export default function ProductFormPage() {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+
+    if (file.type && !allowedImageTypes.includes(file.type)) {
+      setMessage('La imagen debe ser PNG, JPG, WEBP o AVIF.');
+      return;
+    }
 
     if (file.size > 5 * 1024 * 1024) {
       setMessage('La imagen no debe superar los 5MB.');
@@ -263,7 +271,7 @@ export default function ProductFormPage() {
                 <>
                   <ImagePlus className="mb-3 h-12 w-12 text-[#C9B8CE]" />
                   <p className="text-[14px] text-[#524535]">Sube la imagen principal</p>
-                  <p className="mt-1 text-[12px] text-[#847463]">PNG, JPG, max 5MB</p>
+                  <p className="mt-1 text-[12px] text-[#847463]">{imageFormatHelp}</p>
                 </>
               )}
               {uploadingSlot === 0 ? (
@@ -274,7 +282,7 @@ export default function ProductFormPage() {
               ) : null}
             </button>
 
-            <input ref={fileInputRef} onChange={handleFile} className="hidden" type="file" accept="image/png,image/jpeg,image/webp" />
+            <input ref={fileInputRef} onChange={handleFile} className="hidden" type="file" accept={imageAccept} />
 
             <div className="grid grid-cols-3 gap-4">
               {[1, 2, 3].map((slot) => (

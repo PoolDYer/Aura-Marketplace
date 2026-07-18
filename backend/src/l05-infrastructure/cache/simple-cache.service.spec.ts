@@ -2,9 +2,26 @@ import { SimpleCacheService } from './simple-cache.service';
 
 describe('SimpleCacheService Colocated Edge Cases', () => {
   let cacheService: SimpleCacheService;
+  const originalRedisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const originalRedisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const originalCachePrefix = process.env.CACHE_PREFIX;
 
   beforeEach(() => {
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    process.env.CACHE_PREFIX = `test-${Date.now()}-${Math.random()}`;
     cacheService = new SimpleCacheService();
+  });
+
+  afterAll(() => {
+    if (originalRedisUrl === undefined) delete process.env.UPSTASH_REDIS_REST_URL;
+    else process.env.UPSTASH_REDIS_REST_URL = originalRedisUrl;
+
+    if (originalRedisToken === undefined) delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    else process.env.UPSTASH_REDIS_REST_TOKEN = originalRedisToken;
+
+    if (originalCachePrefix === undefined) delete process.env.CACHE_PREFIX;
+    else process.env.CACHE_PREFIX = originalCachePrefix;
   });
 
   it('getOrSet should cache and return value from loader on cache miss', async () => {

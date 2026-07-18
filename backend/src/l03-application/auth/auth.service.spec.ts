@@ -127,7 +127,7 @@ describe('AuthService', () => {
     hasher.verify.mockResolvedValue(true);
 
     await expect(service.login({ email: 'ada@test.dev', password: 'secret' })).resolves.toMatchObject({
-      accessToken: 'user-1-15m',
+      accessToken: 'user-1-7d',
       refreshToken: 'user-1-7d',
       user: { id: 'user-1', email: 'ada@test.dev' },
     });
@@ -242,7 +242,7 @@ describe('AuthService', () => {
     await expect(service.refresh('missing')).rejects.toBeInstanceOf(UnauthorizedException);
     await expect(service.refresh('revoked')).rejects.toBeInstanceOf(UnauthorizedException);
     await expect(service.refresh('expired')).rejects.toBeInstanceOf(UnauthorizedException);
-    await expect(service.refresh('valid')).resolves.toMatchObject({ accessToken: 'user-1-15m' });
+    await expect(service.refresh('valid')).resolves.toMatchObject({ accessToken: 'user-1-7d' });
     await expect(service.logout('refresh-token', 'access-token')).resolves.toEqual({ message: 'Cierre de sesión exitoso' });
     expect(refreshTokenRepo.revokeManyByToken).toHaveBeenCalledWith('refresh-token');
     expect(tokenRevocadoRepo.create).toHaveBeenCalledWith('access-token', new Date(2_000_000));

@@ -103,7 +103,7 @@ test.describe('Autenticación y Registro E2E', () => {
     await page.goto('/profile');
     await page.waitForTimeout(1500);
     
-    const logoutBtn = page.locator('button:has-text("Cerrar"), button:has-text("Salir"), button:has-text("Log out"), button:has-text("Cerrar Sesion"), button:has-text("Cerrar Sesión")');
+    const logoutBtn = page.locator('button:has-text("Cerrar"), button:has-text("Salir"), button:has-text("Log out"), button:has-text("Cerrar Sesion"), button:has-text("Cerrar Sesión"), button[aria-label*="Cerrar"], button[aria-label*="cerrar"], button[title*="Cerrar"], button[title*="cerrar"]');
     await expect(logoutBtn.first()).toBeVisible();
     await logoutBtn.first().click();
     await page.waitForTimeout(1500);

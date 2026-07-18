@@ -85,8 +85,28 @@ describe('CloudinaryService', () => {
     nowSpy.mockRestore();
   });
 
-  it('falls back to a generic local image extension when the MIME subtype is empty', async () => {
+  it('stores AVIF images locally when Cloudinary is not configured', async () => {
     const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1700000000002);
+    const service = new CloudinaryService(config({}) as any);
+
+    await expect(
+      service.uploadProductImage({
+        buffer: Buffer.from('image'),
+        mimetype: 'image/avif',
+        vendorId: 'vendor-1',
+        originalname: 'product.avif',
+      }),
+    ).resolves.toMatchObject({
+      url: expect.stringContaining('http://localhost:3000/uploads/products/uuid-1.avif'),
+      publicId: 'local-1700000000002-product.avif',
+      folder: 'Aura/vendors/vendor-1/products/pending',
+      format: 'avif',
+    });
+    nowSpy.mockRestore();
+  });
+
+  it('falls back to a generic local image extension when the MIME subtype is empty', async () => {
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(1700000000003);
     const service = new CloudinaryService(config({}) as any);
 
     await expect(
