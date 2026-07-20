@@ -52,12 +52,13 @@ export class MercadoPagoService implements IPaymentGateway {
     const currencyId = this.getCurrency();
 
     const payerEmail = this.getPayerEmail(order);
+    const orderAmount = this.toMercadoPagoAmount(order.total);
     const preferenceBody = {
       items: order.lineas.map((linea) => ({
         id: linea.publicacionId,
         title: linea.nombreProducto,
         quantity: linea.cantidad,
-        unit_price: Number(linea.precioUnitario),
+        unit_price: this.toMercadoPagoAmount(linea.precioUnitario),
         currency_id: currencyId,
       })),
       payer: {
@@ -95,14 +96,14 @@ export class MercadoPagoService implements IPaymentGateway {
       where: { ordenId: order.id },
       update: {
         referenciaPasarela: preference.id,
-        monto: order.total,
+        monto: orderAmount,
         estado: 'PENDIENTE',
         metodoPago: 'mercadopago',
       },
       create: {
         ordenId: order.id,
         referenciaPasarela: preference.id,
-        monto: order.total,
+        monto: orderAmount,
         estado: 'PENDIENTE',
         metodoPago: 'mercadopago',
       },
@@ -119,19 +120,20 @@ export class MercadoPagoService implements IPaymentGateway {
   async createBrickInitialization(userId: string, orderId: string) {
     const order = await this.getPendingOrder(userId, orderId);
     const preference = await this.createPreferenceForOrder(userId, order);
+    const orderAmount = this.toMercadoPagoAmount(order.total);
 
     await this.prisma.pago.upsert({
       where: { ordenId: order.id },
       update: {
         referenciaPasarela: preference.id,
-        monto: order.total,
+        monto: orderAmount,
         estado: 'PENDIENTE',
         metodoPago: 'mercadopago_bricks',
       },
       create: {
         ordenId: order.id,
         referenciaPasarela: preference.id,
-        monto: order.total,
+        monto: orderAmount,
         estado: 'PENDIENTE',
         metodoPago: 'mercadopago_bricks',
       },
@@ -139,7 +141,7 @@ export class MercadoPagoService implements IPaymentGateway {
 
     return {
       preferenceId: preference.id,
-      amount: Number(order.total),
+      amount: orderAmount,
       currency: this.getCurrency(),
       payer: {
         email: this.getPayerEmail(order),
@@ -153,6 +155,7 @@ export class MercadoPagoService implements IPaymentGateway {
     const backendUrl = this.configService.get<string>('BACKEND_URL');
     const { paymentMethodId, ...mercadoPagoPayload } = payload;
     const paymentMethod = payload.payment_method_id || paymentMethodId;
+    const orderAmount = this.toMercadoPagoAmount(order.total);
 
     const payerEmail = this.isMercadoPagoTestMode()
       ? this.getPayerEmail(order)
@@ -162,7 +165,7 @@ export class MercadoPagoService implements IPaymentGateway {
       ...mercadoPagoPayload,
       ...(paymentMethod ? { payment_method_id: paymentMethod } : {}),
       ...(paymentMethod === 'yape' && !payload.installments ? { installments: 1 } : {}),
-      transaction_amount: Number(order.total),
+      transaction_amount: orderAmount,
       description: `Aura - Orden ${order.numeroConfirmacion}`,
       external_reference: order.id,
       metadata: {
@@ -180,7 +183,7 @@ export class MercadoPagoService implements IPaymentGateway {
           id: linea.publicacionId,
           title: linea.nombreProducto,
           quantity: linea.cantidad,
-          unit_price: Number(linea.precioUnitario),
+          unit_price: this.toMercadoPagoAmount(linea.precioUnitario),
         })),
       },
       ...(backendUrl ? { notification_url: `${backendUrl}/payments/webhook` } : {}),
@@ -312,7 +315,7 @@ export class MercadoPagoService implements IPaymentGateway {
         id: linea.publicacionId,
         title: linea.nombreProducto,
         quantity: linea.cantidad,
-        unit_price: Number(linea.precioUnitario),
+        unit_price: this.toMercadoPagoAmount(linea.precioUnitario),
         currency_id: currencyId,
       })),
       payer: {
@@ -392,6 +395,15 @@ export class MercadoPagoService implements IPaymentGateway {
 
   private getCurrency() {
     return this.getConfigValue('MERCADOPAGO_CURRENCY') || 'PEN';
+  }
+
+  private toMercadoPagoAmount(value: unknown) {
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) {
+      throw new BadRequestException('El monto del pago no es valido');
+    }
+
+    return Math.round((amount + Number.EPSILON) * 100) / 100;
   }
 
   private isMercadoPagoTestMode() {

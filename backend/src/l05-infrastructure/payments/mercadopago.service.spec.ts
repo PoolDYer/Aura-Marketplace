@@ -24,10 +24,10 @@ describe('MercadoPagoService', () => {
     lineas: [{ publicacionId: 'p1', nombreProducto: 'Silla', cantidad: 2, precioUnitario: 50 }],
   };
 
-  const createPrisma = () => ({
+  const createPrisma = (orderOverride: any = order) => ({
     orden: {
-      findFirst: jest.fn().mockResolvedValue(order),
-      findUnique: jest.fn().mockResolvedValue(order),
+      findFirst: jest.fn().mockResolvedValue(orderOverride),
+      findUnique: jest.fn().mockResolvedValue(orderOverride),
       update: jest.fn(),
     },
     pago: {
@@ -216,6 +216,29 @@ describe('MercadoPagoService', () => {
       }),
     );
     expect(prisma.$transaction).toHaveBeenCalled();
+  });
+
+  it('rounds Mercado Pago amounts to two decimals before creating payments', async () => {
+    const decimalOrder = {
+      ...order,
+      total: '99.98999999999999',
+      lineas: [{ publicacionId: 'p1', nombreProducto: 'Camisa', cantidad: 1, precioUnitario: '99.98999999999999' }],
+    };
+    const { service } = createService({}, createPrisma(decimalOrder));
+    paymentCreate.mockResolvedValueOnce({ id: 123, status: 'approved', payment_method_id: 'visa', transaction_amount: 99.99 });
+
+    await service.processBrickPayment('user-1', 'order-1', { payment_method_id: 'visa', token: 'tok', installments: 1 });
+
+    expect(paymentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          transaction_amount: 99.99,
+          additional_info: expect.objectContaining({
+            items: [expect.objectContaining({ unit_price: 99.99 })],
+          }),
+        }),
+      }),
+    );
   });
 
   it('wraps Brick payment SDK failures', async () => {
