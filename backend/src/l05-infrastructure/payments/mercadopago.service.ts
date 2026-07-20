@@ -406,6 +406,10 @@ export class MercadoPagoService implements IPaymentGateway {
       return 'Mercado Pago rechazo la prueba porque estas usando credenciales de produccion. Usa una cuenta Yape real o cambia a credenciales de prueba de Mercado Pago.';
     }
 
+    if (normalizedMessage.includes('internal_error')) {
+      return 'Mercado Pago devolvio internal_error. Para aprobar una compra de prueba con tarjeta usa titular APRO, documento 123456789 y una tarjeta de prueba.';
+    }
+
     if (normalizedMessage.includes('cannot be paid by the same account') || normalizedMessage.includes('payer and collector')) {
       return 'Mercado Pago rechazo el pago porque el comprador y el vendedor pertenecen a la misma cuenta de prueba. Usa un usuario comprador de prueba distinto al vendedor.';
     }
