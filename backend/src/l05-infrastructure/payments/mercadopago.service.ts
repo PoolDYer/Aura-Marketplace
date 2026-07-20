@@ -407,7 +407,7 @@ export class MercadoPagoService implements IPaymentGateway {
     }
 
     if (normalizedMessage.includes('internal_error')) {
-      return 'Mercado Pago devolvio internal_error. Para aprobar una compra de prueba con tarjeta usa titular APRO, documento 123456789 y una tarjeta de prueba.';
+      return 'Mercado Pago devolvio internal_error. Para aprobar una compra de prueba con tarjeta usa titular APRO, DNI 12345678 y una tarjeta de prueba.';
     }
 
     if (normalizedMessage.includes('cannot be paid by the same account') || normalizedMessage.includes('payer and collector')) {
