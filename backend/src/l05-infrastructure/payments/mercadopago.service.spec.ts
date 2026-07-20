@@ -139,6 +139,34 @@ describe('MercadoPagoService', () => {
     );
   });
 
+  it('uses a sandbox payer email when Mercado Pago test credentials are configured', async () => {
+    const { service } = createService({
+      MERCADOPAGO_ACCESS_TOKEN: 'TEST-access-token',
+      MERCADOPAGO_TEST_PAYER_EMAIL: 'buyer-test@auraperu.shop',
+    });
+    preferenceCreate.mockResolvedValueOnce({ id: 'pref-1', sandbox_init_point: 'https://sandbox.test' });
+    paymentCreate.mockResolvedValueOnce({ id: 123, status: 'approved', payment_method_id: 'visa', transaction_amount: 100 });
+
+    await expect(service.createBrickInitialization('user-1', 'order-1')).resolves.toMatchObject({
+      payer: { email: 'buyer-test@auraperu.shop' },
+    });
+
+    await service.processBrickPayment('user-1', 'order-1', {
+      token: 'tok',
+      payment_method_id: 'visa',
+      installments: 1,
+      payer: { email: 'ada@test.dev' },
+    });
+
+    expect(paymentCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          payer: expect.objectContaining({ email: 'buyer-test@auraperu.shop' }),
+        }),
+      }),
+    );
+  });
+
   it('adds HTTPS return and webhook options to Brick preferences when configured', async () => {
     const { service } = createService({ FRONTEND_URL: 'https://front.test', BACKEND_URL: 'https://api.test' });
     preferenceCreate.mockResolvedValueOnce({ id: 'pref-https' });

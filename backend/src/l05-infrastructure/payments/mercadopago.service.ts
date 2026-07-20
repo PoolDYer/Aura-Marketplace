@@ -51,6 +51,7 @@ export class MercadoPagoService implements IPaymentGateway {
     const backendUrl = this.configService.get<string>('BACKEND_URL');
     const currencyId = this.getCurrency();
 
+    const payerEmail = this.getPayerEmail(order);
     const preferenceBody = {
       items: order.lineas.map((linea) => ({
         id: linea.publicacionId,
@@ -61,7 +62,7 @@ export class MercadoPagoService implements IPaymentGateway {
       })),
       payer: {
         name: order.comprador.nombre,
-        email: order.comprador.email,
+        email: payerEmail,
       },
       external_reference: order.id,
       metadata: {
@@ -141,7 +142,7 @@ export class MercadoPagoService implements IPaymentGateway {
       amount: Number(order.total),
       currency: this.getCurrency(),
       payer: {
-        email: order.comprador.email,
+        email: this.getPayerEmail(order),
         firstName: order.comprador.nombre,
       },
     };
@@ -152,6 +153,10 @@ export class MercadoPagoService implements IPaymentGateway {
     const backendUrl = this.configService.get<string>('BACKEND_URL');
     const { paymentMethodId, ...mercadoPagoPayload } = payload;
     const paymentMethod = payload.payment_method_id || paymentMethodId;
+
+    const payerEmail = this.isMercadoPagoTestMode()
+      ? this.getPayerEmail(order)
+      : mercadoPagoPayload.payer?.email || order.comprador.email;
 
     const paymentBody = {
       ...mercadoPagoPayload,
@@ -167,7 +172,7 @@ export class MercadoPagoService implements IPaymentGateway {
       },
       payer: {
         ...(mercadoPagoPayload.payer || {}),
-        email: order.comprador.email,
+        email: payerEmail,
       },
       additional_info: {
         ...(mercadoPagoPayload.additional_info || {}),
@@ -301,6 +306,7 @@ export class MercadoPagoService implements IPaymentGateway {
     const backendUrl = this.configService.get<string>('BACKEND_URL');
     const currencyId = this.getCurrency();
 
+    const payerEmail = this.getPayerEmail(order);
     const preferenceBody = {
       items: order.lineas.map((linea) => ({
         id: linea.publicacionId,
@@ -311,7 +317,7 @@ export class MercadoPagoService implements IPaymentGateway {
       })),
       payer: {
         name: order.comprador.nombre,
-        email: order.comprador.email,
+        email: payerEmail,
       },
       external_reference: order.id,
       metadata: {
@@ -386,6 +392,24 @@ export class MercadoPagoService implements IPaymentGateway {
 
   private getCurrency() {
     return this.getConfigValue('MERCADOPAGO_CURRENCY') || 'PEN';
+  }
+
+  private isMercadoPagoTestMode() {
+    return (this.getConfigValue('MERCADOPAGO_ACCESS_TOKEN') || '').startsWith('TEST-');
+  }
+
+  private getPayerEmail(order: any) {
+    if (!this.isMercadoPagoTestMode()) {
+      return order.comprador.email;
+    }
+
+    const configuredEmail = this.getConfigValue('MERCADOPAGO_TEST_PAYER_EMAIL');
+    if (configuredEmail) {
+      return configuredEmail;
+    }
+
+    const safeOrderId = String(order.id).replace(/[^a-zA-Z0-9]/g, '').slice(0, 24) || 'order';
+    return `test-buyer-${safeOrderId}@auraperu.shop`;
   }
 
   private getConfigValue(key: string) {
