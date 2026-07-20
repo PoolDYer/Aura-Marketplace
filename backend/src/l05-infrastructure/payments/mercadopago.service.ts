@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MercadoPagoConfig, Payment, Preference, WebhookSignatureValidator } from 'mercadopago';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../database/prisma.service';
 import { IPaymentGateway } from '../../l04-domain/ports/payment-gateway.interface';
 
@@ -161,41 +162,31 @@ export class MercadoPagoService implements IPaymentGateway {
       ? this.getPayerEmail(order)
       : mercadoPagoPayload.payer?.email || order.comprador.email;
 
-    const paymentBody = {
-      ...mercadoPagoPayload,
+    const payer = this.sanitizeObject({
+      email: payerEmail,
+      first_name: mercadoPagoPayload.payer?.first_name || mercadoPagoPayload.payer?.firstName,
+      last_name: mercadoPagoPayload.payer?.last_name || mercadoPagoPayload.payer?.lastName,
+      identification: mercadoPagoPayload.payer?.identification,
+    });
+
+    const paymentBody = this.sanitizeObject({
+      token: mercadoPagoPayload.token,
+      issuer_id: mercadoPagoPayload.issuer_id || mercadoPagoPayload.issuerId,
+      installments: Number(mercadoPagoPayload.installments || (paymentMethod === 'yape' ? 1 : 1)),
       ...(paymentMethod ? { payment_method_id: paymentMethod } : {}),
-      ...(paymentMethod === 'yape' && !payload.installments ? { installments: 1 } : {}),
       transaction_amount: orderAmount,
       description: `Aura - Orden ${order.numeroConfirmacion}`,
       external_reference: order.id,
-      metadata: {
-        ...(mercadoPagoPayload.metadata || {}),
-        orderId: order.id,
-        buyerId: userId,
-      },
-      payer: {
-        ...(mercadoPagoPayload.payer || {}),
-        email: payerEmail,
-      },
-      additional_info: {
-        ...(mercadoPagoPayload.additional_info || {}),
-        items: order.lineas.map((linea) => ({
-          id: linea.publicacionId,
-          title: linea.nombreProducto,
-          quantity: linea.cantidad,
-          unit_price: this.toMercadoPagoAmount(linea.precioUnitario),
-        })),
-      },
+      payer,
       ...(backendUrl ? { notification_url: `${backendUrl}/payments/webhook` } : {}),
-      statement_descriptor: 'AURA',
-    };
+    });
 
     let paymentResponse;
     try {
       paymentResponse = await this.payment.create({
         body: paymentBody,
         requestOptions: {
-          idempotencyKey: `brick-${order.id}-${Date.now()}`,
+          idempotencyKey: randomUUID(),
         },
       });
     } catch (err) {
@@ -404,6 +395,12 @@ export class MercadoPagoService implements IPaymentGateway {
     }
 
     return Math.round((amount + Number.EPSILON) * 100) / 100;
+  }
+
+  private sanitizeObject<T extends Record<string, any>>(value: T): T {
+    return Object.fromEntries(
+      Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== null && entry !== ''),
+    ) as T;
   }
 
   private isMercadoPagoTestMode() {
