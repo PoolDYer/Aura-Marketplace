@@ -12,19 +12,18 @@ import {
 const embeddedMercadoPagoPublicKey = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY as string | undefined;
 let initializedMercadoPagoPublicKey: string | null = null;
 
-const setupMercadoPago = (publicKey: string) => {
-  if (initializedMercadoPagoPublicKey === publicKey) return;
+const normalizePublicKey = (value?: string | null) => value?.trim().replace(/^["']|["']$/g, '').trim() || '';
 
-  initMercadoPago(publicKey, {
+const setupMercadoPago = (publicKey: string) => {
+  const normalizedPublicKey = normalizePublicKey(publicKey);
+  if (!normalizedPublicKey || initializedMercadoPagoPublicKey === normalizedPublicKey) return;
+
+  initMercadoPago(normalizedPublicKey, {
     locale: 'es-PE',
     advancedFraudPrevention: true,
   });
-  initializedMercadoPagoPublicKey = publicKey;
+  initializedMercadoPagoPublicKey = normalizedPublicKey;
 };
-
-if (embeddedMercadoPagoPublicKey) {
-  setupMercadoPago(embeddedMercadoPagoPublicKey);
-}
 
 type BrickInitialization = {
   preferenceId: string;
@@ -82,7 +81,7 @@ export default function CheckoutPaymentPage() {
   const { orderId } = useParams<{ orderId: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [brick, setBrick] = useState<BrickInitialization | null>(null);
-  const [mercadoPagoPublicKey, setMercadoPagoPublicKey] = useState(embeddedMercadoPagoPublicKey || '');
+  const [mercadoPagoPublicKey, setMercadoPagoPublicKey] = useState('');
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('mercadopago');
   const [loading, setLoading] = useState(true);
   const [brickReady, setBrickReady] = useState(false);
@@ -97,12 +96,16 @@ export default function CheckoutPaymentPage() {
       if (!orderId) return;
 
       try {
-        let publicKey = embeddedMercadoPagoPublicKey;
+        let publicKey = '';
 
-        if (!publicKey) {
+        try {
           const configRes = await ordersApi.getPaymentConfig();
-          publicKey = configRes.data.mercadoPagoPublicKey;
+          publicKey = normalizePublicKey(configRes.data.mercadoPagoPublicKey);
+        } catch {
+          publicKey = '';
         }
+
+        publicKey = publicKey || normalizePublicKey(embeddedMercadoPagoPublicKey);
 
         if (!publicKey) {
           setError('La llave publica de Mercado Pago no esta configurada.');
