@@ -41,6 +41,16 @@ type YapeTokenResponse = string | {
   id?: string;
 };
 
+const getPaymentErrorMessage = (err: any) => {
+  const message = err?.response?.data?.message || err?.message || '';
+
+  if (String(message).toLowerCase().includes('internal_error')) {
+    return 'Mercado Pago devolvio internal_error. Si estas probando con tarjeta, usa titular APRO y documento 123456789 con una tarjeta de prueba.';
+  }
+
+  return message || 'No pudimos procesar el pago.';
+};
+
 declare global {
   interface Window {
     MercadoPago?: new (
@@ -215,7 +225,7 @@ export default function CheckoutPaymentPage() {
       setError('Mercado Pago rechazo el pago. Revisa los datos o elige otro medio de pago.');
       return Promise.reject();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'No pudimos procesar el pago.');
+      setError(getPaymentErrorMessage(err));
       return Promise.reject();
     } finally {
       setIsProcessing(false);
@@ -373,6 +383,16 @@ export default function CheckoutPaymentPage() {
           )}
 
           {error && <div className="mb-4 rounded-lg border border-[#f4c7c3] bg-[#fff1f0] px-4 py-3 text-sm text-[#b42318]">{error}</div>}
+
+          {paymentMode === 'mercadopago' && (
+            <div className="mb-4 rounded-lg border border-[#eadfd2] bg-[#fffaf6] px-4 py-3 text-sm leading-6 text-[#524535]">
+              <p className="font-semibold text-[#211527]">Datos para probar tarjeta</p>
+              <p>
+                Usa una tarjeta de prueba de Mercado Pago, vencimiento 11/30, CVV 123, titular <strong>APRO</strong> y documento{' '}
+                <strong>123456789</strong>.
+              </p>
+            </div>
+          )}
 
           {isProcessing && (
             <div className="mb-4 flex items-center gap-2 rounded-lg border border-[#c7ded9] bg-[#f1fbf8] px-4 py-3 text-sm text-[#005144]">
