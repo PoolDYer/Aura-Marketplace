@@ -430,7 +430,7 @@ export class MercadoPagoService implements IPaymentGateway {
       return 'Mercado Pago rechazo la prueba porque estas usando credenciales de produccion. Usa una cuenta Yape real o cambia a credenciales de prueba de Mercado Pago.';
     }
 
-    if (normalizedMessage.includes('internal_error')) {
+    if (normalizedMessage === 'internal_error') {
       return 'Mercado Pago devolvio internal_error. Para aprobar una compra de prueba con tarjeta usa titular APRO, DNI 12345678 y una tarjeta de prueba.';
     }
 
@@ -446,6 +446,15 @@ export class MercadoPagoService implements IPaymentGateway {
     const addMessage = (value: unknown) => {
       if (typeof value === 'string' && value.trim()) messages.add(value.trim());
     };
+    const addCodeDescription = (value: any) => {
+      if (!value || typeof value !== 'object') return;
+
+      const code = typeof value.code === 'string' || typeof value.code === 'number' ? String(value.code) : '';
+      const description = typeof value.description === 'string' ? value.description : '';
+      if (code && description) {
+        messages.add(`${code}: ${description}`);
+      }
+    };
     const collectFrom = (value: any) => {
       if (!value) return;
 
@@ -453,6 +462,15 @@ export class MercadoPagoService implements IPaymentGateway {
       addMessage(value.error);
       addMessage(value.description);
       addMessage(value.status_detail);
+      addMessage(value.status);
+      addCodeDescription(value);
+
+      collectFrom(value.response);
+      collectFrom(value.response?.data);
+      collectFrom(value.data);
+      collectFrom(value.apiResponse);
+      collectFrom(value.api_response);
+      collectFrom(value.body);
 
       if (Array.isArray(value.cause)) {
         value.cause.forEach(collectFrom);
