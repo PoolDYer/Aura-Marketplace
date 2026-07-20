@@ -44,7 +44,7 @@ type YapeTokenResponse = string | {
 const getPaymentErrorMessage = (err: any) => {
   const message = err?.response?.data?.message || err?.message || '';
 
-  if (String(message).toLowerCase().includes('internal_error')) {
+  if (String(message).toLowerCase() === 'internal_error') {
     return 'Mercado Pago devolvio internal_error. Si estas probando con tarjeta, usa titular APRO y DNI 12345678 con una tarjeta de prueba.';
   }
 
