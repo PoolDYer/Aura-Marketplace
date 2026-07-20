@@ -395,16 +395,46 @@ export class MercadoPagoService implements IPaymentGateway {
   }
 
   private getMercadoPagoErrorMessage(err: any, fallback: string) {
-    const message = typeof err?.message === 'string' ? err.message : '';
+    const message = this.extractMercadoPagoErrorMessage(err);
+    const normalizedMessage = message.toLowerCase();
 
-    if (message.toLowerCase().includes('invalid access token')) {
+    if (normalizedMessage.includes('invalid access token')) {
       return 'Mercado Pago no esta configurado correctamente. Revisa MERCADOPAGO_ACCESS_TOKEN en Render.';
     }
 
-    if (message.toLowerCase().includes('unauthorized use of live credentials')) {
+    if (normalizedMessage.includes('unauthorized use of live credentials')) {
       return 'Mercado Pago rechazo la prueba porque estas usando credenciales de produccion. Usa una cuenta Yape real o cambia a credenciales de prueba de Mercado Pago.';
     }
 
+    if (normalizedMessage.includes('cannot be paid by the same account') || normalizedMessage.includes('payer and collector')) {
+      return 'Mercado Pago rechazo el pago porque el comprador y el vendedor pertenecen a la misma cuenta de prueba. Usa un usuario comprador de prueba distinto al vendedor.';
+    }
+
     return message || fallback;
+  }
+
+  private extractMercadoPagoErrorMessage(err: any) {
+    const messages = new Set<string>();
+    const addMessage = (value: unknown) => {
+      if (typeof value === 'string' && value.trim()) messages.add(value.trim());
+    };
+    const collectFrom = (value: any) => {
+      if (!value) return;
+
+      addMessage(value.message);
+      addMessage(value.error);
+      addMessage(value.description);
+      addMessage(value.status_detail);
+
+      if (Array.isArray(value.cause)) {
+        value.cause.forEach(collectFrom);
+      } else if (value.cause && value.cause !== value) {
+        collectFrom(value.cause);
+      }
+    };
+
+    collectFrom(err);
+
+    return Array.from(messages).join(' - ');
   }
 }
