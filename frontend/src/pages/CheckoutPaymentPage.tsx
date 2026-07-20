@@ -45,7 +45,7 @@ const getPaymentErrorMessage = (err: any) => {
   const message = err?.response?.data?.message || err?.message || '';
 
   if (String(message).toLowerCase().includes('internal_error')) {
-    return 'Mercado Pago devolvio internal_error. Si estas probando con tarjeta, usa titular APRO y documento 123456789 con una tarjeta de prueba.';
+    return 'Mercado Pago devolvio internal_error. Si estas probando con tarjeta, usa titular APRO y DNI 12345678 con una tarjeta de prueba.';
   }
 
   return message || 'No pudimos procesar el pago.';
@@ -388,8 +388,8 @@ export default function CheckoutPaymentPage() {
             <div className="mb-4 rounded-lg border border-[#eadfd2] bg-[#fffaf6] px-4 py-3 text-sm leading-6 text-[#524535]">
               <p className="font-semibold text-[#211527]">Datos para probar tarjeta</p>
               <p>
-                Usa una tarjeta de prueba de Mercado Pago, vencimiento 11/30, CVV 123, titular <strong>APRO</strong> y documento{' '}
-                <strong>123456789</strong>.
+                Usa una tarjeta de prueba de Mercado Pago, vencimiento 11/30, CVV 123, titular <strong>APRO</strong> y DNI{' '}
+                <strong>12345678</strong>.
               </p>
             </div>
           )}
