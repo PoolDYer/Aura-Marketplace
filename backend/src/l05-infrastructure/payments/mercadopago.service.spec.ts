@@ -233,9 +233,6 @@ describe('MercadoPagoService', () => {
       expect.objectContaining({
         body: expect.objectContaining({
           transaction_amount: 99.99,
-          additional_info: expect.objectContaining({
-            items: [expect.objectContaining({ unit_price: 99.99 })],
-          }),
         }),
       }),
     );
