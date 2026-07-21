@@ -69,17 +69,30 @@ export default function LoginPage() {
     setResendMessage('');
 
     try {
-      const result = await authClient.signIn.email({
-        email: data.email,
-        password: data.password,
-      });
+      let result;
+      try {
+        result = await authClient.signIn.email({
+          email: data.email,
+          password: data.password,
+        });
+      } catch (neonErr) {
+        result = { error: neonErr };
+      }
 
-      if (!result.error) {
+      if (result && !result.error) {
         const synced = await syncNeonSession({ rol: consumePendingRole(data.email) });
         setAuth(synced.user, synced.accessToken);
 
         const from = (location.state as { from?: string } | null)?.from;
-        navigate(from || '/');
+        if (from) {
+          navigate(from);
+        } else if (synced.user.rol === 'VENDEDOR') {
+          navigate('/vendor/catalog');
+        } else if (synced.user.rol === 'ADMINISTRADOR') {
+          navigate('/admin/orders');
+        } else {
+          navigate('/');
+        }
         return;
       }
 
@@ -88,7 +101,15 @@ export default function LoginPage() {
 
       setAuth(user, accessToken);
       const from = (location.state as { from?: string } | null)?.from;
-      navigate(from || '/');
+      if (from) {
+        navigate(from);
+      } else if (user.rol === 'VENDEDOR') {
+        navigate('/vendor/catalog');
+      } else if (user.rol === 'ADMINISTRADOR') {
+        navigate('/admin/orders');
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       const message = err.response?.data?.message || err.message || '';
       const normalized = message.toLowerCase();

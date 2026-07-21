@@ -235,6 +235,7 @@ describe('presentation controllers', () => {
       { getConversationHistory: jest.fn((id) => id) } as any,
     );
     await expect(agent.sendText(req, 'hola')).resolves.toEqual({ message: 'hola', action: { type: 'none' }, products: [], intention: {} });
+    await expect(agent.sendVoice(req, undefined)).rejects.toBeInstanceOf(BadRequestException);
     await expect(agent.sendVoice(req, { buffer: Buffer.from('audio') })).resolves.toEqual({
       transcribedText: 'audio',
       message: 'hola',

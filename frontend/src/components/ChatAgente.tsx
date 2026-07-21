@@ -153,14 +153,29 @@ export function ChatAgente() {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const mimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+      ].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       const chunks: BlobPart[] = [];
 
-      recorder.ondataavailable = (e) => chunks.push(e.data);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'audio/webm' });
         sendVoiceMessage(blob);
         stream.getTracks().forEach((track) => track.stop());
+      };
+      recorder.onerror = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setMediaRecorder(null);
+        setState('INACTIVO');
       };
 
       recorder.start();

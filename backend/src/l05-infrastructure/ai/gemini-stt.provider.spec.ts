@@ -20,13 +20,21 @@ describe('GeminiSpeechToTextProvider', () => {
     expect(getGenerativeModel).not.toHaveBeenCalled();
   });
 
+  it('returns a clear transcription error without an API key', async () => {
+    const provider = new GeminiSpeechToTextProvider(config() as any);
+
+    await expect(provider.transcribe(Buffer.from('audio'))).resolves.toBe(
+      'No se pudo transcribir el audio. Falta configurar GEMINI_API_KEY.',
+    );
+  });
+
   it('transcribes audio buffers through Gemini multimodal input', async () => {
     const provider = new GeminiSpeechToTextProvider(config('key') as any);
     generateContent.mockResolvedValueOnce({ response: { text: () => ' hola desde audio ' } });
 
-    await expect(provider.transcribe(Buffer.from('audio'))).resolves.toBe('hola desde audio');
+    await expect(provider.transcribe(Buffer.from('audio'), 'audio/webm;codecs=opus')).resolves.toBe('hola desde audio');
     expect(generateContent).toHaveBeenCalledWith([
-      { inlineData: { mimeType: 'audio/webm', data: Buffer.from('audio').toString('base64') } },
+      { inlineData: { mimeType: 'audio/webm;codecs=opus', data: Buffer.from('audio').toString('base64') } },
       { text: expect.stringContaining('Transcribe el audio') },
     ]);
   });

@@ -139,11 +139,11 @@ export class AgentService {
     };
   }
 
-  async processVoiceMessage(userId: string, audioBuffer: Buffer) {
+  async processVoiceMessage(userId: string, audioBuffer: Buffer, mimeType?: string) {
     this.logger.log(`Processing voice message for user ${userId}`);
 
     // 1. STT: Audio -> Text
-    const text = await this.stt.transcribe(audioBuffer);
+    const text = await this.stt.transcribe(audioBuffer, mimeType);
 
     // Check if transcription failed or returned an error message
     if (

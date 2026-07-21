@@ -121,21 +121,98 @@ describe('Orders Workflow Integration Test', () => {
   });
 
   async function cleanup() {
-    // Delete in order: lineas, pagos, ordenes, items, carrito, inventario, publicacion, direccion, usuario
+    const testUsers = await prisma.usuario.findMany({
+      where: { email: { in: [testEmailBuyer, testEmailSeller] } },
+      select: { id: true },
+    });
+    const testUserIds = Array.from(new Set([
+      ...testUsers.map((user) => user.id),
+      buyerId,
+      sellerId,
+    ].filter(Boolean)));
+
+    const testAddresses = testUserIds.length
+      ? await prisma.direccion.findMany({
+          where: {
+            OR: [
+              { usuarioId: { in: testUserIds } },
+              ...(addressId ? [{ id: addressId }] : []),
+            ],
+          },
+          select: { id: true },
+        })
+      : [];
+    const testAddressIds = testAddresses.map((address) => address.id);
+
+    const testOrders = await prisma.orden.findMany({
+      where: {
+        OR: [
+          { comprador: { email: testEmailBuyer } },
+          ...(testUserIds.length ? [{ compradorId: { in: testUserIds } }] : []),
+          ...(testAddressIds.length ? [{ direccionId: { in: testAddressIds } }] : []),
+        ],
+      },
+      select: { id: true },
+    });
+    const testOrderIds = testOrders.map((order) => order.id);
+
+    // Delete in dependency order before removing addresses/users.
+    await prisma.resena.deleteMany({
+      where: {
+        OR: [
+          ...(testOrderIds.length ? [{ ordenId: { in: testOrderIds } }] : []),
+          ...(testUserIds.length ? [{ compradorId: { in: testUserIds } }] : []),
+          { publicacionId: testProductId },
+        ],
+      },
+    });
     await prisma.lineaOrden.deleteMany({
-      where: { orden: { comprador: { email: testEmailBuyer } } },
+      where: {
+        OR: [
+          ...(testOrderIds.length ? [{ ordenId: { in: testOrderIds } }] : []),
+          { publicacionId: testProductId },
+        ],
+      },
     });
     await prisma.pago.deleteMany({
-      where: { orden: { comprador: { email: testEmailBuyer } } },
+      where: testOrderIds.length ? { ordenId: { in: testOrderIds } } : { orden: { comprador: { email: testEmailBuyer } } },
     });
     await prisma.orden.deleteMany({
-      where: { comprador: { email: testEmailBuyer } },
+      where: {
+        OR: [
+          { comprador: { email: testEmailBuyer } },
+          ...(testUserIds.length ? [{ compradorId: { in: testUserIds } }] : []),
+          ...(testAddressIds.length ? [{ direccionId: { in: testAddressIds } }] : []),
+        ],
+      },
     });
     await prisma.itemCarrito.deleteMany({
-      where: { carrito: { comprador: { email: testEmailBuyer } } },
+      where: {
+        OR: [
+          { carrito: { comprador: { email: testEmailBuyer } } },
+          ...(testUserIds.length ? [{ carrito: { compradorId: { in: testUserIds } } }] : []),
+          { publicacionId: testProductId },
+        ],
+      },
     });
     await prisma.carrito.deleteMany({
-      where: { comprador: { email: testEmailBuyer } },
+      where: {
+        OR: [
+          { comprador: { email: testEmailBuyer } },
+          ...(testUserIds.length ? [{ compradorId: { in: testUserIds } }] : []),
+        ],
+      },
+    });
+    await prisma.favorito.deleteMany({
+      where: {
+        OR: [
+          ...(testUserIds.length ? [{ compradorId: { in: testUserIds } }] : []),
+          { publicacionId: testProductId },
+        ],
+      },
+    });
+    await prisma.promocion.deleteMany({
+      where: { publicacionId: testProductId },
     });
     await prisma.inventario.deleteMany({
       where: { publicacionId: testProductId },
@@ -144,7 +221,12 @@ describe('Orders Workflow Integration Test', () => {
       where: { id: testProductId },
     });
     await prisma.direccion.deleteMany({
-      where: { usuarioId: buyerId },
+      where: {
+        OR: [
+          ...(testUserIds.length ? [{ usuarioId: { in: testUserIds } }] : []),
+          ...(testAddressIds.length ? [{ id: { in: testAddressIds } }] : []),
+        ],
+      },
     });
     await prisma.usuario.deleteMany({
       where: { email: { in: [testEmailBuyer, testEmailSeller] } },
