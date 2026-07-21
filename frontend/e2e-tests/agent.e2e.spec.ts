@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import axios from 'axios';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: '../backend/.env' });
+dotenv.config({ path: '../backend/.env', quiet: true });
 import { PrismaClient } from '../../backend/node_modules/@prisma/client/default.js';
+import { api } from './support/api';
 
 const prisma = new PrismaClient();
 
@@ -19,7 +19,7 @@ test.describe('Copiloto AI E2E', () => {
   test.beforeAll(async () => {
     // Seed login user via backend API and activate it
     try {
-      await axios.post('http://127.0.0.1:3000/auth/register', {
+      await api.post('/auth/register', {
         nombre: testUser.nombre,
         email: testUser.email,
         password: testUser.password,

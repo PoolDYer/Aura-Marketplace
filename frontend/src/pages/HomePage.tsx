@@ -151,7 +151,7 @@ export default function HomePage() {
             Catalogo conectado a la base de datos.
           </div>
           <h1 className="max-w-4xl font-auth-display text-[32px] font-bold leading-tight tracking-tight text-[#845400] md:text-[56px] md:leading-[64px]">
-            Explora productos reales publicados en Aura.
+            Explora productos publicados en Aura.
           </h1>
           <p className="mt-4 max-w-2xl text-[16px] leading-6 text-[#524535] md:text-[18px] md:leading-7">
             Lo que ves aqui sale directamente de las publicaciones activas registradas.

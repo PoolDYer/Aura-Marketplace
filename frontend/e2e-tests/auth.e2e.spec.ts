@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import axios from 'axios';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: '../backend/.env' });
+dotenv.config({ path: '../backend/.env', quiet: true });
 import { PrismaClient } from '../../backend/node_modules/@prisma/client/default.js';
+import { api } from './support/api';
 
 const prisma = new PrismaClient();
 
@@ -23,18 +23,16 @@ test.describe('Autenticación y Registro E2E', () => {
 
   test.beforeAll(async () => {
     try {
-      const regRes = await axios.post('http://127.0.0.1:3000/auth/register', {
+      await api.post('/auth/register', {
         nombre: loginUser.nombre,
         email: loginUser.email,
         password: loginUser.password,
         rol: loginUser.rol,
       });
-      console.log('Axios Register response:', regRes.data);
-      const updateRes = await prisma.usuario.update({
+      await prisma.usuario.update({
         where: { email: loginUser.email },
         data: { estado: 'ACTIVO' },
       });
-      console.log('Prisma Activate response:', updateRes);
     } catch (err: any) {
       console.error('Error seeding login user:', err.message, err.response?.data);
       throw err;
@@ -64,25 +62,6 @@ test.describe('Autenticación y Registro E2E', () => {
   });
 
   test('debe iniciar sesión con un usuario activo y cerrar sesión', async ({ page }) => {
-    // Monitor network requests and responses
-    page.on('request', request => {
-      if (request.url().includes('/auth/')) {
-        console.log(`>> REQUEST: ${request.method()} ${request.url()}`, request.postData());
-      }
-    });
-    page.on('response', async response => {
-      if (response.url().includes('/auth/')) {
-        let text = '';
-        try { text = await response.text(); } catch {}
-        console.log(`<< RESPONSE: ${response.status()} ${response.url()}`, text.substring(0, 300));
-      }
-    });
-
-    const dbUser = await prisma.usuario.findUnique({
-      where: { email: loginUser.email },
-    });
-    console.log('LOGGING IN USER FROM DB:', dbUser);
-
     await page.goto('/login');
     await page.fill('input[name="email"]', loginUser.email);
     await page.fill('input[name="password"]', loginUser.password);
