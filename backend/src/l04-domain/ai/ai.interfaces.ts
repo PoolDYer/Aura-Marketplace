@@ -43,7 +43,7 @@ export interface LanguageModelProvider {
 }
 
 export interface SpeechToTextProvider {
-  transcribe(audioBuffer: Buffer): Promise<string>;
+  transcribe(audioBuffer: Buffer, mimeType?: string): Promise<string>;
 }
 
 export interface TextToSpeechProvider {

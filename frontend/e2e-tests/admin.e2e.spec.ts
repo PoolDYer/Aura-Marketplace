@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import axios from 'axios';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: '../backend/.env' });
+dotenv.config({ path: '../backend/.env', quiet: true });
 import { PrismaClient } from '../../backend/node_modules/@prisma/client/default.js';
+import { api } from './support/api';
 
 const prisma = new PrismaClient();
 
@@ -25,7 +25,7 @@ test.describe('Administrador y Seguridad RBAC E2E', () => {
   test.beforeAll(async () => {
     // Seed users via backend API and activate them
     try {
-      await axios.post('http://127.0.0.1:3000/auth/register', {
+      await api.post('/auth/register', {
         nombre: testBuyer.nombre,
         email: testBuyer.email,
         password: testBuyer.password,
@@ -36,7 +36,7 @@ test.describe('Administrador y Seguridad RBAC E2E', () => {
         data: { estado: 'ACTIVO' },
       });
 
-      await axios.post('http://127.0.0.1:3000/auth/register', {
+      await api.post('/auth/register', {
         nombre: testAdmin.nombre,
         email: testAdmin.email,
         password: testAdmin.password,
@@ -87,17 +87,18 @@ test.describe('Administrador y Seguridad RBAC E2E', () => {
     await page.fill('input[name="email"]', testAdmin.email);
     await page.fill('input[name="password"]', testAdmin.password);
     await page.click('button[type="submit"]');
-    await page.waitForTimeout(2000);
 
-    // 2. Verificar redirección automática o acceso a panel de administración
-    await page.goto('/admin/orders');
-    await page.waitForTimeout(1500);
-    expect(page.url()).toContain('/admin/orders');
+    // 2. Verificar redirección automática a panel de administración
+    await expect(page).toHaveURL(/\/admin\/orders/, { timeout: 15000 });
 
     // 3. Navegar a Reportes y verificar que cargue
-    await page.goto('/admin/reports');
-    await page.waitForTimeout(1500);
-    expect(page.url()).toContain('/admin/reports');
+    const reportsLink = page.locator('a[href="/admin/reports"], a:has-text("Reportes")');
+    if (await reportsLink.isVisible()) {
+      await reportsLink.click();
+    } else {
+      await page.goto('/admin/reports');
+    }
+    await expect(page).toHaveURL(/\/admin\/reports/, { timeout: 15000 });
     await expect(page.locator('h1, h2').first()).toBeVisible();
   });
 });

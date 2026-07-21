@@ -18,9 +18,13 @@ export class GeminiSpeechToTextProvider implements SpeechToTextProvider {
     this.model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   }
 
-  async transcribe(audioBuffer: Buffer): Promise<string> {
+  async transcribe(audioBuffer: Buffer, mimeType = 'audio/webm'): Promise<string> {
     try {
       this.logger.log(`Transcribing audio buffer of size: ${audioBuffer.length}`);
+
+      if (!this.model) {
+        return 'No se pudo transcribir el audio. Falta configurar GEMINI_API_KEY.';
+      }
 
       // Convert buffer to base64 for Gemini multimodal input
       const audioBase64 = audioBuffer.toString('base64');
@@ -28,7 +32,7 @@ export class GeminiSpeechToTextProvider implements SpeechToTextProvider {
       const result = await this.model.generateContent([
         {
           inlineData: {
-            mimeType: 'audio/webm',
+            mimeType,
             data: audioBase64,
           },
         },
